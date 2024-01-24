@@ -1,8 +1,8 @@
 const COLORS = {
   background: {
-    dense: '#1d0f2f',
-    dark: '#341b55',
-    light: '#4b277b', // purple-600
+    dense: '#12091d',
+    dark: '#1d0f2f',
+    light: '#3f2164',
   },
 };
 

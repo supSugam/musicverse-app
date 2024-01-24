@@ -1,10 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import {
@@ -15,10 +10,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-
-import { useColorScheme } from '@/components/useColorScheme';
-import { LinearGradient } from 'expo-linear-gradient';
-import COLORS from '@/constants/Colors';
+import { Slot, Stack } from 'expo-router';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -29,7 +21,6 @@ export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -55,24 +46,19 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null;
+    return <></>;
   }
 
   return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <LinearGradient
-      colors={[COLORS.background.dense, COLORS.background.dark]}
-      className="flex-1"
-    >
-      {/* <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack> */}
-    </LinearGradient>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+      }}
+    />
   );
 }

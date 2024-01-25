@@ -1,25 +1,34 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import COLORS from '@/constants/Colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Welcome from './screens/get-started/Welcome';
-
+import COLORS from '@/constants/Colors';
+import { StatusBar } from 'expo-status-bar';
+import Container from '@/components/Container';
+import Register from './screens/get-started/Register';
 const Stack = createNativeStackNavigator();
 
 export default function index() {
   return (
-    <LinearGradient
-      colors={[COLORS.background.dense, COLORS.background.dark]}
-      className="flex-1"
+    <Stack.Navigator
+      screenOptions={{
+        headerTransparent: true,
+      }}
     >
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Welcome"
-          component={Welcome}
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack.Navigator>
-    </LinearGradient>
+      <Stack.Screen
+        name="Welcome"
+        component={Welcome}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Register"
+        component={Register}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 }

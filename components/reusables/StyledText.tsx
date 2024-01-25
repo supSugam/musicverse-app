@@ -30,18 +30,18 @@ type TextTrackingOptions =
 
 type TextDimnessOptions = 'extra' | 'high' | 'medium' | 'low' | 'none';
 
-type TextProps = DefaultText['props'] & {
+type TextProps = {
   className?: string;
   size?: TextSizeOptions;
   weight?: TextWeightOptions;
   tracking?: TextTrackingOptions;
   dimness?: TextDimnessOptions;
   uppercase?: boolean;
+  children: React.ReactNode;
 };
 
 const StyledText = (props: TextProps) => {
   const {
-    style,
     className = '',
     size,
     weight,
@@ -141,7 +141,11 @@ const StyledText = (props: TextProps) => {
     className,
   ]);
 
-  return <DefaultText className={classNames} style={[style]} {...otherProps} />;
+  return (
+    <DefaultText className={classNames} {...otherProps}>
+      {props.children}
+    </DefaultText>
+  );
 };
 
 export default StyledText;

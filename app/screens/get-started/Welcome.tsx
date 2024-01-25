@@ -1,20 +1,23 @@
+import React from 'react';
 import StyledText from '@/components/reusables/StyledText';
-import FloatingWrapper from '@/components/reusables/FloatingWrapper';
 import COLORS from '@/constants/Colors';
-import { LinearGradient } from 'expo-linear-gradient';
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native'; // Import TouchableOpacity for the button
 import LottieView from 'lottie-react-native';
 import { GirlListeningLA } from '@/assets/lottie';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
+import Container from '@/components/Container';
+import StyledButton from '@/components/reusables/StyledButton';
 
-export default function Welcome() {
+export default function Welcome({ navigation }: { navigation: any }) {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useScreenDimensions();
+
+  const navigateToRegistrationScreen = () => {
+    navigation.navigate('Register');
+  };
+
   return (
-    <LinearGradient
-      colors={[COLORS.background.dark, COLORS.background.dense]}
-      className="flex-1"
-    >
-      <View className="flex-1 flex-col justify-center items-center p-8">
+    <Container>
+      <View className="flex-1 flex-col justify-center items-center p-8 pb-16">
         <LottieView
           source={GirlListeningLA}
           autoPlay
@@ -27,12 +30,42 @@ export default function Welcome() {
             transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }],
           }}
         />
-        <FloatingWrapper>
-          <StyledText size="xl" tracking="tighter" weight="bold">
-            Welcome
+
+        <View className="flex flex-col justify-center items-center my-16">
+          <StyledText
+            size="base"
+            tracking="widest"
+            weight="medium"
+            uppercase
+            className="my-2 text-violet-300"
+          >
+            Welcome to
           </StyledText>
-        </FloatingWrapper>
+          <StyledText
+            size="4xl"
+            tracking="tighter"
+            weight="bold"
+            className="my-2"
+          >
+            MusicVerse
+          </StyledText>
+          <StyledText
+            size="base"
+            weight="normal"
+            className="mt-4 text-slate-200 text-center"
+          >
+            Discover, share, and tune into MusicVerse. Your one-stop for musical
+            bliss. Get started now, and let the beats begin!
+          </StyledText>
+        </View>
+
+        {/* Add a button to navigate to the Explore screen */}
+        <StyledButton fullWidth onPress={navigateToRegistrationScreen}>
+          <StyledText size="xl" weight="semibold" tracking="tighter">
+            Get Started
+          </StyledText>
+        </StyledButton>
       </View>
-    </LinearGradient>
+    </Container>
   );
 }

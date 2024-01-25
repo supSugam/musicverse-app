@@ -6,29 +6,34 @@ import COLORS from '@/constants/Colors';
 import { StatusBar } from 'expo-status-bar';
 import Container from '@/components/Container';
 import Register from './screens/get-started/Register';
+import Toast from 'react-native-toast-message';
+
 const Stack = createNativeStackNavigator();
 
 export default function index() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTransparent: true,
-      }}
-    >
-      <Stack.Screen
-        name="Welcome"
-        component={Welcome}
-        options={{
-          headerShown: false,
+    <>
+      <Stack.Navigator
+        screenOptions={{
+          headerTransparent: true,
         }}
-      />
-      <Stack.Screen
-        name="Register"
-        component={Register}
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack.Navigator>
+      >
+        <Stack.Screen
+          name="Welcome"
+          component={Welcome}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={Register}
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack.Navigator>
+      <Toast />
+    </>
   );
 }

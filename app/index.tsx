@@ -6,6 +6,7 @@ import COLORS from '@/constants/Colors';
 import { StatusBar } from 'expo-status-bar';
 import Container from '@/components/Container';
 import Register from './screens/get-started/Register';
+import OTPVerification from './screens/get-started/OTPVerification';
 import Toast from 'react-native-toast-message';
 
 const Stack = createNativeStackNavigator();
@@ -28,6 +29,14 @@ export default function index() {
         <Stack.Screen
           name="Register"
           component={Register}
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="OTPVerification"
+          component={OTPVerification}
           options={{
             headerShown: false,
           }}

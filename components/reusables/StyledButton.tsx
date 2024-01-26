@@ -1,7 +1,9 @@
 import { Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ActivityIndicator } from 'react-native';
 
 type StyledButtonProps = {
+  loading?: boolean;
   children: React.ReactNode;
   onPress: () => void;
   fullWidth?: boolean;
@@ -14,8 +16,10 @@ export default function StyledButton(props: StyledButtonProps) {
     onPress,
     fullWidth = false,
     variant = 'primary',
+    loading = false,
     ...rest
   } = props;
+
   return (
     <Pressable
       onPress={onPress}
@@ -25,7 +29,11 @@ export default function StyledButton(props: StyledButtonProps) {
       {...rest}
     >
       <LinearGradient
-        className={`flex justify-center items-center px-6 py-3 rounded-md ${
+        style={{
+          minHeight: 59,
+          overflow: 'hidden',
+        }}
+        className={`flex justify-center items-center px-6 py-2 rounded-md ${
           fullWidth ? 'w-full' : ''
         }`}
         colors={
@@ -36,7 +44,8 @@ export default function StyledButton(props: StyledButtonProps) {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        {children}
+        {loading && <ActivityIndicator size="large" color="#ffffff" />}
+        {!loading && children}
       </LinearGradient>
     </Pressable>
   );

@@ -53,7 +53,7 @@ export default function StyledTextField({
               value={value}
               placeholderTextColor={'#ffffff80'}
               className={`text-lg text-white border rounded-md p-3 px-4 w-full placeholder:white placeholder-opacity-50 ${
-                errorMessage ? 'border-red-500' : 'border-violet-600'
+                errorMessage ? 'border-red-500' : 'border-purple-900'
               }`}
               {...rest}
             />

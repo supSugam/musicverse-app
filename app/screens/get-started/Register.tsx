@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import StyledText from '@/components/reusables/StyledText';
 import { KeyboardAvoidingView, View, ScrollView } from 'react-native'; // Import TouchableOpacity for the button
 import Container from '@/components/Container';
@@ -9,6 +9,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Platform } from 'react-native';
+import useScreenDimensions from '@/hooks/useScreenDimensions';
+import LogoWithName from '@/components/reusables/LogoWithName';
 
 const schema = yup.object().shape({
   email: yup
@@ -30,9 +32,11 @@ const schema = yup.object().shape({
 });
 
 export default function Register({ navigation }: { navigation: any }) {
-  const navigateToRegistrationScreen = () => {
-    navigation.navigate('Register');
+  const navigateToLoginScreen = () => {
+    navigation.navigate('OTPVerification');
   };
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   const {
     control,
@@ -43,8 +47,14 @@ export default function Register({ navigation }: { navigation: any }) {
   });
 
   const onSubmit = (data: any) => {
-    console.log(data);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      navigation.navigate('OTPVerification');
+    }, 3000);
   };
+
+  const { height } = useScreenDimensions();
 
   return (
     <Container>
@@ -52,29 +62,22 @@ export default function Register({ navigation }: { navigation: any }) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <ScrollView automaticallyAdjustKeyboardInsets={true}>
-          <View className="flex-1 h-full flex-col justify-center items-center p-8 py-16 pt-24">
-            <View className="flex flex-row items-center my-16 gap-3 self-start">
-              <Image
-                source={require('@/assets/images/logo.png')}
-                contentFit="cover"
-                transition={300}
-                style={{
-                  width: 40,
-                  height: 40,
-                  alignSelf: 'center',
-                  transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }],
-                }}
-              />
-              <StyledText
-                weight="bold"
-                tracking="tighter"
-                size="3xl"
-                className="text-violet-300"
-              >
-                MusicVerse
-              </StyledText>
-            </View>
+        <ScrollView
+          style={{
+            flex: 1,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'red',
+          }}
+          automaticallyAdjustKeyboardInsets={true}
+        >
+          <View
+            style={{
+              minHeight: height,
+            }}
+            className="flex-1 h-full flex-col justify-end items-center p-8 py-16 pt-24 bg-black mt-auto"
+          >
+            <LogoWithName className="mt-2" />
 
             <View className="flex flex-col mt-auto w-full">
               <StyledTextField
@@ -97,11 +100,11 @@ export default function Register({ navigation }: { navigation: any }) {
               />
             </View>
 
-            <View className="flex flex-col mt-auto w-full">
+            <View className="flex mt-auto mb-4 flex-col w-full">
               <StyledButton
                 fullWidth
                 variant="secondary"
-                onPress={navigateToRegistrationScreen}
+                onPress={navigateToLoginScreen}
                 className="mb-4"
               >
                 <StyledText
@@ -114,7 +117,11 @@ export default function Register({ navigation }: { navigation: any }) {
                 </StyledText>
               </StyledButton>
 
-              <StyledButton onPress={handleSubmit(onSubmit)} className="w-full">
+              <StyledButton
+                loading={loading}
+                onPress={handleSubmit(onSubmit)}
+                className="w-full"
+              >
                 <StyledText
                   weight="semibold"
                   size="base"

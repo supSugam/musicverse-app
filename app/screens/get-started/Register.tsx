@@ -11,6 +11,8 @@ import * as yup from 'yup';
 import { Platform } from 'react-native';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import LogoWithName from '@/components/reusables/LogoWithName';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { useMutation } from '@tanstack/react-query';
 
 const schema = yup.object().shape({
   email: yup
@@ -37,7 +39,30 @@ export default function Register({ navigation }: { navigation: any }) {
   };
 
   const [loading, setLoading] = useState<boolean>(false);
+  const register = useAuthStore((state) => state.register);
 
+  const registerUserMutation = useMutation({
+    mutationFn: async ({
+      email,
+      username,
+      password,
+    }: {
+      email: string;
+      username: string;
+      password: string;
+    }) =>
+      await register({
+        email,
+        username,
+        password,
+      }),
+    onSuccess: (data) => {
+      console.log(data);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
   const {
     control,
     handleSubmit,
@@ -48,9 +73,9 @@ export default function Register({ navigation }: { navigation: any }) {
 
   const onSubmit = (data: any) => {
     setLoading(true);
+    registerUserMutation.mutate(data);
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('OTPVerification');
     }, 3000);
   };
 

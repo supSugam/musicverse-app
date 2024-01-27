@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { MMKVStorage, api } from '@/utils/constants';
 import { AxiosResponse } from 'axios';
+import { register } from '@/services/auth/auth';
 
 type User = any;
 
@@ -26,7 +27,7 @@ interface AuthStore {
   logout: () => Promise<void>;
 }
 
-export const useAuthStore = create(
+export const useAuthStore = create<AuthStore>(
   (set): AuthStore => ({
     user: null,
     setUser: (user) => {
@@ -48,12 +49,7 @@ export const useAuthStore = create(
     },
     register: async ({ email, password, username }) => {
       try {
-        const response = await api.post('/auth/register', {
-          email,
-          password,
-          username,
-        });
-        MMKVStorage.set('user', response.data);
+        const response = await register({ email, password, username });
         return response;
       } catch (error) {
         console.log(error);

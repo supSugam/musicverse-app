@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MMKVStorage, api } from '@/utils/constants';
+import { api } from '@/utils/constants';
 import { AxiosResponse } from 'axios';
 import { register } from '@/services/auth/auth';
 
@@ -59,7 +59,6 @@ export const useAuthStore = create<AuthStore>(
     logout: async () => {
       try {
         await api.post('/auth/logout');
-        MMKVStorage.delete('user');
       } catch (error) {
         console.log(error);
         throw error;

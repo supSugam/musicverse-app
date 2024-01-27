@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import COLORS from '@/constants/Colors';
-import Toast from 'react-native-toast-message';
+import { isValidNumber } from '@/utils/helpers/string';
 
 interface PinCodeInputProps {
   length?: number;
@@ -15,42 +15,61 @@ export const PinCodeInput = ({
   onChange,
   value,
 }: PinCodeInputProps) => {
-  const otp = value.split('');
+  const [otp, setOtp] = useState<string>(value);
+
+  useEffect(() => {
+    setOtp(value);
+  }, [value]);
+
   const inputRefs = Array.from({ length }, () => useRef<TextInput>(null));
 
   const handleChange = (index: number, value: string) => {
+    if (index === length - 1 && otp.length === length) {
+      return;
+    }
+    if (!isValidNumber(value)) {
+      inputRefs[index]?.current?.clear();
+      return;
+    }
     const newOtp = [...otp];
-    newOtp[index] = value;
+
+    if (isValidNumber(otp[index])) {
+      inputRefs[index + 1]?.current?.focus();
+      newOtp[index + 1] = value[value.length - 1];
+    } else {
+      newOtp[index] = value[0];
+    }
+
     onChange(newOtp.join(''));
     if (value !== '' && index < length - 1) {
-      inputRefs[index + 1].current?.focus();
+      inputRefs[index + 1]?.current?.focus();
     }
   };
 
   const handleBackspace = (index: number) => {
-    if (otp.length === 0) return;
-    if (otp[index] === '') {
-      inputRefs[index - 1]?.current?.focus();
-      return;
+    if (otp.length === 0) {
+      inputRefs?.[0]?.current?.focus();
     }
-    const newOtp = [...otp];
-    newOtp[index] = '';
+
+    const newOtp = otp.split('');
+
+    if (index === length - 1) {
+      newOtp[index] = '';
+    } else {
+      newOtp[index] = isValidNumber(newOtp[index + 1]) ? newOtp[index + 1] : '';
+    }
+
+    setOtp(newOtp.join(''));
+
+    if (index > 0) {
+      inputRefs?.[index - 1]?.current?.focus();
+    }
+
+    // Throttle the onChange call to avoid unnecessary re-renders
     onChange(newOtp.join(''));
-    inputRefs[index - 1]?.current?.focus();
   };
-
-  const handlePaste = async () => {
-    const pastedText = (await Clipboard.getStringAsync()).trim();
-    if (
-      pastedText.length === length &&
-      pastedText.split('').every((char) => !isNaN(parseInt(char)))
-    ) {
-      onChange(pastedText);
-    }
-  };
-
   return (
-    <View className="flex-row justify-between">
+    <View className="flex-row justify-between ">
       {Array(length)
         .fill(0)
         .map((_, index) => (
@@ -66,11 +85,10 @@ export const PinCodeInput = ({
                 handleBackspace(index);
               }
             }}
-            className="w-12 h-14 rounded text-center text-gray-200 text-2xl font-semibold border border-violet-800 shadow-violet-600 shadow-xl"
-            maxLength={1}
+            className="w-12 h-14 rounded text-center text-gray-200 text-2xl font-semibold border border-violet-800 "
+            maxLength={2}
             value={otp[index]}
-            onChangeText={(v) => handleChange(index, v)}
-            onTextInput={handlePaste}
+            onChange={(e) => handleChange(index, e.nativeEvent.text)}
           />
         ))}
     </View>

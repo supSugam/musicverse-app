@@ -1,7 +1,9 @@
-// import { BASE_URL } from '@env';
+import axios from 'axios';
+import { MMKV } from 'react-native-mmkv';
+import { BASE_URL } from '@env';
 
-// import axios from 'axios';
+export const api = axios.create({
+  baseURL: BASE_URL,
+});
 
-// export const api = axios.create({
-//   baseURL: BASE_URL,
-// });
+export const MMKVStorage = new MMKV();

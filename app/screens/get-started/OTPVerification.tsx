@@ -1,19 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import StyledText from '@/components/reusables/StyledText';
-import { KeyboardAvoidingView, View, ScrollView } from 'react-native'; // Import TouchableOpacity for the button
+import { View } from 'react-native'; // Import TouchableOpacity for the button
 import Container from '@/components/Container';
 import StyledButton from '@/components/reusables/StyledButton';
-import StyledTextField from '@/components/reusables/StyledTextField';
-import { Image } from 'expo-image';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { Platform } from 'react-native';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import LogoWithName from '@/components/reusables/LogoWithName';
 import PinCodeInput from '@/components/PinCodeInput';
 import LottieView from 'lottie-react-native';
 import { WaitingForCodeLA } from '@/assets/lottie';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { isValidNumber } from '@/utils/helpers/string';
 
 export default function Register({ navigation }: { navigation: any }) {
   const navigateToRegistrationScreen = () => {
@@ -26,71 +22,97 @@ export default function Register({ navigation }: { navigation: any }) {
   const [otpCode, setOtpCode] = useState<string>('');
   const { height } = useScreenDimensions();
 
+  const WaitingForCodeJSON = useMemo(() => WaitingForCodeLA, []);
+
+  const onOTPSubmit = () => {
+    setLoading(true);
+    console.log('otpCode', otpCode);
+    if (otpCode.length !== 6 || !isValidNumber(otpCode)) {
+      setLoading(false);
+      return;
+    }
+  };
+
   return (
     <Container>
-      <View
-        style={{
-          minHeight: height,
-        }}
-        className="flex-1 h-full flex-col justify-end items-center p-8 py-16 pt-24 mt-auto"
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps="always"
+        style={{ flex: 1 }}
       >
-        <LogoWithName discludeName />
-
-        <LottieView
-          source={WaitingForCodeLA}
-          autoPlay
-          // loop={false}
-          loop
-          speed={0.25}
+        <View
           style={{
-            width: SCREEN_WIDTH * 0.65,
-            height: SCREEN_HEIGHT * 0.25,
-            alignSelf: 'center',
-            transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }],
-            marginTop: 48,
+            minHeight: height,
           }}
-        />
+          className="flex-1 h-full flex-col justify-end items-center p-8 py-6 pt-24 mt-auto"
+        >
+          <LogoWithName discludeName />
 
-        <View className="flex flex-col w-full">
-          <PinCodeInput
-            onChange={(value) => {
-              setOtpCode(value);
-              console.log(value);
-            }}
-            value={otpCode}
-            length={6}
-          />
-        </View>
-
-        <View className="flex mt-auto mb-4 flex-col w-full">
-          <StyledButton
-            fullWidth
-            variant="secondary"
-            onPress={navigateToRegistrationScreen}
-            className="mb-4"
+          <StyledText
+            weight="semibold"
+            size="2xl"
+            className="text-center text-primary mt-4"
           >
-            <StyledText
-              weight="semibold"
-              size="base"
-              className="text-white"
-              uppercase
-            >
-              Resend Code
-            </StyledText>
-          </StyledButton>
+            Please enter the code we sent you to verify your email address.
+          </StyledText>
 
-          <StyledButton loading={loading} onPress={() => {}} className="w-full">
-            <StyledText
-              weight="semibold"
-              size="base"
-              className="text-white"
-              uppercase
+          <View className="flex flex-col w-full mt-12">
+            <PinCodeInput
+              onChange={(value) => {
+                setOtpCode(value);
+              }}
+              value={otpCode}
+              length={6}
+            />
+          </View>
+          <LottieView
+            source={WaitingForCodeJSON}
+            autoPlay
+            // loop={false}
+            loop
+            speed={0.25}
+            style={{
+              width: SCREEN_WIDTH * 0.5,
+              height: SCREEN_HEIGHT * 0.25,
+              alignSelf: 'center',
+              transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }],
+              marginTop: 52,
+            }}
+          />
+
+          <View className="flex mt-auto mb-4 flex-col w-full">
+            <StyledButton
+              fullWidth
+              variant="secondary"
+              onPress={navigateToRegistrationScreen}
+              className="mb-4"
             >
-              Submit
-            </StyledText>
-          </StyledButton>
+              <StyledText
+                weight="semibold"
+                size="base"
+                className="text-white"
+                uppercase
+              >
+                Resend Code
+              </StyledText>
+            </StyledButton>
+
+            <StyledButton
+              loading={loading}
+              onPress={onOTPSubmit}
+              className="w-full"
+            >
+              <StyledText
+                weight="semibold"
+                size="base"
+                className="text-white"
+                uppercase
+              >
+                Submit
+              </StyledText>
+            </StyledButton>
+          </View>
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </Container>
   );
 }

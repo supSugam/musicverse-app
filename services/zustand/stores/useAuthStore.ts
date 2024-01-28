@@ -44,7 +44,6 @@ export const useAuthStore = create<AuthStore>(
       try {
         await api.post('/auth/logout');
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },

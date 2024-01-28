@@ -40,14 +40,12 @@ export default function OTPVerification({
   const resendOtpMutation = useMutation({
     mutationFn: resendOtp,
     onSuccess: (data: any) => {
-      console.log(data);
       Toast.show({
         type: 'success',
         text1: 'OTP Resent Successfully.',
       });
     },
     onError: (error: any) => {
-      console.log(error.response.data);
       Toast.show({
         type: 'error',
         text1: error?.response?.data?.message || 'Something went wrong.',
@@ -58,15 +56,15 @@ export default function OTPVerification({
   const verifyOtpMutation = useMutation({
     mutationFn: verifyOtp,
     onSuccess: (data: any) => {
-      console.log(data);
       Toast.show({
         type: 'success',
         text1: 'OTP Verified Successfully.',
       });
+      setLoading(false);
       navigation.navigate('Login');
     },
     onError: (error: any) => {
-      console.log(error.response.data);
+      setLoading(false);
       Toast.show({
         type: 'error',
         text1: error?.response?.data?.message || 'Something went wrong.',
@@ -97,13 +95,6 @@ export default function OTPVerification({
     resendOtpMutation.mutate(email);
     setResendTimer(60);
   };
-
-  useEffect(() => {
-    Toast.show({
-      type: 'error',
-      text1: `Invalid Email. ${email}`,
-    });
-  }, [email]);
 
   return (
     <Container>

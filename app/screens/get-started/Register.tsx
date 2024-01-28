@@ -47,20 +47,16 @@ export default function Register({ navigation }: { navigation: any }) {
   const registerUserMutation = useMutation({
     mutationFn: async (payload: IRegisterUserDTO) => await register(payload),
     onSuccess: (data: any) => {
-      const email = data.data.result.email;
       Toast.show({
         type: 'success',
-        text1: `Please check the OTP sent to ${email}`,
+        text1: 'Please check your email for the OTP.',
       });
       setLoading(false);
-      setTimeout(() => {
-        navigation.navigate('OTPVerification', {
-          email: data.data.result.email,
-        });
-      }, 3000);
+      navigation.navigate('OTPVerification', {
+        email: data.data.result.email,
+      });
     },
     onError: (error: any) => {
-      console.log(JSON.stringify(error.response.data));
       Toast.show({
         type: 'error',
         text1: error.response.data.message[0],

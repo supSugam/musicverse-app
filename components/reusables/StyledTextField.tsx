@@ -55,6 +55,9 @@ export default function StyledTextField({
               className={`text-lg text-white border rounded-md p-3 px-4 w-full placeholder:white placeholder-opacity-50 ${
                 errorMessage ? 'border-red-500' : 'border-purple-900'
               }`}
+              autoCorrect={false}
+              autoComplete="off"
+              autoCapitalize="none"
               {...rest}
             />
           )}

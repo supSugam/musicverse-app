@@ -13,36 +13,33 @@ const Stack = createNativeStackNavigator();
 
 export default function index() {
   return (
-    <>
-      <Stack.Navigator
-        screenOptions={{
-          headerTransparent: true,
+    <Stack.Navigator
+      screenOptions={{
+        headerTransparent: true,
+      }}
+    >
+      <Stack.Screen
+        name="Welcome"
+        component={Welcome}
+        options={{
+          headerShown: false,
         }}
-      >
-        <Stack.Screen
-          name="Welcome"
-          component={Welcome}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={Register}
-          options={{
-            headerShown: false,
-          }}
-        />
+      />
+      <Stack.Screen
+        name="Register"
+        component={Register}
+        options={{
+          headerShown: false,
+        }}
+      />
 
-        <Stack.Screen
-          name="OTPVerification"
-          component={OTPVerification}
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack.Navigator>
-      <Toast />
-    </>
+      <Stack.Screen
+        name="OTPVerification"
+        component={OTPVerification}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 }

@@ -13,6 +13,8 @@ import useScreenDimensions from '@/hooks/useScreenDimensions';
 import LogoWithName from '@/components/reusables/LogoWithName';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useMutation } from '@tanstack/react-query';
+import { IRegisterUserDTO } from '@/services/auth/auth';
+import Toast from 'react-native-toast-message';
 
 const schema = yup.object().shape({
   email: yup
@@ -42,25 +44,23 @@ export default function Register({ navigation }: { navigation: any }) {
   const register = useAuthStore((state) => state.register);
 
   const registerUserMutation = useMutation({
-    mutationFn: async ({
-      email,
-      username,
-      password,
-    }: {
-      email: string;
-      username: string;
-      password: string;
-    }) =>
-      await register({
-        email,
-        username,
-        password,
-      }),
-    onSuccess: (data) => {
-      console.log(data);
+    mutationFn: async (payload: IRegisterUserDTO) => await register(payload),
+    onSuccess: (data: any) => {
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Please check your email for the OTP.',
+      });
+      setLoading(false);
+      // navigation.navigate('OTPVerification', { email: data.email });
     },
-    onError: (error) => {
-      console.log(error);
+    onError: (error: any) => {
+      Toast.show({
+        type: 'error',
+        text1: 'Oops!',
+        text2: error.response.data.message[0],
+      });
+      setLoading(false);
     },
   });
   const {
@@ -74,9 +74,6 @@ export default function Register({ navigation }: { navigation: any }) {
   const onSubmit = (data: any) => {
     setLoading(true);
     registerUserMutation.mutate(data);
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000);
   };
 
   const { height } = useScreenDimensions();
@@ -110,17 +107,21 @@ export default function Register({ navigation }: { navigation: any }) {
                 control={control}
                 errorMessage={errors.email?.message}
                 controllerName="email"
+                autoComplete="email"
               />
               <StyledTextField
                 label="Username"
                 control={control}
                 errorMessage={errors.username?.message}
                 controllerName="username"
+                autoComplete="username-new"
               />
               <StyledTextField
                 label="Password"
                 control={control}
                 errorMessage={errors.password?.message}
+                secureTextEntry
+                autoComplete="password-new"
                 controllerName="password"
               />
             </View>

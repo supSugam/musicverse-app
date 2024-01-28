@@ -3,9 +3,11 @@ import 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Slot, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
+import Toast from 'react-native-toast-message';
+import { View } from 'react-native';
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -55,6 +57,30 @@ function RootLayoutNav() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
+        <Toast
+          config={{
+            tomatoToast: ({ text1, text2 }) => (
+              <View
+                style={{
+                  height: 60,
+                  width: '100%',
+                  backgroundColor: COLORS.tomato,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}
+                >
+                  {props.text1}
+                </Text>
+                <Text style={{ color: '#fff', fontSize: 14 }}>
+                  {props.text2}
+                </Text>
+              </View>
+            ),
+          }}
+        />
         <Stack
           screenOptions={{
             headerShown: false,

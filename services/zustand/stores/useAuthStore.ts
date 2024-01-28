@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { api } from '@/utils/constants';
 import { AxiosResponse } from 'axios';
-import { register } from '@/services/auth/auth';
+import { IRegisterUserDTO, registerUser } from '@/services/auth/auth';
 
 type User = any;
 
@@ -15,15 +15,7 @@ interface AuthStore {
     email: string;
     password: string;
   }) => Promise<AxiosResponse<any>>;
-  register: ({
-    email,
-    password,
-    username,
-  }: {
-    email: string;
-    password: string;
-    username: string;
-  }) => Promise<AxiosResponse<any>>;
+  register: (payload: IRegisterUserDTO) => Promise<AxiosResponse<any>>;
   logout: () => Promise<void>;
 }
 
@@ -39,22 +31,13 @@ export const useAuthStore = create<AuthStore>(
           email,
           password,
         });
-        console.log(response.data);
-        // MMKVStorage.set('access_token', response.data.access_token);
         return response;
       } catch (error) {
-        console.log(error);
         throw error;
       }
     },
-    register: async ({ email, password, username }) => {
-      try {
-        const response = await register({ email, password, username });
-        return response;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
+    register: async (payload: IRegisterUserDTO) => {
+      return await registerUser(payload);
     },
     logout: async () => {
       try {

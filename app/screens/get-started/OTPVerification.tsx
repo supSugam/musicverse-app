@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import StyledText from '@/components/reusables/StyledText';
 import { View } from 'react-native'; // Import TouchableOpacity for the button
 import Container from '@/components/Container';
@@ -10,28 +10,100 @@ import LottieView from 'lottie-react-native';
 import { WaitingForCodeLA } from '@/assets/lottie';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { isValidNumber } from '@/utils/helpers/string';
+import Toast from 'react-native-toast-message';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { useMutation } from '@tanstack/react-query';
 
-export default function Register({ navigation }: { navigation: any }) {
-  const navigateToRegistrationScreen = () => {
-    navigation.navigate('Register');
-  };
-  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useScreenDimensions();
-
-  const [loading, setLoading] = useState<boolean>(false);
-
+export default function OTPVerification({
+  route,
+  navigation,
+}: {
+  navigation: any;
+  route: any;
+}) {
   const [otpCode, setOtpCode] = useState<string>('');
-  const { height } = useScreenDimensions();
-
+  const { SCREEN_WIDTH, SCREEN_HEIGHT } = useScreenDimensions();
+  const [loading, setLoading] = useState<boolean>(false);
+  const { email } = route.params;
   const WaitingForCodeJSON = useMemo(() => WaitingForCodeLA, []);
+  const { resendOtp, verifyOtp } = useAuthStore((state) => state);
+  const [resendTimer, setResendTimer] = useState<number>(60);
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      setTimeout(() => {
+        setResendTimer(resendTimer - 1);
+      }, 1000);
+    }
+  }, [resendTimer]);
+
+  const resendOtpMutation = useMutation({
+    mutationFn: resendOtp,
+    onSuccess: (data: any) => {
+      console.log(data);
+      Toast.show({
+        type: 'success',
+        text1: 'OTP Resent Successfully.',
+      });
+    },
+    onError: (error: any) => {
+      console.log(error.response.data);
+      Toast.show({
+        type: 'error',
+        text1: error?.response?.data?.message || 'Something went wrong.',
+      });
+    },
+  });
+
+  const verifyOtpMutation = useMutation({
+    mutationFn: verifyOtp,
+    onSuccess: (data: any) => {
+      console.log(data);
+      Toast.show({
+        type: 'success',
+        text1: 'OTP Verified Successfully.',
+      });
+      navigation.navigate('Login');
+    },
+    onError: (error: any) => {
+      console.log(error.response.data);
+      Toast.show({
+        type: 'error',
+        text1: error?.response?.data?.message || 'Something went wrong.',
+      });
+    },
+  });
 
   const onOTPSubmit = () => {
     setLoading(true);
-    console.log('otpCode', otpCode);
     if (otpCode.length !== 6 || !isValidNumber(otpCode)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid OTP, Please try again.',
+      });
       setLoading(false);
       return;
     }
+    verifyOtpMutation.mutate({ email, otp: +otpCode });
   };
+  const onResendCode = () => {
+    if (resendTimer > 0) {
+      Toast.show({
+        type: 'error',
+        text1: `You can resend OTP after ${resendTimer} seconds.`,
+      });
+      return;
+    }
+    resendOtpMutation.mutate(email);
+    setResendTimer(60);
+  };
+
+  useEffect(() => {
+    Toast.show({
+      type: 'error',
+      text1: `Invalid Email. ${email}`,
+    });
+  }, [email]);
 
   return (
     <Container>
@@ -41,7 +113,7 @@ export default function Register({ navigation }: { navigation: any }) {
       >
         <View
           style={{
-            minHeight: height,
+            minHeight: SCREEN_HEIGHT,
           }}
           className="flex-1 h-full flex-col justify-end items-center p-8 py-6 pt-24 mt-auto"
         >
@@ -83,7 +155,7 @@ export default function Register({ navigation }: { navigation: any }) {
             <StyledButton
               fullWidth
               variant="secondary"
-              onPress={navigateToRegistrationScreen}
+              onPress={!resendOtpMutation.isPending ? onResendCode : () => {}}
               className="mb-4"
             >
               <StyledText
@@ -92,7 +164,9 @@ export default function Register({ navigation }: { navigation: any }) {
                 className="text-white"
                 uppercase
               >
-                Resend Code
+                {resendTimer > 0
+                  ? `Resend OTP in ${resendTimer} seconds.`
+                  : 'Resend Code'}
               </StyledText>
             </StyledButton>
 

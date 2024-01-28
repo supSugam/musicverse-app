@@ -1,22 +1,23 @@
 import { create } from 'zustand';
 import { api } from '@/utils/constants';
 import { AxiosResponse } from 'axios';
-import { IRegisterUserDTO, registerUser } from '@/services/auth/auth';
+import { registerUser, resendOtp, verifyOtp } from '@/services/auth/auth';
+import {
+  ILoginDTO,
+  IRegisterUserDTO,
+  IVerifyOtpDTO,
+} from '@/services/auth/IAuth';
 
 type User = any;
 
 interface AuthStore {
   user: User | null;
   setUser: (user: User | null) => void;
-  login: ({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) => Promise<AxiosResponse<any>>;
+  login: (payload: ILoginDTO) => Promise<AxiosResponse<any>>;
   register: (payload: IRegisterUserDTO) => Promise<AxiosResponse<any>>;
   logout: () => Promise<void>;
+  verifyOtp: (payload: IVerifyOtpDTO) => Promise<AxiosResponse<any>>;
+  resendOtp: (email: string) => Promise<AxiosResponse<any>>;
 }
 
 export const useAuthStore = create<AuthStore>(
@@ -46,6 +47,13 @@ export const useAuthStore = create<AuthStore>(
         console.log(error);
         throw error;
       }
+    },
+
+    verifyOtp: async (payload: IVerifyOtpDTO) => {
+      return await verifyOtp(payload);
+    },
+    resendOtp: async (email: string) => {
+      return await resendOtp(email);
     },
   })
 );

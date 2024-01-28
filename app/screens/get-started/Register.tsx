@@ -13,7 +13,7 @@ import useScreenDimensions from '@/hooks/useScreenDimensions';
 import LogoWithName from '@/components/reusables/LogoWithName';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useMutation } from '@tanstack/react-query';
-import { IRegisterUserDTO } from '@/services/auth/auth';
+import { IRegisterUserDTO } from '@/services/auth/IAuth';
 import Toast from 'react-native-toast-message';
 
 const schema = yup.object().shape({
@@ -24,7 +24,8 @@ const schema = yup.object().shape({
   username: yup
     .string()
     .required('Please enter a valid username.')
-    .min(4, 'Username must be at least 4 characters.'),
+    .min(4, 'Username must be at least 4 characters.')
+    .matches(/^\S*$/, 'Username cannot contain spaces.'),
   password: yup
     .string()
     .required('Password is required.')
@@ -37,7 +38,7 @@ const schema = yup.object().shape({
 
 export default function Register({ navigation }: { navigation: any }) {
   const navigateToLoginScreen = () => {
-    navigation.navigate('OTPVerification');
+    navigation.navigate('Login');
   };
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -46,19 +47,23 @@ export default function Register({ navigation }: { navigation: any }) {
   const registerUserMutation = useMutation({
     mutationFn: async (payload: IRegisterUserDTO) => await register(payload),
     onSuccess: (data: any) => {
+      const email = data.data.result.email;
       Toast.show({
         type: 'success',
-        text1: 'Success!',
-        text2: 'Please check your email for the OTP.',
+        text1: `Please check the OTP sent to ${email}`,
       });
       setLoading(false);
-      // navigation.navigate('OTPVerification', { email: data.email });
+      setTimeout(() => {
+        navigation.navigate('OTPVerification', {
+          email: data.data.result.email,
+        });
+      }, 3000);
     },
     onError: (error: any) => {
+      console.log(JSON.stringify(error.response.data));
       Toast.show({
         type: 'error',
-        text1: 'Oops!',
-        text2: error.response.data.message[0],
+        text1: error.response.data.message[0],
       });
       setLoading(false);
     },
@@ -76,7 +81,7 @@ export default function Register({ navigation }: { navigation: any }) {
     registerUserMutation.mutate(data);
   };
 
-  const { height } = useScreenDimensions();
+  const { SCREEN_HEIGHT } = useScreenDimensions();
 
   return (
     <Container>
@@ -95,7 +100,7 @@ export default function Register({ navigation }: { navigation: any }) {
         >
           <View
             style={{
-              minHeight: height,
+              minHeight: SCREEN_HEIGHT,
             }}
             className="flex-1 h-full flex-col justify-end items-center p-8 py-16 pt-24 bg-black mt-auto"
           >
@@ -121,8 +126,8 @@ export default function Register({ navigation }: { navigation: any }) {
                 control={control}
                 errorMessage={errors.password?.message}
                 secureTextEntry
-                autoComplete="password-new"
                 controllerName="password"
+                autoComplete="password-new"
               />
             </View>
 

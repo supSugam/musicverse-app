@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Dimensions, ScaledSize } from 'react-native';
 
-export default function useScreenDimensions(): ScaledSize {
+export default function useScreenDimensions() {
   const [screenData, setScreenData] = useState<ScaledSize>(
     Dimensions.get('screen')
   );
@@ -22,5 +22,10 @@ export default function useScreenDimensions(): ScaledSize {
     Dimensions.addEventListener('change', onChange);
   });
 
-  return screenData;
+  return {
+    SCREEN_WIDTH: screenData.width,
+    SCREEN_HEIGHT: screenData.height,
+    scale: screenData.scale,
+    fontScale: screenData.fontScale,
+  };
 }

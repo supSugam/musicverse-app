@@ -9,7 +9,7 @@ import Container from '@/components/Container';
 import StyledButton from '@/components/reusables/StyledButton';
 
 export default function Welcome({ navigation }: { navigation: any }) {
-  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useScreenDimensions();
+  const { SCREEN_WIDTH, SCREEN_HEIGHT } = useScreenDimensions();
 
   const navigateToRegistrationScreen = () => {
     navigation.navigate('Register');

@@ -27,6 +27,7 @@ export default function StyledButton(props: StyledButtonProps) {
     ${fullWidth ? 'w-full' : ''}
     `}
       {...rest}
+      disabled={loading}
     >
       <LinearGradient
         style={{

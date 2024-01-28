@@ -26,16 +26,9 @@ export const useAuthStore = create<AuthStore>(
     setUser: (user) => {
       set(() => ({ user }));
     },
-    login: async ({ email, password }) => {
-      try {
-        const response = await api.post('/auth/login', {
-          email,
-          password,
-        });
-        return response;
-      } catch (error) {
-        throw error;
-      }
+    login: async (payload: ILoginDTO) => {
+      return await api.post('/auth/login', payload);
+      // TODO: add login logic, save jwt token to localstorage
     },
     register: async (payload: IRegisterUserDTO) => {
       return await registerUser(payload);

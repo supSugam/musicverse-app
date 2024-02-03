@@ -11,6 +11,7 @@ import { ICurrentUser, IUser } from '@/utils/enums/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persist } from 'zustand/middleware';
 import { jwtDecode } from 'jwt-decode';
+import 'core-js/stable/atob'; // <- polyfill here
 interface AuthStore {
   currentUser: ICurrentUser | null;
   setCurrentUser: (user: ICurrentUser | null) => void;

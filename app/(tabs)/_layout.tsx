@@ -43,6 +43,7 @@ export default function TabsLayout() {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <Tab.Navigator
+        initialRouteName="Home"
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             let iconName: keyof (typeof Ionicons)['glyphMap'] = 'home';

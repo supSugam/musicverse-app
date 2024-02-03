@@ -18,7 +18,7 @@ import { toastResponseMessage } from '@/utils/toast';
 import { jwtDecode } from 'jwt-decode';
 import { ICurrentUser } from '@/utils/enums/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import 'core-js/stable/atob';
 const schema = yup.object().shape({
   usernameOrEmail: yup.string().required('Enter your username or email.'),
   password: yup.string().required('Password cannot be empty.'),
@@ -41,17 +41,20 @@ export default function Login({ navigation }: { navigation: any }) {
       });
       setLoading(false);
       const accessToken = data.data.result.access_token;
-      if (accessToken) {
-        const currentUser = {
-          ...JSON.parse(jwtDecode(accessToken)),
-          accessToken,
-        } as ICurrentUser;
-        AsyncStorage.setItem('current-user', JSON.stringify(currentUser));
-        setCurrentUser(currentUser);
+      try {
+        const decodedToken = jwtDecode(accessToken);
+        if (accessToken) {
+          const currentUser = {
+            ...decodedToken,
+            accessToken,
+          } as ICurrentUser;
+          AsyncStorage.setItem('current-user', JSON.stringify(currentUser));
+          setCurrentUser(currentUser);
+          navigation.navigate('Home');
+        }
+      } catch (e) {
+        console.log(e);
       }
-      //   navigation.navigate('OTPVerification', {
-      //     email: data.data.result.email,
-      //   });
     },
     onError: (error: any) => {
       toastResponseMessage({

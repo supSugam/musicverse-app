@@ -8,10 +8,24 @@ import Container from '@/components/Container';
 import Register from './screens/get-started/Register';
 import OTPVerification from './screens/get-started/OTPVerification';
 import Toast from 'react-native-toast-message';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { useEffect, useState } from 'react';
 
 const Stack = createNativeStackNavigator();
 
 export default function index() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  const { initialize } = useAuthStore((state) => state);
+
+  const onInitialize = async () => {
+    const loggedIn = await initialize();
+    setIsLoggedIn(loggedIn);
+  };
+
+  useEffect(() => {
+    onInitialize();
+  }, []);
   return (
     <Stack.Navigator
       screenOptions={{

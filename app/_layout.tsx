@@ -65,7 +65,6 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const translateY = useSharedValue(-80);
   const opacity = useSharedValue(0);
-
   const { SCREEN_WIDTH } = useScreenDimensions();
 
   const animatedStyle = useAnimatedStyle(() => {

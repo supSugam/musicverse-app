@@ -1,12 +1,15 @@
-import { View, Text } from 'react-native';
+// app/tabs/home/HomeScreen.tsx
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import React from 'react';
+import { View, Text } from 'react-native';
 
-const index = () => {
+const HomeScreen: React.FC = () => {
+  const { currentUser } = useAuthStore((state) => state);
   return (
     <View>
-      <Text>index</Text>
+      <Text>Welcome to the home screen {currentUser?.username}</Text>
     </View>
   );
 };
 
-export default index;
+export default HomeScreen;

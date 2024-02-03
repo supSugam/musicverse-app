@@ -10,9 +10,13 @@ export const toastResponseMessage = ({
 }: ToastContentProps<ToastType>): void => {
   if (type === 'error') {
     const errorMessage =
-      content.response?.data?.message ||
-      content.response?.message ||
-      'Something went wrong.';
+      typeof content === 'string'
+        ? content
+        : content.response.data.message instanceof Array
+        ? content.response.data.message[0]
+        : content.response.data.message ||
+          content.response.message ||
+          'An error occurred. Please try again later.';
 
     if (typeof errorMessage === 'string') {
       Toast.show({

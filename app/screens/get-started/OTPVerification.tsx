@@ -48,7 +48,7 @@ export default function OTPVerification({
     onError: (error: any) => {
       Toast.show({
         type: 'error',
-        text1: error?.response?.data?.message || 'Something went wrong.',
+        text1: error?.response?.data?.message[0] || 'Something went wrong.',
       });
     },
   });
@@ -67,7 +67,7 @@ export default function OTPVerification({
       setLoading(false);
       Toast.show({
         type: 'error',
-        text1: error?.response?.data?.message || 'Something went wrong.',
+        text1: error?.response?.data?.message[0] || 'Something went wrong.',
       });
     },
   });

@@ -30,17 +30,7 @@ export const useAuthStore = create<AuthStore>(
       await AsyncStorage.setItem('current-user', JSON.stringify(currentUser));
     },
     login: async (payload: ILoginDTO) => {
-      const response = await api.post('/auth/login', payload);
-      const accessToken = response.data.result.access_token;
-      if (accessToken) {
-        const currentUser = {
-          ...JSON.parse(jwtDecode(accessToken)),
-          accessToken,
-        } as ICurrentUser;
-        set(() => ({ currentUser }));
-        await AsyncStorage.setItem('current-user', JSON.stringify(currentUser));
-      }
-      return response;
+      return await api.post('/auth/login', payload);
     },
     register: async (payload: IRegisterUserDTO) => {
       return await registerUser(payload);

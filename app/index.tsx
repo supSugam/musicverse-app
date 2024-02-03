@@ -10,6 +10,8 @@ import OTPVerification from './screens/get-started/OTPVerification';
 import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useEffect, useState } from 'react';
+import TabsLayout from './(tabs)/_layout';
+import Login from './screens/Login';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,33 +29,46 @@ export default function index() {
     onInitialize();
   }, []);
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTransparent: true,
-      }}
-    >
-      <Stack.Screen
-        name="Welcome"
-        component={Welcome}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="Register"
-        component={Register}
-        options={{
-          headerShown: false,
-        }}
-      />
+    <>
+      {isLoggedIn ? (
+        <TabsLayout />
+      ) : (
+        <Stack.Navigator
+          screenOptions={{
+            headerTransparent: true,
+          }}
+        >
+          <Stack.Screen
+            name="Welcome"
+            component={Welcome}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={Register}
+            options={{
+              headerShown: false,
+            }}
+          />
 
-      <Stack.Screen
-        name="OTPVerification"
-        component={OTPVerification}
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack.Navigator>
+          <Stack.Screen
+            name="OTPVerification"
+            component={OTPVerification}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack.Navigator>
+      )}
+    </>
   );
 }

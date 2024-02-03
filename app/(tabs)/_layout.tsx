@@ -18,7 +18,7 @@ import { toastResponseMessage } from '@/utils/toast';
 
 const Tab = createBottomTabNavigator();
 
-export default function _layout() {
+export default function TabsLayout() {
   const navigation = useNavigation();
   const { currentUser } = useAuthStore((state) => state);
 

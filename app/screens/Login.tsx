@@ -14,6 +14,10 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useMutation } from '@tanstack/react-query';
 import { CredentialsType } from '@/services/auth/IAuth';
 import Toast from 'react-native-toast-message';
+import { toastResponseMessage } from '@/utils/toast';
+import { jwtDecode } from 'jwt-decode';
+import { ICurrentUser } from '@/utils/enums/IUser';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const schema = yup.object().shape({
   usernameOrEmail: yup.string().required('Enter your username or email.'),
@@ -26,7 +30,7 @@ export default function Login({ navigation }: { navigation: any }) {
   };
 
   const [loading, setLoading] = useState<boolean>(false);
-  const login = useAuthStore((state) => state.login);
+  const { login, setCurrentUser } = useAuthStore((state) => state);
 
   const loginUserMutation = useMutation({
     mutationFn: login,
@@ -36,14 +40,23 @@ export default function Login({ navigation }: { navigation: any }) {
         text1: 'Logged in successfully.',
       });
       setLoading(false);
+      const accessToken = data.data.result.access_token;
+      if (accessToken) {
+        const currentUser = {
+          ...JSON.parse(jwtDecode(accessToken)),
+          accessToken,
+        } as ICurrentUser;
+        AsyncStorage.setItem('current-user', JSON.stringify(currentUser));
+        setCurrentUser(currentUser);
+      }
       //   navigation.navigate('OTPVerification', {
       //     email: data.data.result.email,
       //   });
     },
     onError: (error: any) => {
-      Toast.show({
+      toastResponseMessage({
         type: 'error',
-        text1: error.response.data.message[0],
+        content: error,
       });
       setLoading(false);
     },

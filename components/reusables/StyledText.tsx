@@ -1,5 +1,5 @@
 import { joinClassNames } from '@/utils/helpers/string';
-import { Text as DefaultText } from 'react-native';
+import { Text as DefaultText, TextProps } from 'react-native';
 
 type TextSizeOptions =
   | 'xs'
@@ -18,7 +18,8 @@ type TextWeightOptions =
   | 'normal'
   | 'medium'
   | 'semibold'
-  | 'bold';
+  | 'bold'
+  | 'extrabold';
 
 type TextTrackingOptions =
   | 'tighter'
@@ -30,7 +31,7 @@ type TextTrackingOptions =
 
 type TextDimnessOptions = 'extra' | 'high' | 'medium' | 'low' | 'none';
 
-type TextProps = {
+interface ITextProps extends TextProps {
   className?: string;
   size?: TextSizeOptions;
   weight?: TextWeightOptions;
@@ -38,9 +39,9 @@ type TextProps = {
   dimness?: TextDimnessOptions;
   uppercase?: boolean;
   children: React.ReactNode;
-};
+}
 
-const StyledText = (props: TextProps) => {
+const StyledText = (props: ITextProps) => {
   const {
     className = '',
     size,
@@ -90,6 +91,8 @@ const StyledText = (props: TextProps) => {
         return 'font-semibold';
       case 'bold':
         return 'font-bold';
+      case 'extrabold':
+        return 'font-extrabold';
       default:
         return 'font-normal';
     }

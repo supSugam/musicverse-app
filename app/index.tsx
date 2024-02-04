@@ -7,7 +7,6 @@ import { StatusBar } from 'expo-status-bar';
 import Container from '@/components/Container';
 import Register from './screens/get-started/Register';
 import OTPVerification from './screens/get-started/OTPVerification';
-import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useEffect, useState } from 'react';
 import TabsLayout from './(tabs)/_layout';
@@ -16,21 +15,19 @@ import Login from './screens/Login';
 const Stack = createNativeStackNavigator();
 
 export default function index() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  const { initialize } = useAuthStore((state) => state);
-
-  const onInitialize = async () => {
-    const loggedIn = await initialize();
-    setIsLoggedIn(loggedIn);
-  };
+  const { currentUser, initialize } = useAuthStore((state) => state);
 
   useEffect(() => {
+    const onInitialize = async () => {
+      await initialize();
+    };
+
     onInitialize();
-  }, []);
+  }, [initialize]);
+
   return (
     <>
-      {isLoggedIn ? (
+      {currentUser !== null ? (
         <TabsLayout />
       ) : (
         <Stack.Navigator

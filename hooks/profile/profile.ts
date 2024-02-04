@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-query';
 import { PROFILE_QUERY_KEY } from '@/services/key-factory';
 import { toastResponseMessage } from '@/utils/toast';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 
 // TODO: Profile Hooks
 // Create User Profile
@@ -21,7 +22,6 @@ export const useCreateProfile = () => {
     mutationKey: ['createProfile'],
     mutationFn: createUserProfile,
     onSuccess: (data) => {
-      console.log(data);
       queryClient.invalidateQueries({
         queryKey: PROFILE_QUERY_KEY(),
       });
@@ -41,14 +41,11 @@ export const useCreateProfile = () => {
 
 // Get User Profile
 
-const getUserProfileByUserId = async (userId: string) => {
-  return await api.get(`/profile/${userId}`);
-};
-
-export const useGetProfile = (userId: string) => {
+export const useGetProfile = () => {
+  const api = useAuthStore((state) => state.api);
   return useQuery({
-    queryKey: PROFILE_QUERY_KEY(userId),
-    queryFn: () => getUserProfileByUserId(userId),
+    queryKey: PROFILE_QUERY_KEY(),
+    queryFn: async () => await api.get('/profile/me'),
     refetchOnWindowFocus: true,
   });
 };

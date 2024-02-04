@@ -40,21 +40,6 @@ export default function Login({ navigation }: { navigation: any }) {
         text1: 'Logged in successfully.',
       });
       setLoading(false);
-      const accessToken = data.data.result.access_token;
-      try {
-        const decodedToken = jwtDecode(accessToken);
-        if (accessToken) {
-          const currentUser = {
-            ...decodedToken,
-            accessToken,
-          } as ICurrentUser;
-          AsyncStorage.setItem('current-user', JSON.stringify(currentUser));
-          setCurrentUser(currentUser);
-          navigation.navigate('Home');
-        }
-      } catch (e) {
-        console.log(e);
-      }
     },
     onError: (error: any) => {
       toastResponseMessage({

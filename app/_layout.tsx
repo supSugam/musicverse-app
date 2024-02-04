@@ -16,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import StyledText from '@/components/reusables/StyledText';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -79,7 +80,7 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <>
+    <ThemeProvider value={DarkTheme}>
       <QueryClientProvider client={queryClient}>
         <Stack
           screenOptions={{
@@ -87,7 +88,7 @@ function RootLayoutNav() {
             gestureEnabled: true,
           }}
         />
-        <StatusBar style="light" />
+        <StatusBar style="light" backgroundColor="#171717" />
       </QueryClientProvider>
       <Toast
         position="top"
@@ -136,7 +137,7 @@ function RootLayoutNav() {
           ),
         }}
       />
-    </>
+    </ThemeProvider>
   );
 }
 

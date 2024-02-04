@@ -26,12 +26,12 @@ export interface IUser {
 }
 
 export interface IUserProfile {
+  avatar: string | null;
+  bio: string | null;
+  cover: string | null;
+  createdAt: string;
   id: string;
   name: string;
-  bio?: string;
-  avatar?: string;
-  createdAt: string;
   updatedAt: string;
   userId: string;
-  user: IUser;
 }

@@ -1,19 +1,24 @@
 import { create } from 'zustand';
 import { api } from '@/utils/constants';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { registerUser, resendOtp, verifyOtp } from '@/services/auth/auth';
 import {
   ILoginDTO,
   IRegisterUserDTO,
   IVerifyOtpDTO,
 } from '@/services/auth/IAuth';
-import { ICurrentUser, IUser } from '@/utils/enums/IUser';
+import { ICurrentUser, IUser, IUserProfile } from '@/utils/enums/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { persist } from 'zustand/middleware';
 import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob'; // <- polyfill here
+import { BASE_URL } from '@env';
+import { toastResponseMessage } from '@/utils/toast';
 interface AuthStore {
   currentUser: ICurrentUser | null;
+  currentUserProfile: IUserProfile | null;
+  api: AxiosInstance;
+  setCurrentUserProfile: (user: IUserProfile) => void;
+  setApi: (api: AxiosInstance) => void;
   setCurrentUser: (user: ICurrentUser | null) => void;
   login: (payload: ILoginDTO) => Promise<AxiosResponse<any>>;
   register: (payload: IRegisterUserDTO) => Promise<AxiosResponse<any>>;
@@ -26,13 +31,56 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
     currentUser: null,
+    currentUserProfile: null,
+    api: api,
+    setApi: (api) => {
+      set(() => ({ api }));
+    },
     setCurrentUser: async (currentUser) => {
       set(() => ({ currentUser }));
       await AsyncStorage.setItem('current-user', JSON.stringify(currentUser));
     },
-    login: async (payload: ILoginDTO) => {
-      return await api.post('/auth/login', payload);
+    setCurrentUserProfile: (currentUserProfile) => {
+      set(() => ({ currentUserProfile }));
     },
+    login: async (payload: ILoginDTO) => {
+      const response = await api.post('/auth/login', payload);
+      const accessToken = response.data.result.access_token;
+
+      try {
+        const decodedToken = jwtDecode(accessToken);
+        if (accessToken) {
+          const axiosInstance = axios.create({
+            baseURL: BASE_URL,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+
+          // Update the Zustand store with the new Axios instance
+          set(() => ({ api: axiosInstance }));
+
+          const currentUser = {
+            ...decodedToken,
+            accessToken,
+          } as ICurrentUser;
+
+          await AsyncStorage.setItem(
+            'current-user',
+            JSON.stringify(currentUser)
+          );
+          set(() => ({ currentUser }));
+        }
+      } catch (e) {
+        toastResponseMessage({
+          content: 'An error occurred while trying to login',
+          type: 'error',
+        });
+      } finally {
+        return response;
+      }
+    },
+
     register: async (payload: IRegisterUserDTO) => {
       return await registerUser(payload);
     },
@@ -51,19 +99,26 @@ export const useAuthStore = create<AuthStore>(
       return await resendOtp(email);
     },
     initialize: async (): Promise<boolean> => {
-      const user = await AsyncStorage.getItem('current-user');
-      if (user) {
-        if (JSON.parse(user).exp < Date.now() / 1000) {
+      const userJson = await AsyncStorage.getItem('current-user');
+      if (userJson) {
+        const user = JSON.parse(userJson) as ICurrentUser;
+        const axiosInstance = axios.create({
+          baseURL: BASE_URL,
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        });
+        set(() => ({ api: axiosInstance }));
+        if (user.exp < Date.now() / 1000) {
           await AsyncStorage.removeItem('current-user');
           set(() => ({ currentUser: null }));
-          return false;
+        } else {
+          set(() => ({ currentUser: user as ICurrentUser }));
         }
-        set(() => ({ currentUser: JSON.parse(user) }));
       } else {
         set(() => ({ currentUser: null }));
-        return false;
       }
-      return true;
+      return get().currentUser !== null;
     },
   })
 );

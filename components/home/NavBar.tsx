@@ -7,15 +7,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { Image } from 'expo-image';
 import COLORS from '@/constants/Colors';
-import { useGetProfile } from '@/hooks/profile/profile';
 import { toastResponseMessage } from '@/utils/toast';
 import { IUserProfile } from '@/utils/enums/IUser';
+import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 
 const NavBar = () => {
   const { setCurrentUserProfile, currentUserProfile, logout, api } =
     useAuthStore((state) => state);
 
-  const { data: profile, isLoading, isError, error, refetch } = useGetProfile();
+  const { data: profile } = useProfileQuery().get;
 
   useEffect(() => {
     if (profile) {

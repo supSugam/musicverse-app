@@ -28,3 +28,4 @@ export const PROFILE_QUERY_KEY = (...args: string[]) => [
   'profile',
   ...args,
 ];
+export const GENRES_QUERY_KEY = 'genres';

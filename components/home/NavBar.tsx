@@ -10,6 +10,7 @@ import COLORS from '@/constants/Colors';
 import { toastResponseMessage } from '@/utils/toast';
 import { IUserProfile } from '@/utils/enums/IUser';
 import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
+import { Link } from '@react-navigation/native';
 
 const NavBar = () => {
   const { setCurrentUserProfile, currentUserProfile, logout, api } =
@@ -62,12 +63,15 @@ const NavBar = () => {
             color="white"
             style={{ marginRight: 12 }}
           />
-          <Ionicons
-            name="arrow-up-circle"
-            size={25}
-            color="white"
-            style={{ marginRight: 12 }}
-          />
+          <Link to="/upload">
+            <Ionicons
+              name="arrow-up-circle"
+              size={25}
+              color="white"
+              style={{ marginRight: 12 }}
+              role="button"
+            />
+          </Link>
 
           <Pressable onPress={logout}>
             <Image

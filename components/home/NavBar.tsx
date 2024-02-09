@@ -11,8 +11,9 @@ import { toastResponseMessage } from '@/utils/toast';
 import { IUserProfile } from '@/utils/enums/IUser';
 import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 import { Link } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
 
-const NavBar = () => {
+const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
   const { setCurrentUserProfile, currentUserProfile, logout, api } =
     useAuthStore((state) => state);
 
@@ -23,6 +24,10 @@ const NavBar = () => {
       setCurrentUserProfile(profile.data.result as IUserProfile);
     }
   }, [profile]);
+
+  const navigation = useNavigation();
+  const currentRouteName =
+    navigation.getState().routes[navigation.getState().index].name;
   return (
     <View
       style={{
@@ -52,7 +57,7 @@ const NavBar = () => {
           height={44}
           title={
             <StyledText weight="extrabold" tracking="tight" size="2xl">
-              Home
+              {title}
             </StyledText>
           }
         />
@@ -63,15 +68,6 @@ const NavBar = () => {
             color="white"
             style={{ marginRight: 12 }}
           />
-          <Link to="/upload">
-            <Ionicons
-              name="arrow-up-circle"
-              size={25}
-              color="white"
-              style={{ marginRight: 12 }}
-              role="button"
-            />
-          </Link>
 
           <Pressable onPress={logout}>
             <Image

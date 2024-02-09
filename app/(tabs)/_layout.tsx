@@ -26,6 +26,8 @@ export default function TabsLayout() {
             iconName = focused ? 'search' : 'search-outline';
           } else if (route.name === 'MyLibrary') {
             iconName = focused ? 'library' : 'library-outline';
+          } else if (route.name === 'Upload') {
+            iconName = focused ? 'add-circle' : 'add-circle-outline';
           }
 
           return (
@@ -132,7 +134,7 @@ export default function TabsLayout() {
         component={UploadStackSreen}
         name="Upload"
         options={{
-          headerShown: false,
+          headerTitle: 'Upload',
         }}
       />
     </Tab.Navigator>

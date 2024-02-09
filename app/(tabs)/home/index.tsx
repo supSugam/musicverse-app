@@ -18,8 +18,7 @@ const HomeScreen: React.FC = () => {
   const [selectedGenre, setSelectedGenre] = useState<string>('All');
 
   return (
-    <Container>
-      <NavBar />
+    <Container includeNavBar navbarTitle="Home">
       <ScrollView style={styles.scrollView}>
         {/* <View>
           <StyledText size="2xl" weight="bold" tracking="tighter">

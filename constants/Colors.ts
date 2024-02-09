@@ -11,6 +11,7 @@ const COLORS = {
     light: '#a3a3a3',
     normal: '#737373',
     dark: '#2c2c2c',
+    dense: '#0a0a0a',
   },
   primary: {
     light: '#7e22ce',

@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
-export default function UploadStackSreen() {
+export default function UploadStackScreen() {
   return (
     <Stack.Navigator
       screenOptions={{

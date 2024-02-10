@@ -13,7 +13,7 @@ import StyledButton from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 
 const SelectUploadType = ({ navigation }: { navigation: any }) => {
-  const { uploadType } = useUploadStore((state) => state);
+  const { uploadType, album } = useUploadStore((state) => state);
   const [selectedType, setSelectedType] = useState<'album' | 'single'>(
     uploadType
   );

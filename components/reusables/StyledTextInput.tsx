@@ -23,6 +23,7 @@ type TextFieldProps = {
   fontWeight?: TextWeightOptions;
   backgroundColor?: string;
   textAlign?: 'center' | 'left';
+  wrapperClassName?: string;
 } & React.ComponentProps<typeof TextInput>;
 export default function StyledTextField({
   label,
@@ -35,6 +36,7 @@ export default function StyledTextField({
   fontWeight = 'normal',
   backgroundColor,
   textAlign = 'left',
+  wrapperClassName,
   ...rest
 }: TextFieldProps) {
   const [borderOpacity, setBorderOpacity] = useState<number>(40);
@@ -52,7 +54,9 @@ export default function StyledTextField({
   }, [errorMessage]);
 
   return (
-    <View className="flex flex-col justify-center w-full my-1">
+    <View
+      className={`flex flex-col justify-center w-full my-1 ${wrapperClassName}`}
+    >
       {label && (
         <StyledText
           size="base"

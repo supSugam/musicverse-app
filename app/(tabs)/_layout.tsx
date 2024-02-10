@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
-import UploadStackSreen from '../screens/upload';
+import UploadStackScreen from '../screens/upload';
 
 const Tab = createBottomTabNavigator();
 
@@ -132,7 +132,7 @@ export default function TabsLayout() {
         }}
       />
       <Tab.Screen
-        component={UploadStackSreen}
+        component={UploadStackScreen}
         name="Upload"
         options={{
           headerTitle: 'Upload',

@@ -29,3 +29,4 @@ export const PROFILE_QUERY_KEY = (...args: string[]) => [
   ...args,
 ];
 export const GENRES_QUERY_KEY = 'genres';
+export const TAGS_QUERY_KEY = 'tags';

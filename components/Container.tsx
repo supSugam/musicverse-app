@@ -1,7 +1,7 @@
 import { Platform, StatusBar, StyleSheet, ViewProps } from 'react-native';
 import React from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, KeyboardAvoidingView } from 'react-native';
 import COLORS from '@/constants/Colors';
 import NavBar from './home/NavBar';
 
@@ -32,20 +32,25 @@ const Container = ({
   ...rest
 }: ContainerProps) => {
   return (
-    <LinearGradient
-      colors={[
-        COLORS.background.dense,
-        `${COLORS.background.dense}40`,
-        `${COLORS.background.dense}80`,
-        `${COLORS.background.dense}90`,
-      ]}
-      style={styles.gradient}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
     >
-      <SafeAreaView style={[styles.container, style]} {...rest}>
-        {includeNavBar && <NavBar title={navbarTitle} />}
-        {children}
-      </SafeAreaView>
-    </LinearGradient>
+      <LinearGradient
+        colors={[
+          COLORS.background.dense,
+          `${COLORS.background.dense}40`,
+          `${COLORS.background.dense}80`,
+          `${COLORS.background.dense}90`,
+        ]}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={[styles.container, style]} {...rest}>
+          {includeNavBar && <NavBar title={navbarTitle} />}
+          {children}
+        </SafeAreaView>
+      </LinearGradient>
+    </KeyboardAvoidingView>
   );
 };
 

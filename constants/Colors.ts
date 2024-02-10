@@ -18,6 +18,15 @@ const COLORS = {
     dark: '#ff3d00',
   },
   transparent: 'rgba(0, 0, 0, 0)',
+  // 600 and 900
+  red: {
+    light: '#dc2626',
+    dark: '#7f1d1d',
+  },
+  purple: {
+    light: '#9333ea',
+    dark: '#581c87',
+  },
 };
 
 export default COLORS;

@@ -1,7 +1,7 @@
 import { joinClassNames } from '@/utils/helpers/string';
 import { Text as DefaultText, TextProps } from 'react-native';
 
-type TextSizeOptions =
+export type TextSizeOptions =
   | 'xs'
   | 'sm'
   | 'base'
@@ -12,7 +12,7 @@ type TextSizeOptions =
   | '4xl'
   | '5xl';
 
-type TextWeightOptions =
+export type TextWeightOptions =
   | 'extralight'
   | 'light'
   | 'normal'

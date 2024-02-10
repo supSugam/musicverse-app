@@ -63,7 +63,7 @@ export default function TabsLayout() {
           paddingTop: 10,
           height: 70,
           backgroundColor: 'transparent',
-          position: 'absolute',
+          // position: 'absolute', // this makes tab bar take position
           borderTopWidth: 0,
           elevation: 0,
         },
@@ -72,6 +72,7 @@ export default function TabsLayout() {
           swipeEnabled: true,
           animationEnabled: true,
         },
+        tabBarHideOnKeyboard: true,
         tabBarBackground: () => (
           <LinearGradient
             colors={[

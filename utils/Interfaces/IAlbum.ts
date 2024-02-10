@@ -3,7 +3,7 @@ import { ITrack } from './ITrack';
 export interface IAlbum {
   title: string;
   description?: string;
-  cover: string;
+  cover?: string;
   genreId: string;
   releaseDate: string;
   tracks: ITrack[];

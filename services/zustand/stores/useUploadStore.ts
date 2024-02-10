@@ -8,18 +8,18 @@ import { IAlbum } from '../../../utils/Interfaces/IAlbum';
 import { IGenre } from '../../../utils/Interfaces/IGenre';
 
 interface IUploadStore {
-  uploadType: 'track' | 'album';
-  setUploadType: (type: 'track' | 'album') => void;
+  uploadType: 'single' | 'album';
+  setUploadType: (type: 'single' | 'album') => void;
   tracks: ITrack[];
   addTrack: (track: ITrack) => void;
   removeTrack: (track: ITrack) => void;
-  album: IAlbum | null;
-  setAlbum: (album: IAlbum) => void;
+  album: Partial<IAlbum> | null;
+  setAlbum: (album: Partial<IAlbum>) => void;
 }
 
-const useUploadStore = create<IUploadStore>(
+export const useUploadStore = create<IUploadStore>(
   (set): IUploadStore => ({
-    uploadType: 'track',
+    uploadType: 'single',
     setUploadType: (uploadType) => {
       set(() => ({ uploadType }));
     },

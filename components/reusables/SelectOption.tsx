@@ -19,6 +19,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { ScrollView } from 'react-native';
 
 interface SelectOptionProps {
   options: string[];
@@ -28,6 +29,7 @@ interface SelectOptionProps {
   single?: boolean;
   maxSelection?: number;
   minSelection?: number;
+  errorMessage?: string | null;
 }
 
 const SelectOption: React.FC<SelectOptionProps> = ({
@@ -37,7 +39,8 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   placeholder = 'Select',
   minSelection = 0,
   maxSelection = options.length,
-  single = true,
+  single = false,
+  errorMessage,
 }) => {
   if (minSelection > maxSelection) {
     throw new Error(
@@ -51,7 +54,6 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   const { SCREEN_HEIGHT } = useScreenDimensions(); // Assuming you get SCREEN_HEIGHT from your custom hook
   const fadeAnim = useSharedValue<number>(0);
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const errorMessageHeight = useSharedValue<number>(0);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -63,16 +65,6 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   useEffect(() => {
     errorMessageHeight.value = withTiming(errorMessage ? 30 : 0);
   }, [errorMessage]);
-
-  useEffect(() => {
-    if (tempSelected.length < minSelection) {
-      setErrorMessage(`Select at least ${minSelection} options`);
-    } else if (tempSelected.length > maxSelection) {
-      setErrorMessage(`Select at most ${maxSelection} options`);
-    } else {
-      setErrorMessage(null);
-    }
-  }, [tempSelected]);
 
   const toggleModal = () => {
     if (!modalVisible) {
@@ -144,7 +136,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
             {selected[0] || placeholder}
           </StyledText>
         ) : (
-          <View style={styles.selectedContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {selected.length === 0 ? (
               <StyledText weight="normal" size="lg">
                 {placeholder}
@@ -154,14 +146,19 @@ const SelectOption: React.FC<SelectOptionProps> = ({
                 <TouchableOpacity
                   key={index}
                   style={styles.selectedItem}
-                  onPress={() => handleOptionPress(item)}
+                  onPress={() => {
+                    const newSelected = selected.filter(
+                      (selectedItem) => selectedItem !== item
+                    );
+                    onChange(newSelected);
+                  }}
                 >
-                  <Text style={styles.selectedText}>{item}</Text>
+                  <StyledText className="mr-2">{item}</StyledText>
                   <MaterialIcons name="close" size={16} color="black" />
                 </TouchableOpacity>
               ))
             )}
-          </View>
+          </ScrollView>
         )}
       </TouchableOpacity>
       <Modal
@@ -214,6 +211,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
         <StyledText
           size="sm"
           weight="medium"
+          className="text-left mt-1"
           style={{ color: COLORS.red.light }}
         >
           {errorMessage}
@@ -225,9 +223,9 @@ const SelectOption: React.FC<SelectOptionProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: 12,
   },
   input: {
     width: '100%',
@@ -250,9 +248,6 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 20,
     margin: 2,
-  },
-  selectedText: {
-    marginRight: 5,
   },
   modalBackground: {
     flex: 1,

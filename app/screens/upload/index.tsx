@@ -3,6 +3,7 @@ import SelectUploadType from './SelectUploadType';
 import AlbumDetailsSC1 from './AlbumDetailsSC1';
 import AlbumDetailsSC2 from './AlbumDetailsSC2';
 import { Platform } from 'react-native';
+import TracksUploadZone from './TracksUploadZone';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,13 @@ export default function UploadStackScreen() {
       <Stack.Screen
         name="AlbumDetailsSC2"
         component={AlbumDetailsSC2}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="TracksUploadZone"
+        component={TracksUploadZone}
         options={{
           headerShown: false,
         }}

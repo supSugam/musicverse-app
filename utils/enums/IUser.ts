@@ -2,13 +2,14 @@ export enum UserRole {
   ADMIN = 'ADMIN',
   USER = 'USER',
   ARTIST = 'ARTIST',
+  MEMBER = 'MEMBER',
 }
 
 export interface ICurrentUser {
   id: string;
   email: string;
   username: string;
-  role: string;
+  role: UserRole;
   isVerified: boolean;
   iat: number;
   exp: number;

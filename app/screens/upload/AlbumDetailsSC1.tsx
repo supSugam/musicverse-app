@@ -31,6 +31,7 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
       description: data.desc,
       ...(image && { cover: image }),
     });
+    setLoading(false);
     navigation.navigate('AlbumDetailsSC2');
   };
 

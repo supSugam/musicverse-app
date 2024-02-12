@@ -6,7 +6,7 @@ import StyledTextField from '@/components/reusables/StyledTextInput';
 import COLORS from '@/constants/Colors';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTagsQuery } from '@/hooks/react-query/useTagsQuery';
-import { useAssetsPicker } from '@/hooks/useAssetsPicker';
+import { AssetWithDuration, useAssetsPicker } from '@/hooks/useAssetsPicker';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { ActionsEnum } from '@/utils/enums/Action';
 import { toastResponseMessage } from '@/utils/toast';
@@ -19,6 +19,14 @@ import { Modal, ScrollView, StyleSheet } from 'react-native';
 import { View, Text } from 'react-native';
 
 import * as yup from 'yup';
+import AudioDetailsCard from './AudioDetailsCard';
+import {
+  extractExtension,
+  extractFilename,
+  formatBytes,
+  formatDuration,
+} from '@/utils/helpers/string';
+import { DocumentPickerAsset } from 'expo-document-picker';
 
 const schema = yup.object().shape({
   title: yup.string().required('Title is required'),
@@ -26,6 +34,7 @@ const schema = yup.object().shape({
     .string()
     .nullable()
     .min(50, 'No Description or must be atleast 50 characters'),
+  lyrics: yup.string().nullable(),
 });
 
 interface TrackDetailsModalProps {
@@ -51,8 +60,13 @@ const TrackDetailsModal = ({
   };
   const [is2ndStep, setIs2ndStep] = useState<boolean>(false);
 
-  const { assets, pickAssets } = useAssetsPicker({});
-
+  const { pickAssets } = useAssetsPicker({});
+  const [trackSource, setTrackSource] = useState<AssetWithDuration | null>(
+    null
+  );
+  const [trackPreview, setTrackPreview] = useState<AssetWithDuration | null>(
+    null
+  );
   const {
     register,
     handleSubmit,
@@ -113,64 +127,119 @@ const TrackDetailsModal = ({
       }
     >
       <ScrollView contentContainerStyle={styles.contentWrapper}>
-        <StyledTextField
-          placeholder="Enter track title"
-          controllerName="title"
-          errorMessage={errors.title?.message}
-          control={control}
-          variant="underlined"
-          textAlign="center"
-          textSize="xl"
-          fontWeight="bold"
-        />
+        {is2ndStep ? (
+          <>
+            {trackSource ? (
+              <AudioDetailsCard
+                duration={formatDuration(trackSource?.duration || 0, true)}
+                extension={extractExtension(trackSource?.name)}
+                size={formatBytes(trackSource.size)}
+                onRemove={() => setTrackSource(null)}
+                title={extractFilename(trackSource.name)}
+              />
+            ) : (
+              <StyledButton
+                className="mt-4"
+                onPress={async () => {
+                  const file = await pickAssets();
+                  setTrackSource(file?.[0] ?? null);
+                }}
+                variant="secondary"
+                fullWidth
+              >
+                <StyledText weight="bold" size="xl" uppercase>
+                  Select your track
+                </StyledText>
+              </StyledButton>
+            )}
 
-        <StyledTextField
-          variant="default"
-          control={control}
-          rules={{ required: true }}
-          controllerName="desc"
-          placeholder="Enter description"
-          fontWeight="normal"
-          textSize="base"
-          multiline
-          numberOfLines={3}
-          textAlignVertical="top"
-          errorMessage={errors.description?.message}
-          wrapperClassName="my-2"
-          backgroundColor="transparent"
-          borderColor={COLORS.neutral.normal}
-        />
+            {trackPreview ? (
+              <AudioDetailsCard
+                duration={formatDuration(trackPreview?.duration || 0, true)}
+                extension={extractExtension(trackPreview?.name)}
+                size={formatBytes(trackPreview.size)}
+                onRemove={() => setTrackPreview(null)}
+                title={extractFilename(trackPreview.name)}
+              />
+            ) : (
+              <StyledButton
+                className="mt-4"
+                onPress={async () => {
+                  const file = await pickAssets();
+                  setTrackPreview(file?.[0] ?? null);
+                }}
+                variant="secondary"
+                fullWidth
+              >
+                <StyledText weight="bold" size="xl" uppercase>
+                  Select your track preview
+                </StyledText>
+              </StyledButton>
+            )}
+            <StyledTextField
+              variant="default"
+              control={control}
+              rules={{ required: true }}
+              controllerName="lyrics"
+              placeholder="Lyrics (Optional)"
+              fontWeight="normal"
+              textSize="base"
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+              errorMessage={errors.lyrics?.message}
+              wrapperClassName="my-2 mt-4"
+            />
+          </>
+        ) : (
+          <>
+            <StyledTextField
+              placeholder="Enter track title"
+              controllerName="title"
+              errorMessage={errors.title?.message}
+              control={control}
+              variant="underlined"
+              textAlign="center"
+              textSize="xl"
+              fontWeight="bold"
+            />
+            <StyledTextField
+              variant="default"
+              control={control}
+              rules={{ required: true }}
+              controllerName="desc"
+              placeholder="Enter description"
+              fontWeight="normal"
+              textSize="base"
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+              errorMessage={errors.description?.message}
+              wrapperClassName="my-2"
+              backgroundColor="transparent"
+              borderColor={COLORS.neutral.normal}
+            />
 
-        <SelectOption
-          options={tags.map((tag) => tag.name)}
-          placeholder="Select Tags"
-          selected={selectedTags}
-          onChange={onSelectedTagsChange}
-          single
-          minSelection={0}
-          maxSelection={3}
-        />
-        <SelectOption
-          options={genres.map((genre) => genre.name)}
-          placeholder="Select Genre"
-          selected={selectedGenre}
-          onChange={onSelectedGenreChange}
-          single
-          minSelection={1}
-          maxSelection={1}
-        />
-        <StyledButton
-          className="mt-4"
-          onPress={async () => {
-            await pickAssets();
-          }}
-          variant="secondary"
-          fullWidth
-        >
-          <StyledText weight="bold" size="xl" uppercase>
-            Pick
-          </StyledText>
-        </StyledButton>
+            <SelectOption
+              options={tags.map((tag) => tag.name)}
+              placeholder="Select Tags"
+              selected={selectedTags}
+              onChange={onSelectedTagsChange}
+              single
+              minSelection={0}
+              maxSelection={3}
+            />
+            <SelectOption
+              options={genres.map((genre) => genre.name)}
+              placeholder="Select Genre"
+              selected={selectedGenre}
+              onChange={onSelectedGenreChange}
+              single
+              minSelection={1}
+              maxSelection={1}
+            />
+          </>
+        )}
 
         <View className="my-4 w-full">
           <StyledButton

@@ -104,7 +104,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           </StyledText>
         </LinearGradient>
       </TouchableOpacity>
-
       <View className="flex flex-col px-4 mt-4 w-full">
         <StyledButton
           variant="primary"

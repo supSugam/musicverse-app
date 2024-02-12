@@ -24,6 +24,7 @@ type TextFieldProps = {
   backgroundColor?: string;
   textAlign?: 'center' | 'left';
   wrapperClassName?: string;
+  borderColor?: string;
 } & React.ComponentProps<typeof TextInput>;
 export default function StyledTextField({
   label,
@@ -37,6 +38,7 @@ export default function StyledTextField({
   backgroundColor,
   textAlign = 'left',
   wrapperClassName,
+  borderColor = COLORS.purple.dark,
   ...rest
 }: TextFieldProps) {
   const [borderOpacity, setBorderOpacity] = useState<number>(40);
@@ -101,7 +103,7 @@ export default function StyledTextField({
                   ? COLORS.red.light
                   : isUnderlined
                   ? `rgba(255, 255, 255, ${borderOpacity / 100})`
-                  : COLORS.purple.dark,
+                  : borderColor,
                 borderTopWidth: isUnderlined ? 0 : 1,
                 borderBottomWidth: isUnderlined ? 1 : 1,
                 borderLeftWidth: isUnderlined ? 0 : 1,

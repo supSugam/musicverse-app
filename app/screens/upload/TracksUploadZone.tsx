@@ -90,10 +90,10 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             padding: 20,
             width: '80%',
           }}
-          start={{ x: 0, y: 0 }}
+          start={{ x: 0, y: 1 }}
           end={{ x: 1, y: 1 }}
         >
-          <MaterialIcons name="add" size={28} color="white" />
+          <MaterialIcons name="add-box" size={28} color="white" />
           <StyledText size="2xl" weight="bold" className="text-center mt-3">
             Add Track
           </StyledText>

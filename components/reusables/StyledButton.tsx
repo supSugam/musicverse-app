@@ -1,6 +1,7 @@
 import { Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator } from 'react-native';
+import COLORS from '@/constants/Colors';
 
 type StyledButtonProps = {
   loading?: boolean;
@@ -40,7 +41,7 @@ export default function StyledButton(props: StyledButtonProps) {
         colors={
           variant === 'primary'
             ? ['#b11fc8', '#5b21b6']
-            : ['#372648', '#342647']
+            : [COLORS.neutral.dark, COLORS.neutral.dense, COLORS.neutral.dark]
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}

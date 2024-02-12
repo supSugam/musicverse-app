@@ -10,10 +10,13 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated from 'react-native-reanimated';
+import COLORS from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import StyledText from './StyledText';
 
 interface IModalWrapperProps extends ModalProps {
   blur?: boolean;
-  header?: React.ReactElement;
+  header?: React.ReactNode;
   children: React.ReactNode;
   onClose: () => void;
 }
@@ -42,15 +45,15 @@ const ModalWrapper = ({
           alignItems: 'center',
         },
         modalContainer: {
-          width: '80%',
-          backgroundColor: 'white',
+          width: '90%',
           borderRadius: 10,
         },
         headerContainer: {
-          marginBottom: 10,
+          marginBottom: 16,
+          marginTop: 8,
           borderBottomWidth: 1,
           paddingBottom: 10,
-          borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+          borderBottomColor: COLORS.neutral.gray,
           width: '100%',
         },
       }),
@@ -82,8 +85,36 @@ const ModalWrapper = ({
         >
           <Animated.View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
-              {/* {header && <View style={styles.headerContainer}>{header}</View>} */}
-              {children}
+              <LinearGradient
+                colors={[
+                  COLORS.neutral.black,
+                  COLORS.neutral.dark,
+                  COLORS.neutral.dense,
+                  COLORS.neutral.dense,
+                ]}
+                style={{
+                  borderWidth: 1,
+                  borderColor: `${COLORS.neutral.light}20`,
+                  padding: 16,
+                  width: '100%',
+                  borderRadius: 10,
+                }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                {header && (
+                  <View style={styles.headerContainer}>
+                    {typeof header === 'string' ? (
+                      <StyledText size="lg" weight="bold" className="text-left">
+                        {header}
+                      </StyledText>
+                    ) : (
+                      header
+                    )}
+                  </View>
+                )}
+                {children}
+              </LinearGradient>
             </TouchableWithoutFeedback>
           </Animated.View>
         </BlurView>

@@ -10,7 +10,7 @@ const COLORS = {
     gray: '#525252',
     light: '#a3a3a3',
     normal: '#737373',
-    dark: '#2c2c2c',
+    dark: '#171717',
     dense: '#0a0a0a',
   },
   primary: {

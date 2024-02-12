@@ -58,7 +58,6 @@ const ImageDisplay = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',

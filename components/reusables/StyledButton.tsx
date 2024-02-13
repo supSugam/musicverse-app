@@ -1,4 +1,4 @@
-import { Pressable } from 'react-native';
+import { Pressable, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator } from 'react-native';
 import COLORS from '@/constants/Colors';
@@ -11,7 +11,7 @@ type StyledButtonProps = {
   variant?: 'primary' | 'secondary';
 } & React.ComponentProps<typeof Pressable>;
 
-export default function StyledButton(props: StyledButtonProps) {
+export function StyledButton(props: StyledButtonProps) {
   const {
     children,
     onPress,
@@ -52,3 +52,31 @@ export default function StyledButton(props: StyledButtonProps) {
     </Pressable>
   );
 }
+
+interface IStyledTouchableOpacityProps
+  extends React.ComponentProps<typeof TouchableOpacity> {
+  children: React.ReactNode;
+}
+
+export const StyledTouchableOpacity = ({
+  children,
+  ...rest
+}: IStyledTouchableOpacityProps) => {
+  const styles = {
+    root: {
+      backgroundColor: COLORS.neutral.dark,
+      borderColor: COLORS.neutral.normal,
+      borderWidth: 1,
+    },
+  };
+  return (
+    <TouchableOpacity
+      className="flex flex-row items-center justify-center px-4 py-2 rounded-md"
+      style={styles.root}
+      {...rest}
+      activeOpacity={rest.activeOpacity || 0.8}
+    >
+      {children}
+    </TouchableOpacity>
+  );
+};

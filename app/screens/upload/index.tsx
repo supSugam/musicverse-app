@@ -2,10 +2,37 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SelectUploadType from './SelectUploadType';
 import AlbumDetailsSC1 from './AlbumDetailsSC1';
 import AlbumDetailsSC2 from './AlbumDetailsSC2';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import TracksUploadZone from './TracksUploadZone';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import Container from '@/components/Container';
+import BackNavigator from '@/components/reusables/BackNavigator';
 
 const Stack = createNativeStackNavigator();
+
+const Tab = createMaterialTopTabNavigator();
+
+function AlbumDetailsTabs() {
+  return (
+    <Container includeNavBar navbarTitle="Upload">
+      <Tab.Navigator
+        initialRouteName="AlbumDetailsSC1"
+        tabBar={() => <BackNavigator showBackText />}
+      >
+        <Tab.Screen
+          navigationKey="AlbumDetailsSC1"
+          name="Step 1"
+          component={AlbumDetailsSC1}
+        />
+        <Tab.Screen
+          navigationKey="AlbumDetailsSC2"
+          name="Step 2"
+          component={AlbumDetailsSC2}
+        />
+      </Tab.Navigator>
+    </Container>
+  );
+}
 
 export default function UploadStackScreen() {
   return (
@@ -23,19 +50,19 @@ export default function UploadStackScreen() {
         }}
       />
       <Stack.Screen
-        name="AlbumDetailsSC1"
-        component={AlbumDetailsSC1}
+        name="AlbumTabs"
+        component={AlbumDetailsTabs}
         options={{
           headerShown: false,
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="AlbumDetailsSC2"
         component={AlbumDetailsSC2}
         options={{
           headerShown: false,
         }}
-      />
+      /> */}
       <Stack.Screen
         name="TracksUploadZone"
         component={TracksUploadZone}

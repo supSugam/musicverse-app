@@ -6,7 +6,7 @@ import LottieView from 'lottie-react-native';
 import { GirlListeningLA } from '@/assets/lottie';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import Container from '@/components/Container';
-import StyledButton from '@/components/reusables/StyledButton';
+import { StyledButton } from '@/components/reusables/StyledButton';
 
 export default function Welcome({ navigation }: { navigation: any }) {
   const { SCREEN_WIDTH, SCREEN_HEIGHT } = useScreenDimensions();

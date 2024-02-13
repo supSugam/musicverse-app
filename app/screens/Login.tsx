@@ -2,7 +2,7 @@ import { useState } from 'react';
 import StyledText from '@/components/reusables/StyledText';
 import { KeyboardAvoidingView, View, ScrollView } from 'react-native'; // Import TouchableOpacity for the button
 import Container from '@/components/Container';
-import StyledButton from '@/components/reusables/StyledButton';
+import { StyledButton } from '@/components/reusables/StyledButton';
 import StyledTextField from '@/components/reusables/StyledTextInput';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';

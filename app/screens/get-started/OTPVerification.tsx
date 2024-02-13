@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import StyledText from '@/components/reusables/StyledText';
 import { View } from 'react-native'; // Import TouchableOpacity for the button
 import Container from '@/components/Container';
-import StyledButton from '@/components/reusables/StyledButton';
+import { StyledButton } from '@/components/reusables/StyledButton';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import LogoWithName from '@/components/reusables/LogoWithName';
 import PinCodeInput from '@/components/PinCodeInput';

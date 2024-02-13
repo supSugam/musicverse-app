@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { useState } from 'react';
 import Container from '@/components/Container';
 import StyledText from '@/components/reusables/StyledText';
-import StyledButton from '@/components/reusables/StyledButton';
+import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 
 import useDatePicker from '@/hooks/useDatePicker';
@@ -66,8 +66,8 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
   };
 
   return (
-    <Container includeNavBar navbarTitle="Upload">
-      <View className="flex justify-between items-center mt-20 px-6">
+    <View className="flex-1">
+      <View className="flex justify-between items-center mt-8 px-6">
         <StyledText weight="extrabold" size="2xl">
           Just a few more details
         </StyledText>
@@ -114,10 +114,11 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
           minSelection={0}
           maxSelection={3}
         />
-
+      </View>
+      <View className="flex-1 p-4">
         <StyledButton
           variant="primary"
-          className="mt-12"
+          className="mt-auto mb-2"
           fullWidth
           loading={loading}
           onPress={handleSubmit}
@@ -127,7 +128,7 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
           </StyledText>
         </StyledButton>
       </View>
-    </Container>
+    </View>
   );
 };
 

@@ -7,26 +7,24 @@ import StyledText from '@/components/reusables/StyledText';
 export interface IAudioDetailsCardProps {
   title: string;
   size: string;
-  duration: string;
+  duration?: string;
   extension: string;
   onRemove?: () => void;
   onEdit?: () => void;
+  icon?: keyof typeof MaterialIcons.glyphMap;
 }
 const AudioDetailsCard = ({
   title,
   size,
-  duration,
+  duration = '',
   extension,
   onRemove,
   onEdit,
+  icon = 'audio-file',
 }: IAudioDetailsCardProps) => {
   return (
     <TouchableOpacity activeOpacity={0.8} style={styles.cardRoot}>
-      <MaterialIcons
-        name="audio-file"
-        size={32}
-        color={COLORS.neutral.normal}
-      />
+      <MaterialIcons name={icon} size={30} color={COLORS.neutral.normal} />
       <View className="flex flex-col ml-2 items-start justify-center flex-1">
         <StyledText
           weight="semibold"

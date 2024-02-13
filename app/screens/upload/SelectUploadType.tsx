@@ -9,7 +9,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import COLORS from '@/constants/Colors';
-import StyledButton from '@/components/reusables/StyledButton';
+import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 
 const SelectUploadType = ({ navigation }: { navigation: any }) => {
@@ -27,7 +27,7 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
         navigation.navigate('TracksUploadZone');
         break;
       case 'album':
-        navigation.navigate('AlbumDetailsSC1');
+        navigation.navigate('AlbumTabs');
         break;
       default:
         break;
@@ -76,6 +76,8 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
               </StyledText>
             </View>
           </TouchableOpacity>
+
+          {/* TODO: Disabled for !member||!artist */}
           <TouchableOpacity
             style={{
               backgroundColor:

@@ -1,6 +1,6 @@
 import ModalWrapper from '@/components/reusables/ModalWrapper';
 import SelectOption from '@/components/reusables/SelectOption';
-import StyledButton from '@/components/reusables/StyledButton';
+import { StyledButton } from '@/components/reusables/StyledButton';
 import StyledText from '@/components/reusables/StyledText';
 import StyledTextField from '@/components/reusables/StyledTextInput';
 import COLORS from '@/constants/Colors';
@@ -15,7 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MediaType } from 'expo-media-library';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Modal, ScrollView, StyleSheet } from 'react-native';
+import { Modal, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { View, Text } from 'react-native';
 
 import * as yup from 'yup';
@@ -27,6 +27,8 @@ import {
   formatDuration,
 } from '@/utils/helpers/string';
 import { DocumentPickerAsset } from 'expo-document-picker';
+import RadioButton from '@/components/reusables/RadioButton';
+import FilePicker from '@/components/reusables/FilePicker';
 
 const schema = yup.object().shape({
   title: yup.string().required('Title is required'),
@@ -59,18 +61,25 @@ const TrackDetailsModal = ({
     setSelectedTags(tags);
   };
   const [is2ndStep, setIs2ndStep] = useState<boolean>(false);
+  const [lyricsInputType, setLyricsInputType] = useState<
+    'textfield' | 'textfile'
+  >('textfield');
 
-  const { pickAssets } = useAssetsPicker({});
+  const { pickAssets: pickAudio } = useAssetsPicker({});
+  const { pickAssets: pickText } = useAssetsPicker({
+    mediaTypes: ['text/plain'],
+  });
   const [trackSource, setTrackSource] = useState<AssetWithDuration | null>(
     null
   );
   const [trackPreview, setTrackPreview] = useState<AssetWithDuration | null>(
     null
   );
+  const [lyricsSource, setLyricsSource] = useState<DocumentPickerAsset | null>(
+    null
+  );
   const {
-    register,
     handleSubmit,
-    setValue,
     control,
     formState: { errors },
   } = useForm({
@@ -103,7 +112,6 @@ const TrackDetailsModal = ({
       blur
       animationType="fade"
       visible={visible}
-      onClose={onClose}
       header={
         <View className="flex flex-row items-center">
           {is2ndStep && (
@@ -123,6 +131,11 @@ const TrackDetailsModal = ({
           >
             {is2ndStep ? 'Step 2: Track Details' : 'Step 1: Track Details'}
           </StyledText>
+          <TouchableOpacity onPress={onClose} className="ml-auto">
+            <StyledText weight="bold" size="lg">
+              Cancel
+            </StyledText>
+          </TouchableOpacity>
         </View>
       }
     >
@@ -138,19 +151,14 @@ const TrackDetailsModal = ({
                 title={extractFilename(trackSource.name)}
               />
             ) : (
-              <StyledButton
-                className="mt-4"
+              <FilePicker
                 onPress={async () => {
-                  const file = await pickAssets();
+                  const file = await pickAudio();
                   setTrackSource(file?.[0] ?? null);
                 }}
-                variant="secondary"
-                fullWidth
-              >
-                <StyledText weight="bold" size="xl" uppercase>
-                  Select your track
-                </StyledText>
-              </StyledButton>
+                caption="Select your track"
+                className="my-2"
+              />
             )}
 
             {trackPreview ? (
@@ -162,34 +170,69 @@ const TrackDetailsModal = ({
                 title={extractFilename(trackPreview.name)}
               />
             ) : (
-              <StyledButton
-                className="mt-4"
+              <FilePicker
                 onPress={async () => {
-                  const file = await pickAssets();
+                  const file = await pickAudio();
                   setTrackPreview(file?.[0] ?? null);
                 }}
-                variant="secondary"
-                fullWidth
-              >
-                <StyledText weight="bold" size="xl" uppercase>
-                  Select your track preview
-                </StyledText>
-              </StyledButton>
+                caption="Select preview (Optional)"
+                className="mt-2"
+              />
             )}
-            <StyledTextField
-              variant="default"
-              control={control}
-              rules={{ required: true }}
-              controllerName="lyrics"
-              placeholder="Lyrics (Optional)"
-              fontWeight="normal"
-              textSize="base"
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-              errorMessage={errors.lyrics?.message}
-              wrapperClassName="my-2 mt-4"
-            />
+
+            <View className="flex flex-row items-center justify-between mt-4 mx-2">
+              <RadioButton
+                label="Enter Lyrics"
+                onSelect={() => setLyricsInputType('textfield')}
+                selected={lyricsInputType === 'textfield'}
+              />
+              <RadioButton
+                label="Select Lyrics File"
+                onSelect={() => setLyricsInputType('textfile')}
+                selected={lyricsInputType === 'textfile'}
+              />
+            </View>
+            {lyricsInputType === 'textfile' && (
+              <>
+                {lyricsSource ? (
+                  <AudioDetailsCard
+                    duration={formatDuration(lyricsSource.size || 0, true)}
+                    extension={extractExtension(lyricsSource.name)}
+                    size={formatBytes(lyricsSource.size)}
+                    onRemove={() => setLyricsSource(null)}
+                    title={extractFilename(lyricsSource.name)}
+                    icon="file-present"
+                  />
+                ) : (
+                  <FilePicker
+                    onPress={async () => {
+                      const file = await pickText();
+                      setLyricsSource(file?.[0] ?? null);
+                    }}
+                    caption="Select lyrics file"
+                    className="mt-2"
+                  />
+                )}
+              </>
+            )}
+            {lyricsInputType === 'textfield' && (
+              <StyledTextField
+                variant="default"
+                control={control}
+                rules={{ required: true }}
+                controllerName="lyrics"
+                placeholder="Lyrics (Optional)"
+                fontWeight="normal"
+                textSize="base"
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                errorMessage={errors.lyrics?.message}
+                wrapperClassName="my-2 mt-4"
+                borderColor={COLORS.neutral.normal}
+                backgroundColor="transparent"
+              />
+            )}
           </>
         ) : (
           <>
@@ -207,7 +250,7 @@ const TrackDetailsModal = ({
               variant="default"
               control={control}
               rules={{ required: true }}
-              controllerName="desc"
+              controllerName="description"
               placeholder="Enter description"
               fontWeight="normal"
               textSize="base"

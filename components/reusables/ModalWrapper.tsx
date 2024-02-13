@@ -13,12 +13,14 @@ import Animated from 'react-native-reanimated';
 import COLORS from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import StyledText from './StyledText';
+import ToastInstance from '../ToastInstance';
 
 interface IModalWrapperProps extends ModalProps {
   blur?: boolean;
   header?: React.ReactNode;
   children: React.ReactNode;
-  onClose: () => void;
+  onClose?: () => void;
+  closeOnOutsideClick?: boolean;
 }
 
 const ModalWrapper = ({
@@ -29,6 +31,7 @@ const ModalWrapper = ({
   header,
   onClose,
   children,
+  closeOnOutsideClick,
 }: IModalWrapperProps) => {
   const styles = useMemo(
     () =>
@@ -63,7 +66,8 @@ const ModalWrapper = ({
   const blurIntensity = useMemo(() => (blur ? 90 : 0), [blur]);
 
   const handleOutsideClick = () => {
-    onClose(); // Close the modal when clicking outside
+    if (!closeOnOutsideClick || !onClose) return;
+    onClose();
   };
 
   return (
@@ -76,13 +80,14 @@ const ModalWrapper = ({
       <TouchableOpacity
         activeOpacity={1}
         style={styles.modalBackground}
-        onPressOut={handleOutsideClick} // Close modal when clicking outside
+        onPressOut={handleOutsideClick}
       >
         <BlurView
           intensity={blurIntensity}
           style={[StyleSheet.absoluteFill, styles.blurView]}
           tint="dark"
         >
+          <ToastInstance />
           <Animated.View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
               <LinearGradient
@@ -113,6 +118,7 @@ const ModalWrapper = ({
                     )}
                   </View>
                 )}
+
                 {children}
               </LinearGradient>
             </TouchableWithoutFeedback>

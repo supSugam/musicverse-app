@@ -14,12 +14,12 @@ export const isValidEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export const extractExtension = (filename?: string): string => {
-  return filename?.split('.').pop() || '';
+export const extractExtension = (filename: string = ''): string => {
+  return (filename.match(/(?<=\.)[^.]+$/) || [])[0] || '';
 };
 
 export const extractFilename = (filename?: string): string => {
-  return filename?.split('.').shift() || '';
+  return (filename?.match(/[^./]+(?=\.)/) || [])[0] || '';
 };
 
 export const formatBytes = (bytes?: number, decimals = 2): string => {
@@ -36,7 +36,8 @@ export const formatBytes = (bytes?: number, decimals = 2): string => {
 };
 
 // Tranform seconds to formatted duration ie. 3600 -> 1:00:00, 120 -> 2:00, 60 -> 1:00
-export const formatDuration = (seconds: number, ms = false): string => {
+export const formatDuration = (seconds?: number, ms = false): string => {
+  if (seconds === undefined) return '';
   if (ms) {
     seconds = seconds / 1000;
   }

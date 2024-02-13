@@ -146,9 +146,7 @@ const TrackDetailsModal = ({
         setLoading(false);
         return;
       }
-
       const trackDetails: ITrack = {
-        id: uuid(),
         title: data.title,
         description: data.description,
         lyrics,
@@ -158,7 +156,9 @@ const TrackDetailsModal = ({
         preview: trackPreview?.uri,
         cover: cover || undefined,
         isPublic: isTrackPublic,
+        trackSource,
       };
+      // TODO: Every song shall have same genre and tags as the album
 
       if (uploadType === 'album') {
         if (currentUser?.role !== UserRole.ARTIST) {

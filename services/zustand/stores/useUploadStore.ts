@@ -59,13 +59,13 @@ export const useUploadStore = create<IUploadStore>(
         }
       });
     },
-    removeTrackFromAlbum: (trackId: string) => {
+    removeTrackFromAlbum: (trackTitle: string) => {
       set((state) => {
         if (state.album && state.album.tracks) {
           return {
             album: {
               ...state.album,
-              tracks: state.album.tracks.filter((t) => t.id !== trackId),
+              tracks: state.album.tracks.filter((t) => t.title !== trackTitle),
             },
           };
         } else {

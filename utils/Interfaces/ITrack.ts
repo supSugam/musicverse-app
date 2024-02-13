@@ -1,5 +1,6 @@
+import { AssetWithDuration } from '@/hooks/useAssetsPicker';
+
 export interface ITrack {
-  id: string;
   title: string;
   description?: string;
   src: string;
@@ -9,4 +10,5 @@ export interface ITrack {
   genreId: string;
   tags?: string[];
   isPublic: boolean;
+  trackSource: AssetWithDuration;
 }

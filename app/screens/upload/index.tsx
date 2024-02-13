@@ -15,20 +15,9 @@ const Tab = createMaterialTopTabNavigator();
 function AlbumDetailsTabs() {
   return (
     <Container includeNavBar navbarTitle="Upload">
-      <Tab.Navigator
-        initialRouteName="AlbumDetailsSC1"
-        tabBar={() => <BackNavigator showBackText />}
-      >
-        <Tab.Screen
-          navigationKey="AlbumDetailsSC1"
-          name="Step 1"
-          component={AlbumDetailsSC1}
-        />
-        <Tab.Screen
-          navigationKey="AlbumDetailsSC2"
-          name="Step 2"
-          component={AlbumDetailsSC2}
-        />
+      <Tab.Navigator tabBar={() => <BackNavigator showBackText />}>
+        <Tab.Screen name="AlbumDetailsSC1" component={AlbumDetailsSC1} />
+        <Tab.Screen name="AlbumDetailsSC2" component={AlbumDetailsSC2} />
       </Tab.Navigator>
     </Container>
   );

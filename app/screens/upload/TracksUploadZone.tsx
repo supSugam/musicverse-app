@@ -4,10 +4,7 @@ import Container from '@/components/Container';
 import StyledText from '@/components/reusables/StyledText';
 import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
-import useDatePicker from '@/hooks/useDatePicker';
-import SelectOption from '@/components/reusables/SelectOption';
-import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
-import { useTagsQuery } from '@/hooks/react-query/useTagsQuery';
+
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { UserRole } from '@/utils/enums/IUser';
@@ -16,11 +13,19 @@ import COLORS from '@/constants/Colors';
 import TrackDetailsModal from './components/TrackDetailsModal';
 import { ActionsEnum } from '@/utils/enums/Action';
 import { MaterialIcons } from '@expo/vector-icons';
+import AudioDetailsCard from './components/AudioDetailsCard';
+import {
+  extractExtension,
+  formatBytes,
+  formatDuration,
+} from '@/utils/helpers/string';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { currentUser } = useAuthStore((state) => state);
-  const { album, setAlbum, uploadType } = useUploadStore((state) => state);
+  const { album, setAlbum, uploadType, track, removeTrack } = useUploadStore(
+    (state) => state
+  );
   const [trackModalVisible, setTrackModalVisible] = useState<boolean>(false);
 
   const isUploadTypeSingle = uploadType === 'single';
@@ -28,6 +33,13 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const handleSubmit = () => {};
 
   const onAddTrack = () => {
+    if (isUploadTypeSingle && track !== null) {
+      toastResponseMessage({
+        content: 'You can only upload one track at a time',
+        type: 'error',
+      });
+      return;
+    }
     setTrackModalVisible(true);
   };
 
@@ -37,8 +49,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   return (
     <Container includeNavBar navbarTitle="Upload">
-      <View className="flex-1 justify-center">
-        <View className="flex justify-between items-center mt-8 px-6">
+      <View className="flex-1 justify-center items-center">
+        <View className="flex justify-between items-center mt-12 px-6">
           <StyledText weight="bold" size="2xl">
             {isUploadTypeSingle
               ? 'Upload your track here'
@@ -67,7 +79,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         </View>
 
         <TrackDetailsModal
-          action={ActionsEnum.CREATE}
+          // action={ActionsEnum.CREATE}
           visible={trackModalVisible}
           onClose={onModalClose}
         />
@@ -76,6 +88,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           onPress={onAddTrack}
           activeOpacity={0.8}
           style={{ marginVertical: 20 }}
+          disabled={loading}
+          className="mt-12"
         >
           <LinearGradient
             colors={[
@@ -113,12 +127,46 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             justifyContent: 'center',
             alignItems: 'center',
             maxHeight: 200,
-            borderColor: COLORS.neutral.light,
-            borderWidth: 1,
             borderRadius: 6,
+            marginHorizontal: 24,
+            padding: 10,
+            backgroundColor: COLORS.neutral.dark,
+            flex: 1,
+            marginTop: 20,
           }}
+          showsVerticalScrollIndicator
           className="w-full"
-        ></ScrollView>
+        >
+          {!isUploadTypeSingle &&
+            album?.tracks?.length &&
+            album?.tracks?.map((track, index) => (
+              <AudioDetailsCard
+                key={index}
+                title={track.title}
+                size={formatBytes(track.trackSource.size)}
+                duration={formatDuration(track.trackSource.duration, true)}
+                extension={extractExtension(track.trackSource.file?.name)}
+                onEdit={() => {}}
+                onRemove={() => {}}
+              />
+            ))}
+          {isUploadTypeSingle && track && (
+            <AudioDetailsCard
+              title={track.title}
+              size={formatBytes(track.trackSource.size)}
+              duration={formatDuration(track.trackSource.duration, true)}
+              extension={extractExtension(track.trackSource.file?.name)}
+              onEdit={() => {}}
+              onRemove={() => {
+                removeTrack();
+                toastResponseMessage({
+                  content: 'Track removed successfully',
+                  type: 'success',
+                });
+              }}
+            />
+          )}
+        </ScrollView>
         <View className="flex flex-col px-4 mt-4 w-full">
           <StyledButton
             variant="primary"

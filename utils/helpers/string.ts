@@ -17,8 +17,9 @@ export const isValidEmail = (email: string): boolean => {
 export const extractExtension = (filename?: string): string => {
   return filename?.split('.').pop() || '';
 };
+
 export const extractFilename = (filename?: string): string => {
-  return filename?.match(/[^/]+$/)?.pop() || '';
+  return filename?.split('.').shift() || '';
 };
 
 export const formatBytes = (bytes?: number, decimals = 2): string => {

@@ -1,6 +1,9 @@
 import ModalWrapper from '@/components/reusables/ModalWrapper';
 import SelectOption from '@/components/reusables/SelectOption';
-import { StyledButton } from '@/components/reusables/StyledButton';
+import {
+  StyledButton,
+  StyledTouchableOpacity,
+} from '@/components/reusables/StyledButton';
 import StyledText from '@/components/reusables/StyledText';
 import StyledTextField from '@/components/reusables/StyledTextInput';
 import COLORS from '@/constants/Colors';
@@ -29,27 +32,38 @@ import {
 import { DocumentPickerAsset } from 'expo-document-picker';
 import RadioButton from '@/components/reusables/RadioButton';
 import FilePicker from '@/components/reusables/FilePicker';
-
+import * as FileSystem from 'expo-file-system';
+import { useImagePicker } from '@/hooks/useImagePicker';
+import ImageDisplay from '@/components/reusables/ImageDisplay';
+import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
+import { ITrack } from '@/utils/Interfaces/ITrack';
+import { UserRole } from '@/utils/enums/IUser';
+import { uuid } from '@/utils/constants';
 const schema = yup.object().shape({
-  title: yup.string().required('Title is required'),
+  title: yup
+    .string()
+    .required('Title is required')
+    .min(2, 'Title is too short'),
   description: yup
     .string()
     .nullable()
-    .min(50, 'No Description or must be atleast 50 characters'),
+    .min(20, 'No Description or must be atleast 20 characters'),
   lyrics: yup.string().nullable(),
 });
 
 interface TrackDetailsModalProps {
-  action?: ActionsEnum;
+  // action?: ActionsEnum;
   visible: boolean;
   onClose: () => void;
 }
 
 const TrackDetailsModal = ({
-  action = ActionsEnum.CREATE,
+  // action = ActionsEnum.CREATE,
   visible,
   onClose,
 }: TrackDetailsModalProps) => {
+  const { uploadType, album, addTrackToAlbum, setTrack, track } =
+    useUploadStore((state) => state);
   const { currentUser } = useAuthStore((state) => state);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedGenre, setSelectedGenre] = useState<string[]>([]);
@@ -60,6 +74,7 @@ const TrackDetailsModal = ({
   const onSelectedTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
   };
+  const [isTrackPublic, setIsTrackPublic] = useState<boolean>(true);
   const [is2ndStep, setIs2ndStep] = useState<boolean>(false);
   const [lyricsInputType, setLyricsInputType] = useState<
     'textfield' | 'textfile'
@@ -78,9 +93,13 @@ const TrackDetailsModal = ({
   const [lyricsSource, setLyricsSource] = useState<DocumentPickerAsset | null>(
     null
   );
+
+  const { pickImage, image: cover } = useImagePicker({ selectionLimit: 1 });
+
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -88,7 +107,7 @@ const TrackDetailsModal = ({
   });
   const { genres } = useGenreQuery();
   const { tags } = useTagsQuery();
-  const handleSubmitTrack = () => {
+  const handleSubmitTrack = (data: any) => {
     setLoading(true);
     if (selectedGenre.length === 0) {
       toastResponseMessage({
@@ -99,8 +118,88 @@ const TrackDetailsModal = ({
       return;
     }
     if (is2ndStep) {
-      console.log('bro');
-      return;
+      if (!trackSource) {
+        toastResponseMessage({
+          type: 'error',
+          content: 'Please select a track',
+        });
+        setLoading(false);
+        return;
+      }
+      if (lyricsInputType === 'textfile' && !lyricsSource) {
+        toastResponseMessage({
+          type: 'error',
+          content: 'Please select a lyrics file',
+        });
+        setLoading(false);
+        return;
+      }
+      const lyrics =
+        lyricsInputType === 'textfile' && lyricsSource
+          ? async () => await FileSystem.readAsStringAsync(lyricsSource?.uri)
+          : data.lyrics;
+      const chosenTags = tags
+        .filter((tag) => selectedTags.includes(tag.name))
+        .map((tag) => tag.id);
+      const genre = genres.find((g) => g.name === selectedGenre[0])?.id;
+      if (!genre) {
+        setLoading(false);
+        return;
+      }
+
+      const trackDetails: ITrack = {
+        id: uuid(),
+        title: data.title,
+        description: data.description,
+        lyrics,
+        genreId: genre,
+        tags: chosenTags,
+        src: trackSource.uri,
+        preview: trackPreview?.uri,
+        cover: cover || undefined,
+        isPublic: isTrackPublic,
+      };
+
+      if (uploadType === 'album') {
+        if (currentUser?.role !== UserRole.ARTIST) {
+          toastResponseMessage({
+            type: 'error',
+            content: 'Only artists can upload albums',
+          });
+          setLoading(false);
+          return;
+        }
+        if (album?.tracks && album?.tracks?.length >= 10) {
+          toastResponseMessage({
+            type: 'error',
+            content: 'Album can only have 10 tracks',
+          });
+          setLoading(false);
+          return;
+        }
+        addTrackToAlbum(trackDetails);
+        toastResponseMessage({
+          type: 'success',
+          content: 'Track added to album',
+        });
+      }
+
+      if (uploadType === 'single') {
+        if (track) {
+          toastResponseMessage({
+            type: 'error',
+            content: 'Track already exists',
+          });
+          setLoading(false);
+          return;
+        }
+        setTrack(trackDetails);
+        toastResponseMessage({
+          type: 'success',
+          content: 'Track added',
+        });
+      }
+      setLoading(false);
     } else {
       setIs2ndStep(true);
       setLoading(false);
@@ -131,11 +230,11 @@ const TrackDetailsModal = ({
           >
             {is2ndStep ? 'Step 2: Track Details' : 'Step 1: Track Details'}
           </StyledText>
-          <TouchableOpacity onPress={onClose} className="ml-auto">
+          <StyledTouchableOpacity onPress={onClose} className="ml-auto">
             <StyledText weight="bold" size="lg">
               Cancel
             </StyledText>
-          </TouchableOpacity>
+          </StyledTouchableOpacity>
         </View>
       }
     >
@@ -188,7 +287,10 @@ const TrackDetailsModal = ({
               />
               <RadioButton
                 label="Select Lyrics File"
-                onSelect={() => setLyricsInputType('textfile')}
+                onSelect={() => {
+                  setLyricsInputType('textfile');
+                  setValue('lyrics', null);
+                }}
                 selected={lyricsInputType === 'textfile'}
               />
             </View>
@@ -196,7 +298,7 @@ const TrackDetailsModal = ({
               <>
                 {lyricsSource ? (
                   <AudioDetailsCard
-                    duration={formatDuration(lyricsSource.size || 0, true)}
+                    duration={'-'}
                     extension={extractExtension(lyricsSource.name)}
                     size={formatBytes(lyricsSource.size)}
                     onRemove={() => setLyricsSource(null)}
@@ -261,6 +363,13 @@ const TrackDetailsModal = ({
               wrapperClassName="my-2"
               backgroundColor="transparent"
               borderColor={COLORS.neutral.normal}
+            />
+            <ImageDisplay
+              source={cover}
+              placeholder="Select Track Cover"
+              width={164}
+              height={164}
+              onPress={pickImage}
             />
 
             <SelectOption

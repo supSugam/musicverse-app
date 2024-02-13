@@ -8,4 +8,5 @@ export interface IAlbum {
   releaseDate: string;
   tracks: ITrack[];
   tags?: string[];
+  isPublic?: boolean;
 }

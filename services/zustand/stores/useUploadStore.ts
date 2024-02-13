@@ -10,11 +10,13 @@ import { IGenre } from '../../../utils/Interfaces/IGenre';
 interface IUploadStore {
   uploadType: 'single' | 'album';
   setUploadType: (type: 'single' | 'album') => void;
-  tracks: ITrack[];
-  addTrack: (track: ITrack) => void;
-  removeTrack: (track: ITrack) => void;
+  track: ITrack | null;
+  setTrack: (track: ITrack) => boolean;
+  removeTrack: () => boolean;
   album: Partial<IAlbum> | null;
-  setAlbum: (album: Partial<IAlbum>) => void;
+  setAlbum: (album: Partial<IAlbum>) => boolean;
+  addTrackToAlbum: (track: ITrack) => void;
+  removeTrackFromAlbum: (trackId: string) => void;
 }
 
 export const useUploadStore = create<IUploadStore>(
@@ -23,18 +25,58 @@ export const useUploadStore = create<IUploadStore>(
     setUploadType: (uploadType) => {
       set(() => ({ uploadType }));
     },
-    tracks: [],
-    addTrack: (track) => {
-      set((state) => ({ tracks: [...state.tracks, track] }));
+    track: null,
+    setTrack: (track) => {
+      set(() => ({ track }));
+      return true;
     },
-    removeTrack: (track) => {
-      set((state) => ({
-        tracks: state.tracks.filter((t) => t.id !== track.id),
-      }));
+    removeTrack: () => {
+      set(() => ({ track: null }));
+      return true;
     },
+
     album: null,
     setAlbum: (album) => {
       set(() => ({ album }));
+      return true;
+    },
+    addTrackToAlbum: (track: ITrack) => {
+      set((state) => {
+        if (state.album && state.album.tracks) {
+          return {
+            album: {
+              ...state.album,
+              tracks: [...state.album.tracks, track],
+            },
+          };
+        } else {
+          return {
+            album: {
+              ...state.album,
+              tracks: [track],
+            },
+          };
+        }
+      });
+    },
+    removeTrackFromAlbum: (trackId: string) => {
+      set((state) => {
+        if (state.album && state.album.tracks) {
+          return {
+            album: {
+              ...state.album,
+              tracks: state.album.tracks.filter((t) => t.id !== trackId),
+            },
+          };
+        } else {
+          return {
+            album: {
+              ...state.album,
+              tracks: [],
+            },
+          };
+        }
+      });
     },
   })
 );

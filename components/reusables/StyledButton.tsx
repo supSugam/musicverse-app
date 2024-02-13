@@ -2,6 +2,7 @@ import { Pressable, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator } from 'react-native';
 import COLORS from '@/constants/Colors';
+import { StyleSheet } from 'react-native';
 
 type StyledButtonProps = {
   loading?: boolean;
@@ -62,21 +63,21 @@ export const StyledTouchableOpacity = ({
   children,
   ...rest
 }: IStyledTouchableOpacityProps) => {
-  const styles = {
-    root: {
-      backgroundColor: COLORS.neutral.dark,
-      borderColor: COLORS.neutral.normal,
-      borderWidth: 1,
-    },
-  };
   return (
     <TouchableOpacity
-      className="flex flex-row items-center justify-center px-4 py-2 rounded-md"
-      style={styles.root}
       {...rest}
+      style={[styles.root, rest.style]}
+      className={`flex flex-row items-center justify-center px-3 py-1 rounded-md ${rest.className}`}
       activeOpacity={rest.activeOpacity || 0.8}
     >
       {children}
     </TouchableOpacity>
   );
 };
+const styles = StyleSheet.create({
+  root: {
+    backgroundColor: COLORS.neutral.dark,
+    borderColor: COLORS.neutral.normal,
+    borderWidth: 1,
+  },
+});

@@ -8,4 +8,5 @@ export interface ITrack {
   lyrics?: string;
   genreId: string;
   tags?: string[];
+  isPublic: boolean;
 }

@@ -29,6 +29,10 @@ export const useAssetsPicker = ({
 
         const assetsWithDuration = await Promise.all(
           pickedAssets.map(async (asset) => {
+            // if check match for audio/* or video/*
+            if (!asset.mimeType?.match(/audio\/|video\//)) {
+              return asset;
+            }
             try {
               const sound = new Audio.Sound();
               sound._onPlaybackStatusUpdate = (status) => {};

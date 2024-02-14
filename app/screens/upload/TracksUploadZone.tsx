@@ -19,6 +19,8 @@ import {
   formatBytes,
   formatDuration,
 } from '@/utils/helpers/string';
+import { EmptyGhostLA } from '@/assets/lottie';
+import LottieView from 'lottie-react-native';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -40,6 +42,13 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
       });
       return;
     }
+    if (!isUploadTypeSingle && album?.tracks?.length === 10) {
+      toastResponseMessage({
+        content: 'You can only upload a maximum of 10 tracks for an album',
+        type: 'error',
+      });
+      return;
+    }
     setTrackModalVisible(true);
   };
 
@@ -49,7 +58,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   return (
     <Container includeNavBar navbarTitle="Upload">
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1">
         <View className="flex justify-between items-center mt-12 px-6">
           <StyledText weight="bold" size="2xl">
             {isUploadTypeSingle
@@ -88,7 +97,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           onPress={onAddTrack}
           activeOpacity={0.8}
           style={{ marginVertical: 20 }}
-          disabled={loading}
           className="mt-12"
         >
           <LinearGradient
@@ -116,8 +124,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             </StyledText>
             <StyledText size="sm" weight="medium" className="text-center mt-1">
               {isUploadTypeSingle
-                ? 'Add your track to the platform'
-                : 'Add a track to the album'}
+                ? 'Add your track to MusicVerse! You can only upload one track at a time.'
+                : 'Add multiple tracks to MusicVerse! You can only upload a maximum of 10 tracks for an album.'}
             </StyledText>
           </LinearGradient>
         </TouchableOpacity>
@@ -126,17 +134,42 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            maxHeight: 200,
             borderRadius: 6,
             marginHorizontal: 24,
             padding: 10,
             backgroundColor: COLORS.neutral.dark,
             flex: 1,
-            marginTop: 20,
+            marginTop: 10,
           }}
           showsVerticalScrollIndicator
           className="w-full"
         >
+          {!track && !album?.tracks?.length && (
+            <View className="flex justify-between items-center w-full">
+              <LottieView
+                source={EmptyGhostLA}
+                autoPlay
+                loop
+                speed={0.5}
+                style={{
+                  width: '100%',
+                  height: 125,
+                  transform: [
+                    {
+                      scale: 1.7,
+                    },
+                    {
+                      translateY: -10,
+                    },
+                  ],
+                }}
+              />
+              <StyledText weight="bold" size="xl" className="text-center">
+                Waiting for tracks...
+              </StyledText>
+            </View>
+          )}
+
           {!isUploadTypeSingle &&
             album?.tracks?.length &&
             album?.tracks?.map((track, index) => (
@@ -170,7 +203,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         <View className="flex flex-col px-4 mt-4 w-full">
           <StyledButton
             variant="primary"
-            className="mt-16"
             fullWidth
             loading={loading}
             onPress={handleSubmit}

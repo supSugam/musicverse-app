@@ -94,7 +94,10 @@ const TrackDetailsModal = ({
     null
   );
 
-  const { pickImage, image: cover } = useImagePicker({ selectionLimit: 1 });
+  const { pickImage, image: cover } = useImagePicker({
+    selectionLimit: 1,
+    allowsEditing: true,
+  });
 
   const {
     handleSubmit,

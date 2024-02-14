@@ -35,7 +35,10 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
     navigation.navigate('AlbumDetailsSC2');
   };
 
-  const { pickImage, image } = useImagePicker({ selectionLimit: 1 });
+  const { pickImage, image } = useImagePicker({
+    selectionLimit: 1,
+    allowsEditing: true,
+  });
 
   const {
     control,

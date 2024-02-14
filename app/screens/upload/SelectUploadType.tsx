@@ -11,9 +11,13 @@ import Animated, {
 import COLORS from '@/constants/Colors';
 import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
+import { GLOBAL_STYLES, USER_PERMISSIONS } from '@/utils/constants';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { toastResponseMessage } from '@/utils/toast';
 
 const SelectUploadType = ({ navigation }: { navigation: any }) => {
   const { uploadType, album } = useUploadStore((state) => state);
+  const { currentUser } = useAuthStore((state) => state);
   const [selectedType, setSelectedType] = useState<'album' | 'single'>(
     uploadType
   );
@@ -79,15 +83,29 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
 
           {/* TODO: Disabled for !member||!artist */}
           <TouchableOpacity
-            style={{
-              backgroundColor:
-                selectedType === 'album'
-                  ? COLORS.primary.light
-                  : COLORS.neutral.dark,
-            }}
+            style={[
+              {
+                backgroundColor:
+                  selectedType === 'album'
+                    ? COLORS.primary.light
+                    : COLORS.neutral.dark,
+              },
+              GLOBAL_STYLES.getDisabledStyles(
+                !USER_PERMISSIONS.canCreateAlbums(currentUser?.role)
+              ),
+            ]}
             className="flex p-3 rounded-xl flex-row items-center justify-between border border-gray-600"
             activeOpacity={0.85}
-            onPress={() => setSelectedType('album')}
+            onPress={() => {
+              if (!USER_PERMISSIONS.canCreateAlbums(currentUser?.role)) {
+                toastResponseMessage({
+                  content: 'Only artists can create albums',
+                  type: 'error',
+                });
+                return;
+              }
+              setSelectedType('album');
+            }}
           >
             <MaterialIcons name="album" size={32} color="white" />
 

@@ -55,6 +55,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const onModalClose = () => {
     setTrackModalVisible(false);
   };
+  console.log('album', album);
 
   return (
     <Container includeNavBar navbarTitle="Upload">
@@ -65,7 +66,11 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               ? 'Upload your track here'
               : 'Upload tracks for'}{' '}
             {!isUploadTypeSingle && (
-              <StyledText weight="extrabold" size="2xl">
+              <StyledText
+                weight="extrabold"
+                size="2xl"
+                className="text-purple-400"
+              >
                 {album?.title}
               </StyledText>
             )}
@@ -97,7 +102,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           onPress={onAddTrack}
           activeOpacity={0.8}
           style={{ marginVertical: 20 }}
-          className="mt-12"
+          className="mt-8 px-6"
         >
           <LinearGradient
             colors={[
@@ -113,7 +118,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               borderColor: `${COLORS.neutral.light}60`,
               borderRadius: 6,
               padding: 20,
-              width: '80%',
+              width: '100%',
             }}
             start={{ x: 0, y: 1 }}
             end={{ x: 1, y: 1 }}
@@ -139,7 +144,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             padding: 10,
             backgroundColor: COLORS.neutral.dark,
             flex: 1,
-            marginTop: 10,
+            marginTop: 6,
           }}
           showsVerticalScrollIndicator
           className="w-full"

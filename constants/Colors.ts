@@ -12,6 +12,7 @@ const COLORS = {
     normal: '#737373',
     dark: '#171717',
     dense: '#0a0a0a',
+    semidark: '#1f1f1f',
   },
   primary: {
     light: '#7e22ce',

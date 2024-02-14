@@ -55,10 +55,12 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
       setLoading(false);
       return;
     }
+    const genre = genres.find((g) => g.name === selectedGenre[0])?.id;
+
     setAlbum({
       ...album,
       releaseDate: date?.toISOString(),
-      ...(selectedGenre.length > 0 && { genreId: selectedGenre[0] }),
+      ...(selectedGenre.length > 0 && { genreId: genre }),
       ...(selectedTags.length > 0 && { tags: selectedTags }),
     });
     setLoading(false);

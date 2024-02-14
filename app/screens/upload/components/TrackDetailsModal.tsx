@@ -110,7 +110,7 @@ const TrackDetailsModal = ({
   });
   const { genres } = useGenreQuery();
   const { tags } = useTagsQuery();
-  const handleSubmitTrack = (data: any) => {
+  const handleSubmitTrack = async (data: any) => {
     setLoading(true);
     if (selectedGenre.length === 0) {
       toastResponseMessage({
@@ -137,10 +137,17 @@ const TrackDetailsModal = ({
         setLoading(false);
         return;
       }
-      const lyrics =
-        lyricsInputType === 'textfile' && lyricsSource
-          ? async () => await FileSystem.readAsStringAsync(lyricsSource?.uri)
-          : data.lyrics;
+      let lyrics = data.lyrics;
+      if (lyricsInputType === 'textfile' && lyricsSource) {
+        try {
+          lyrics = await FileSystem.readAsStringAsync(lyricsSource.uri, {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+        } catch (error) {
+          console.error('Error reading file:', error);
+        }
+      }
+
       const chosenTags = tags
         .filter((tag) => selectedTags.includes(tag.name))
         .map((tag) => tag.id);
@@ -161,6 +168,7 @@ const TrackDetailsModal = ({
         isPublic: isTrackPublic,
         trackSource,
       };
+      console.log('track lyrics', lyrics);
       // TODO: Every song shall have same genre and tags as the album
 
       if (uploadType === 'album') {
@@ -172,7 +180,7 @@ const TrackDetailsModal = ({
           setLoading(false);
           return;
         }
-        if (album?.tracks && album?.tracks?.length >= 10) {
+        if (album?.tracks && album?.tracks?.length === 10) {
           toastResponseMessage({
             type: 'error',
             content: 'Album can only have 10 tracks',
@@ -183,15 +191,13 @@ const TrackDetailsModal = ({
         addTrackToAlbum(trackDetails);
         toastResponseMessage({
           type: 'success',
-          content: 'Track added to album',
+          content: 'Track added to album.',
         });
-      }
-
-      if (uploadType === 'single') {
+      } else {
         if (track) {
           toastResponseMessage({
             type: 'error',
-            content: 'Track already exists',
+            content: 'One Track already exists',
           });
           setLoading(false);
           return;
@@ -199,9 +205,10 @@ const TrackDetailsModal = ({
         setTrack(trackDetails);
         toastResponseMessage({
           type: 'success',
-          content: 'Track added',
+          content: 'Track details added.',
         });
       }
+      onClose();
       setLoading(false);
     } else {
       setIs2ndStep(true);

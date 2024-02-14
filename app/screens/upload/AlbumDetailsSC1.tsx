@@ -13,7 +13,7 @@ import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { toastResponseMessage } from '@/utils/toast';
 const schema = yup.object().shape({
   title: yup.string().required('Album Name is Required'),
-  desc: yup
+  description: yup
     .string()
     .nullable()
     .min(50, 'Description must be at least 50 characters')
@@ -27,8 +27,8 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
   const handlePress = (data: any) => {
     setLoading(true);
     setAlbum({
-      title: data.albumName,
-      description: data.desc,
+      title: data.title,
+      description: data.description,
       ...(image && { cover: image }),
     });
     setLoading(false);
@@ -89,14 +89,14 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           variant="default"
           control={control}
           rules={{ required: true }}
-          controllerName="desc"
+          controllerName="description"
           placeholder="Enter Description"
           fontWeight="normal"
           textSize="base"
           multiline
           numberOfLines={3}
           textAlignVertical="top"
-          errorMessage={errors.desc?.message}
+          errorMessage={errors.description?.message}
           wrapperClassName="my-2 mt-8"
           backgroundColor="transparent"
           borderColor="#ffffff60"

@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import {
   View,
-  Text,
   Modal,
   ModalProps,
   StyleSheet,
@@ -129,4 +128,4 @@ const ModalWrapper = ({
   );
 };
 
-export default React.memo(ModalWrapper);
+export default ModalWrapper;

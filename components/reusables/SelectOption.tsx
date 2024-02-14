@@ -154,7 +154,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
                   }}
                 >
                   <StyledText className="mr-2">{item}</StyledText>
-                  <MaterialIcons name="close" size={16} color="black" />
+                  <MaterialIcons name="close" size={20} color="white" />
                 </TouchableOpacity>
               ))
             )}
@@ -244,10 +244,13 @@ const styles = StyleSheet.create({
   selectedItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e0e0e0',
-    padding: 5,
+    justifyContent: 'center',
+    backgroundColor: COLORS.neutral.semidark,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 20,
-    margin: 2,
+    margin: 4,
+    marginLeft: 0,
   },
   modalBackground: {
     flex: 1,

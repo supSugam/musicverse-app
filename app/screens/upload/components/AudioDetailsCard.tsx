@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import COLORS from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
+import ReusableAlert from '@/components/reusables/ReusableAlert';
 
 export interface IAudioDetailsCardProps {
   title: string;
@@ -22,48 +23,72 @@ const AudioDetailsCard = ({
   onEdit,
   icon = 'audio-file',
 }: IAudioDetailsCardProps) => {
+  const [alertVisible, setAlertVisible] = useState<boolean>(false);
   return (
-    <TouchableOpacity activeOpacity={0.8} style={styles.cardRoot}>
-      <MaterialIcons name={icon} size={30} color={COLORS.neutral.normal} />
-      <View className="flex flex-col ml-2 items-start justify-center flex-1">
-        <StyledText
-          weight="semibold"
-          size="base"
-          numberOfLines={1}
-          ellipsizeMode="tail"
+    <>
+      {onRemove && (
+        <ReusableAlert
+          cancelText="Cancel"
+          confirmText="Confirm"
+          onConfirm={onRemove}
+          visible={alertVisible}
+          onClose={() => {
+            setAlertVisible(false);
+          }}
+          type="alert"
+          header={
+            <StyledText size="base" className="ml-2">
+              Remove Track
+            </StyledText>
+          }
         >
-          {title}
-        </StyledText>
-        <StyledText
-          weight="extralight"
-          size="sm"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          className="text-neutral-400"
-        >{`${size} | ${duration} | ${extension}`}</StyledText>
-      </View>
-      <View className="flex flex-row ml-2 items-center">
-        {onEdit && (
-          <>
+          <StyledText size="lg" weight="semibold" className="text-left">
+            Are you sure you want to remove this audio?
+          </StyledText>
+        </ReusableAlert>
+      )}
+      <TouchableOpacity activeOpacity={0.8} style={styles.cardRoot}>
+        <MaterialIcons name={icon} size={30} color={COLORS.neutral.normal} />
+        <View className="flex flex-col ml-2 items-start justify-center flex-1">
+          <StyledText
+            weight="semibold"
+            size="base"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {title}
+          </StyledText>
+          <StyledText
+            weight="extralight"
+            size="sm"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            className="text-neutral-400"
+          >{`${size} | ${duration} | ${extension}`}</StyledText>
+        </View>
+        <View className="flex flex-row ml-2 items-center">
+          {onEdit && (
+            <>
+              <MaterialIcons
+                name="edit"
+                size={28}
+                color={COLORS.neutral.normal}
+                onPress={onEdit}
+              />
+              <View className="w-2" />
+            </>
+          )}
+          {onRemove && (
             <MaterialIcons
-              name="edit"
+              name="delete"
               size={28}
-              color={COLORS.neutral.normal}
-              onPress={onEdit}
+              color={COLORS.red.light}
+              onPress={() => setAlertVisible(true)}
             />
-            <View className="w-2" />
-          </>
-        )}
-        {onRemove && (
-          <MaterialIcons
-            name="delete"
-            size={28}
-            color={COLORS.red.light}
-            onPress={onRemove}
-          />
-        )}
-      </View>
-    </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
+    </>
   );
 };
 

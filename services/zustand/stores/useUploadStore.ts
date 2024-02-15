@@ -8,16 +8,17 @@ import { IAlbum } from '../../../utils/Interfaces/IAlbum';
 import { IGenre } from '../../../utils/Interfaces/IGenre';
 import { USER_LIMITS } from '@/utils/constants';
 import { toastResponseMessage } from '@/utils/toast';
+import { ISimpleResponse } from '@/utils/Interfaces/ISimpleResponse';
 
 interface IUploadStore {
   uploadType: 'single' | 'album';
   setUploadType: (type: 'single' | 'album') => void;
   track: ITrack | null;
-  setTrack: (track: ITrack) => boolean;
+  setTrack: (track: ITrack) => ISimpleResponse;
   removeTrack: () => boolean;
   album: Partial<IAlbum> | null;
   setAlbum: (album: Partial<IAlbum>) => boolean;
-  addTrackToAlbum: (track: ITrack) => void;
+  addTrackToAlbum: (track: ITrack) => ISimpleResponse;
   removeTrackFromAlbum: (trackId: string) => void;
 }
 
@@ -29,8 +30,20 @@ export const useUploadStore = create<IUploadStore>(
     },
     track: null,
     setTrack: (track) => {
-      set(() => ({ track }));
-      return true;
+      const response = {
+        content: 'Track added successfully',
+        type: 'success',
+      } as ISimpleResponse;
+      set((state) => {
+        if (state.track) {
+          response.content = 'You can only upload one track at a time';
+          response.type = 'error';
+          return state;
+        } else {
+          return { track };
+        }
+      });
+      return response;
     },
     removeTrack: () => {
       set(() => ({ track: null }));
@@ -43,38 +56,47 @@ export const useUploadStore = create<IUploadStore>(
       return true;
     },
     addTrackToAlbum: (track: ITrack) => {
+      let response = {
+        content: 'Track added successfully',
+        type: 'success',
+      } as ISimpleResponse;
+
       set((state) => {
-        if (state.album && state.album.tracks) {
-          if (state.album.tracks.length === USER_LIMITS.MAX_TRACKS_PER_ALBUM) {
-            toastResponseMessage({
-              content: `You can only upload a maximum of ${USER_LIMITS.MAX_TRACKS_PER_ALBUM} tracks for an album`,
-              type: 'error',
-            });
-            return state;
-          }
-          if (state.album.tracks.find((t) => t.title === track.title)) {
-            toastResponseMessage({
-              content: `Track with title ${track.title} already exists in the album.`,
-              type: 'error',
-            });
-            return state;
-          }
-          return {
-            album: {
-              ...state.album,
-              tracks: [...state.album.tracks, track],
-            },
-          };
-        } else {
-          return {
-            album: {
-              ...state.album,
-              tracks: [track],
-            },
-          };
+        if (!state.album) {
+          return { album: { tracks: [track] } };
         }
+
+        const { album } = state;
+        const { tracks } = album;
+        if (tracks && tracks.length === USER_LIMITS.MAX_TRACKS_PER_ALBUM) {
+          response = {
+            content: `You can only upload a maximum of ${USER_LIMITS.MAX_TRACKS_PER_ALBUM} tracks for an album`,
+            type: 'error',
+          };
+          return state;
+        }
+
+        if (
+          tracks &&
+          tracks.some(
+            (t) => t.title.toLowerCase() === track.title.toLowerCase()
+          )
+        ) {
+          response = {
+            content: `Track with title ${track.title} already exists in the album.`,
+            type: 'error',
+          };
+          return state;
+        }
+
+        return {
+          album: { ...album, tracks: [...(tracks ? tracks : []), track] },
+        };
       });
+
+      return response;
     },
+
     removeTrackFromAlbum: (trackTitle: string) => {
       set((state) => {
         if (state.album && state.album.tracks) {

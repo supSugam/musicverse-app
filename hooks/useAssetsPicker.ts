@@ -2,10 +2,13 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import { toastResponseMessage } from '@/utils/toast';
 import { Audio } from 'expo-av';
+import { USER_LIMITS } from '@/utils/constants';
+import { formatBytes } from '@/utils/helpers/string';
 
 interface IAudioPickerProps {
   selectionLimit?: number;
   mediaTypes?: string[];
+  maxFileSize?: number;
 }
 export type AssetWithDuration = DocumentPicker.DocumentPickerAsset & {
   duration?: number;
@@ -14,6 +17,7 @@ export type AssetWithDuration = DocumentPicker.DocumentPickerAsset & {
 export const useAssetsPicker = ({
   selectionLimit = 1,
   mediaTypes = ['audio/wav', 'audio/mpeg', 'audio/x-wav'],
+  maxFileSize,
 }: IAudioPickerProps) => {
   const pickAssets = async (): Promise<AssetWithDuration[] | null> => {
     try {
@@ -26,6 +30,21 @@ export const useAssetsPicker = ({
         const pickedAssets = Array.isArray(result.assets)
           ? result.assets.slice(0, selectionLimit)
           : [result.assets];
+
+        if (maxFileSize) {
+          const areAllFilesWithinSize = pickedAssets.every((asset) => {
+            return asset.size && asset.size <= maxFileSize;
+          });
+          if (!areAllFilesWithinSize) {
+            toastResponseMessage({
+              content: `File size should not exceed ${formatBytes(
+                maxFileSize
+              )}`,
+              type: 'error',
+            });
+            return null;
+          }
+        }
 
         const assetsWithDuration = await Promise.all(
           pickedAssets.map(async (asset) => {

@@ -10,7 +10,6 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import StyledText from './StyledText';
 import COLORS from '@/constants/Colors';
@@ -20,6 +19,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { ScrollView } from 'react-native';
+import ModalWrapper from './ModalWrapper';
+import { StyledTouchableOpacity } from './StyledButton';
+import StyledTextField from './StyledTextInput';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+const schema = yup.object().shape({
+  search: yup.string(),
+});
 
 interface SelectOptionProps {
   options: string[];
@@ -47,9 +56,13 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       'minSelection should be less than or equal to maxSelection'
     );
   }
+  const { control, watch } = useForm<yup.InferType<typeof schema>>({
+    resolver: yupResolver(schema),
+    defaultValues: { search: '' },
+  });
+  const searchTerm = watch('search');
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [searchText, setSearchText] = useState('');
   const [tempSelected, setTempSelected] = useState<string[]>([]); // Initialize tempSelected as an empty array
   const { SCREEN_HEIGHT } = useScreenDimensions(); // Assuming you get SCREEN_HEIGHT from your custom hook
   const fadeAnim = useSharedValue<number>(0);
@@ -104,17 +117,16 @@ const SelectOption: React.FC<SelectOptionProps> = ({
         style={[styles.optionItem, isSelected && styles.selectedOptionItem]}
         onPress={() => handleOptionPress(item)}
       >
-        <Text
-          style={isSelected ? styles.selectedOptionText : styles.optionText}
-        >
+        <StyledText weight="normal" size="lg">
           {item}
-        </Text>
+          {isSelected && ' ✓'}
+        </StyledText>
       </TouchableOpacity>
     );
   };
 
   const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(searchText.toLowerCase())
+    option.toLowerCase().includes(searchTerm?.toLowerCase() || '')
   );
 
   const modalContainerStyle = useAnimatedStyle(() => {
@@ -161,52 +173,59 @@ const SelectOption: React.FC<SelectOptionProps> = ({
           </ScrollView>
         )}
       </TouchableOpacity>
-      <Modal
+
+      <ModalWrapper
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={toggleModal}
+        onClose={toggleModal}
+        closeOnOutsideClick
       >
-        <TouchableWithoutFeedback onPress={toggleModal}>
-          <View style={styles.modalBackground}>
-            <Animated.View style={[styles.modalContainer, modalContainerStyle]}>
-              <View style={styles.modalHeader}>
-                <TextInput
-                  style={styles.searchInput}
+        <View style={styles.modalBackground}>
+          <Animated.View style={[styles.modalContainer, modalContainerStyle]}>
+            <View style={styles.modalHeader}>
+              <View className="flex-1">
+                <StyledTextField
                   placeholder="Search..."
-                  value={searchText}
-                  onChangeText={(text) => setSearchText(text)}
+                  variant="underlined"
+                  control={control}
+                  controllerName="search"
                 />
-                <TouchableOpacity onPress={toggleModal} className="ml-2">
-                  <MaterialIcons name="close" size={24} color="black" />
-                  {/* Close button */}
-                </TouchableOpacity>
               </View>
-              <FlatList
-                data={filteredOptions}
-                renderItem={renderOptionItem}
-                keyExtractor={(item, index) => index.toString()}
-              />
-              {!single && (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: 'transparent' }]}
-                    onPress={handleCancel}
-                  >
-                    <Text style={styles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleConfirm}
-                  >
-                    <Text style={styles.buttonText}>OK</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </Animated.View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+
+              <TouchableOpacity onPress={toggleModal} className="ml-2">
+                <MaterialIcons name="close" size={24} color="white" />
+                {/* Close button */}
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={filteredOptions}
+              renderItem={renderOptionItem}
+              keyExtractor={(item, index) => index.toString()}
+            />
+            {!single && (
+              <View style={styles.buttonContainer}>
+                <StyledTouchableOpacity
+                  style={styles.button}
+                  onPress={handleCancel}
+                >
+                  <StyledText weight="bold" size="sm" className="text-white">
+                    Cancel
+                  </StyledText>
+                </StyledTouchableOpacity>
+                <StyledTouchableOpacity
+                  style={styles.button}
+                  onPress={handleConfirm}
+                >
+                  <StyledText weight="bold" size="sm" className="text-white">
+                    Confirm
+                  </StyledText>
+                </StyledTouchableOpacity>
+              </View>
+            )}
+          </Animated.View>
+        </View>
+      </ModalWrapper>
       <Animated.View style={animatedStyle}>
         <StyledText
           size="sm"
@@ -256,11 +275,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: '80%',
-    backgroundColor: 'white',
+    width: '100%',
+    backgroundColor: COLORS.neutral.dark,
     borderRadius: 10,
     padding: 20,
   },
@@ -275,14 +293,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     padding: 10,
+    borderColor: COLORS.neutral.normal,
+    color: 'white',
   },
   optionItem: {
     padding: 10,
     borderBottomWidth: 1,
-    borderColor: '#ccc',
+    borderColor: COLORS.neutral.normal,
   },
   selectedOptionItem: {
-    backgroundColor: '#cfd8dc',
+    backgroundColor: COLORS.neutral.normal,
   },
   optionText: {
     fontWeight: 'normal',
@@ -300,10 +320,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginLeft: 10,
     borderRadius: 5,
-    backgroundColor: '#007bff',
-  },
-  buttonText: {
-    color: 'white',
   },
 });
 

@@ -16,17 +16,13 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { toastResponseMessage } from '@/utils/toast';
 
 const SelectUploadType = ({ navigation }: { navigation: any }) => {
-  const { uploadType, album } = useUploadStore((state) => state);
+  const { uploadType, album, setUploadType } = useUploadStore((state) => state);
   const { currentUser } = useAuthStore((state) => state);
-  const [selectedType, setSelectedType] = useState<'album' | 'single'>(
-    uploadType
-  );
   const [loading, setLoading] = useState<boolean>(false);
 
   const handlePress = () => {
     setLoading(true);
-    useUploadStore.setState({ uploadType: selectedType });
-    switch (selectedType) {
+    switch (uploadType) {
       case 'single':
         navigation.navigate('TracksUploadZone');
         break;
@@ -61,13 +57,13 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
           <TouchableOpacity
             style={{
               backgroundColor:
-                selectedType === 'single'
+                uploadType === 'single'
                   ? COLORS.primary.light
                   : COLORS.neutral.dark,
             }}
             className="flex p-3 rounded-xl flex-row items-center justify-between border border-gray-600 mb-4"
             activeOpacity={0.8}
-            onPress={() => setSelectedType('single')}
+            onPress={() => setUploadType('single')}
           >
             <FontAwesome6 name="music" size={32} color="white" />
             <View className="flex flex-col mx-4">
@@ -86,7 +82,7 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
             style={[
               {
                 backgroundColor:
-                  selectedType === 'album'
+                  uploadType === 'album'
                     ? COLORS.primary.light
                     : COLORS.neutral.dark,
               },
@@ -104,7 +100,7 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
                 });
                 return;
               }
-              setSelectedType('album');
+              setUploadType('album');
             }}
           >
             <MaterialIcons name="album" size={32} color="white" />

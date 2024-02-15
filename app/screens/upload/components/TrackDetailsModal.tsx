@@ -38,7 +38,7 @@ import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 import { ITrack } from '@/utils/Interfaces/ITrack';
 import { UserRole } from '@/utils/enums/IUser';
-import { uuid } from '@/utils/constants';
+import { USER_LIMITS, uuid } from '@/utils/constants';
 const schema = yup.object().shape({
   title: yup
     .string()
@@ -80,7 +80,9 @@ const TrackDetailsModal = ({
     'textfield' | 'textfile'
   >('textfield');
 
-  const { pickAssets: pickAudio } = useAssetsPicker({});
+  const { pickAssets: pickAudio } = useAssetsPicker({
+    maxFileSize: USER_LIMITS.getMaxTrackSize(currentUser?.role as UserRole),
+  });
   const { pickAssets: pickText } = useAssetsPicker({
     mediaTypes: ['text/plain'],
   });
@@ -188,11 +190,11 @@ const TrackDetailsModal = ({
           setLoading(false);
           return;
         }
-        addTrackToAlbum(trackDetails);
-        toastResponseMessage({
-          type: 'success',
-          content: 'Track added to album.',
-        });
+        const response = addTrackToAlbum(trackDetails);
+        toastResponseMessage(response);
+        if (response.type === 'success') {
+          onClose();
+        }
       } else {
         if (track) {
           toastResponseMessage({
@@ -202,13 +204,13 @@ const TrackDetailsModal = ({
           setLoading(false);
           return;
         }
-        setTrack(trackDetails);
-        toastResponseMessage({
-          type: 'success',
-          content: 'Track details added.',
-        });
+        const response = setTrack(trackDetails);
+        toastResponseMessage(response);
+        if (response.type === 'success') {
+          onClose();
+        }
+        onClose();
       }
-      onClose();
       setLoading(false);
     } else {
       setIs2ndStep(true);

@@ -8,7 +8,7 @@ export const api = axios.create({
 });
 
 export const USER_LIMITS = {
-  MAX_TRACK_SIZE: (role: UserRole) =>
+  getMaxTrackSize: (role: UserRole) =>
     role === UserRole.ARTIST || role === UserRole.MEMBER
       ? 200 * 1024 * 1024
       : 20 * 1024 * 1024,

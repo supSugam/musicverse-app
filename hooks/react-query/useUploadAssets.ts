@@ -1,79 +1,111 @@
-// import { useState } from 'react';
-// import { useMutation, UseMutationResult, UseMutationOptions } from '@tanstack/react-query';
-// import axios, { AxiosRequestConfig, AxiosResponse, CancelToken } from 'axios';
-// import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { useState } from 'react';
+import {
+  useMutation,
+  UseMutationResult,
+  MutationOptions,
+} from '@tanstack/react-query';
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  CancelTokenSource,
+  Method,
+} from 'axios';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 
-// type UploadOptions = {
-//   payload: any;
-//   endpoint: string;
-//   reqType: 'patch' | 'post';
-// };
+type Payload = {
+  [key: string]: any;
+};
 
-// type UploadState = {
-//   progress: number;
-//   isUploading: boolean;
-// };
+type UploadOptions = {
+  payload: Payload;
+  endpoint: string;
+  requestType: Method;
+  onEnd?: () => void;
+  onError?: (error: AxiosError) => void;
+  onSettled?: () => void;
+  onCancel?: () => void;
+};
 
-// const useUploadAssets = (
-//   options: UploadOptions,
-//   config?: AxiosRequestConfig,
-//   mutationOptions?: UseMutationOptions<AxiosResponse, unknown, UploadOptions>
-// ): UseMutationResult<AxiosResponse, unknown, UploadOptions> => {
-//   const { api } = useAuthStore((state) => state);
-//   const [uploadState, setUploadState] = useState<UploadState>({
-//     progress: 0,
-//     isUploading: false,
-//   });
+const useUploadAssets = ({
+  payload,
+  endpoint,
+  requestType = 'POST',
+}: UploadOptions) => {
+  const { api } = useAuthStore((state) => state);
+  const uploadEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const [progressDetails, setProgressDetails] = useState<{
+    progress: number;
+    isUploading: boolean;
+  }>({
+    progress: 0,
+    isUploading: false,
+  });
+  const [cancelTokenSource, setCancelTokenSource] = useState<CancelTokenSource>(
+    axios.CancelToken.source()
+  );
 
-//   const uploadAsset = async (formData: FormData, cancelToken: CancelToken) => {
-//     const { endpoint, reqType } = options;
-//     const axiosConfig: AxiosRequestConfig = {
-//       ...config,
-//       method: reqType,
-//       url: endpoint,
-//       data: formData,
-//       cancelToken,
-//       onUploadProgress: (progressEvent) => {
-//         const progress = Math.round((progressEvent.loaded / (progressEvent.total || 0)) * 100);
-//         setUploadState({ ...uploadState, progress });
-//       },
-//     };
+  const getFormData = (payload: Payload) => {
+    const formData = new FormData();
+    for (const key in payload) {
+      if (Array.isArray(payload[key])) {
+        payload[key].forEach((item: any, index: number) => {
+          formData.append(`${key}[${index}]`, item);
+        });
+      } else {
+        formData.append(key, payload[key]);
+      }
+    }
+    return formData;
+  };
 
-//     try {
-//       const response = await api(axiosConfig);
-//       return response.data;
-//     } catch (error) {
-//       throw error;
-//     }
-//   };
+  const mutation = useMutation<void, AxiosError, UploadOptions>({
+    mutationFn: async ({ payload, endpoint, requestType }) => {
+      const config: AxiosRequestConfig = {
+        ...api,
+        method: requestType,
+        url: endpoint,
+        data: payload,
+        cancelToken: cancelTokenSource.token,
+        onUploadProgress: (axiosProgressEvent) => {
+          const progress = Math.round(
+            (axiosProgressEvent.loaded * 100) / (axiosProgressEvent.total || 0)
+          );
+          setProgressDetails((prev) => ({
+            ...prev,
+            progress,
+            isUploading: true,
+          }));
+        },
+      };
+      const response = await api(config);
+      return response.data;
+    },
+    onError: (error: any) => {
+      if (axios.isCancel(error)) {
+        console.log('Request canceled', error.message);
+      } else {
+        console.log('Error', error.message);
+      }
+    },
+    onSettled: () => {
+      setProgressDetails((prev) => ({ ...prev, isUploading: false }));
+    },
+  });
 
-//   const appendFormData = (formData: FormData, data: any, parentKey?: string) => {
-//     for (const key in data) {
-//       if (Object.prototype.hasOwnProperty.call(data, key)) {
-//         const value = data[key];
-//         const newKey = parentKey ? `${parentKey}[${key}]` : key;
+  const upload = async () => {
+    mutation.mutate({
+      payload: getFormData(payload),
+      endpoint: uploadEndpoint,
+      requestType,
+    });
+  };
 
-//         if (value instanceof FileList) {
-//           for (let i = 0; i < value.length; i++) {
-//             formData.append(newKey, value[i]);
-//           }
-//         } else if (typeof value === 'object' && !Array.isArray(value)) {
-//           appendFormData(formData, value, newKey);
-//         } else {
-//           formData.append(newKey, value);
-//         }
-//       }
-//     }
-//   };
+  const cancelUpload = () => {
+    cancelTokenSource.cancel('Upload cancelled');
+    mutation.reset();
+  };
 
-//   const uploadMutation = useMutation((options) => {
-//     const { payload } = options;
-//     const formData = new FormData();
-//     appendFormData(formData, payload);
-//     return uploadAsset(formData, new axios.CancelToken(() => {}));
-//   }, mutationOptions);
+  return { ...mutation, progressDetails, upload, cancelUpload };
+};
 
-//   return uploadMutation;
-// };
-
-// export default useUploadAssets;
+export default useUploadAssets;

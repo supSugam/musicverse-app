@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  FlexAlignType,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated from 'react-native-reanimated';
@@ -20,6 +21,8 @@ interface IModalWrapperProps extends ModalProps {
   children: React.ReactNode;
   onClose?: () => void;
   closeOnOutsideClick?: boolean;
+  position?: 'start' | 'center' | 'end';
+  fullWidth?: boolean;
 }
 
 const ModalWrapper = ({
@@ -31,7 +34,11 @@ const ModalWrapper = ({
   onClose,
   children,
   closeOnOutsideClick,
+  position = 'center',
+  fullWidth = false,
 }: IModalWrapperProps) => {
+  const positionStyle: FlexAlignType =
+    position === 'center' ? position : `flex-${position}`;
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -44,10 +51,10 @@ const ModalWrapper = ({
         blurView: {
           flex: 1,
           justifyContent: 'center',
-          alignItems: 'center',
+          alignItems: positionStyle,
         },
         modalContainer: {
-          width: '90%',
+          width: fullWidth ? '100%' : '90%',
           borderRadius: 10,
         },
         headerContainer: {

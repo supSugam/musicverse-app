@@ -10,10 +10,13 @@ import SelectOption from '@/components/reusables/SelectOption';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTagsQuery } from '@/hooks/react-query/useTagsQuery';
 import { toastResponseMessage } from '@/utils/toast';
+import Switch from '@/components/reusables/StyledSwitch';
 const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
   const { album, setAlbum } = useUploadStore((state) => state);
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [requestPublicUpload, setRequestPublicUpload] =
+    useState<boolean>(false);
 
   const {
     date,
@@ -116,7 +119,14 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
           minSelection={0}
           maxSelection={3}
         />
+        <Switch
+          value={requestPublicUpload}
+          onToggle={setRequestPublicUpload}
+          label="Request Public Upload"
+          className="mt-2"
+        />
       </View>
+
       <View className="flex-1 p-4">
         <StyledButton
           variant="primary"

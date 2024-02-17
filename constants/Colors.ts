@@ -17,6 +17,8 @@ const COLORS = {
   primary: {
     light: '#7e22ce',
     dark: '#ff3d00',
+    purple: '#b11fc8',
+    violet: '#6b21a8',
   },
   transparent: 'rgba(0, 0, 0, 0)',
   // 600 and 900
@@ -27,6 +29,9 @@ const COLORS = {
   purple: {
     light: '#9333ea',
     dark: '#581c87',
+  },
+  gradient: {
+    primary: ['#b11fc8', '#5b21b6'],
   },
 };
 

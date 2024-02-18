@@ -11,7 +11,6 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 import { AssetWithDuration } from '../useAssetsPicker';
-import { isMyCustomType } from '@/utils/helpers/ts-utilities';
 import { IFilePayload } from '@/utils/Interfaces/IFilePayload';
 import { ImageWithRotation } from '../useImagePicker';
 type Payload = {
@@ -55,32 +54,24 @@ const useUploadAssets = ({
 
     switch (typeof value) {
       case 'object':
-        // Check for custom Type
-
-        // If Image
-        const isImage = isMyCustomType<ImageWithRotation>(value);
-        if (isImage) {
+        if (value.type === 'image') {
           const img = value as ImagePickerAsset;
           const imgFile: IFilePayload = {
             name: img.fileName || 'Untitled',
             type: img.mimeType || img.type || '',
             uri: img.uri,
           };
-          console.log(imgFile, 'image');
           return imgFile;
         }
 
         // If Audio
-        const isAudio = isMyCustomType<AssetWithDuration>(value);
-        console.log(isAudio);
-        if (isAudio) {
+        if (value.type === 'audio') {
           const audio = value as AssetWithDuration;
           const audioFile: IFilePayload = {
             name: audio.file?.name || audio.name || 'Untitled',
             type: audio.mimeType || audio.file?.type || '',
             uri: audio.uri,
           };
-          console.log(audioFile, 'audio');
           return audioFile;
         }
 
@@ -135,6 +126,7 @@ const useUploadAssets = ({
               isUploading: true,
             }));
           },
+          maxRate: 1,
         };
         const response = await api(config);
         console.log(response.data);
@@ -164,12 +156,13 @@ const useUploadAssets = ({
   const upload = async (payload: Payload) => {
     setProgressDetails({ isUploading: true, progress: 0 });
     const payloadFormData = getFormData(payload);
-    // mutation.mutate(payloadFormData);
+    mutation.mutate(payloadFormData);
   };
 
   // mutation.mutate(payloadFormData);
   const cancelUpload = () => {
     cancelTokenSource.cancel('Upload Cancelled');
+    setCancelTokenSource(axios.CancelToken.source());
     mutation.reset();
   };
 

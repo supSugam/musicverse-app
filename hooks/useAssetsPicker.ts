@@ -1,8 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 import { toastResponseMessage } from '@/utils/toast';
 import { Audio } from 'expo-av';
-import { USER_LIMITS } from '@/utils/constants';
 import { formatBytes } from '@/utils/helpers/string';
 
 interface IAudioPickerProps {
@@ -12,6 +10,7 @@ interface IAudioPickerProps {
 }
 export type AssetWithDuration = DocumentPicker.DocumentPickerAsset & {
   duration?: number;
+  type?: string;
 };
 
 export const useAssetsPicker = () => {
@@ -63,9 +62,8 @@ export const useAssetsPicker = () => {
               return {
                 ...asset,
                 duration,
-                lastModified: undefined,
-                file: undefined,
-              }; // added to satisfy condition where its checked for custom type (length)
+                type: 'audio',
+              };
             } catch (error) {
               console.error('Error getting duration:', error);
               return asset;

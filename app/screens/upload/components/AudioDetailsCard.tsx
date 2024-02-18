@@ -1,9 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import COLORS from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import ReusableAlert from '@/components/reusables/ReusableAlert';
+import ProgressBar from '@/components/reusables/ProgressBar';
+import { GLOBAL_STYLES } from '@/utils/constants';
 
 export interface IAudioDetailsCardProps {
   title: string;
@@ -13,6 +15,8 @@ export interface IAudioDetailsCardProps {
   onRemove?: () => void;
   onEdit?: () => void;
   icon?: keyof typeof MaterialIcons.glyphMap;
+  uploadProgress?: number;
+  uploading?: boolean;
 }
 const AudioDetailsCard = ({
   title,
@@ -22,8 +26,11 @@ const AudioDetailsCard = ({
   onRemove,
   onEdit,
   icon = 'audio-file',
+  uploadProgress,
+  uploading = false,
 }: IAudioDetailsCardProps) => {
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
+
   return (
     <>
       {onRemove && (
@@ -47,46 +54,55 @@ const AudioDetailsCard = ({
           </StyledText>
         </ReusableAlert>
       )}
-      <TouchableOpacity activeOpacity={0.8} style={styles.cardRoot}>
-        <MaterialIcons name={icon} size={30} color={COLORS.neutral.normal} />
-        <View className="flex flex-col ml-2 items-start justify-center flex-1">
-          <StyledText
-            weight="semibold"
-            size="base"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {title}
-          </StyledText>
-          <StyledText
-            weight="extralight"
-            size="sm"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            className="text-neutral-400"
-          >{`${size} | ${duration} | ${extension}`}</StyledText>
-        </View>
-        <View className="flex flex-row ml-2 items-center">
-          {onEdit && (
-            <>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={[styles.cardRoot, GLOBAL_STYLES.getDisabledStyles(uploading)]}
+        disabled={uploading}
+      >
+        <View style={styles.detailsWrapper}>
+          <MaterialIcons name={icon} size={30} color={COLORS.neutral.normal} />
+          <View className="flex flex-col ml-2 items-start justify-center flex-1">
+            <StyledText
+              weight="semibold"
+              size="base"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </StyledText>
+            <StyledText
+              weight="extralight"
+              size="sm"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              className="text-neutral-400"
+            >{`${size} | ${duration} | ${extension}`}</StyledText>
+          </View>
+          <View className="flex flex-row ml-2 items-center">
+            {onEdit && (
+              <>
+                <MaterialIcons
+                  name="edit"
+                  size={28}
+                  color={COLORS.neutral.normal}
+                  onPress={onEdit}
+                />
+                <View className="w-2" />
+              </>
+            )}
+            {onRemove && (
               <MaterialIcons
-                name="edit"
+                name="delete"
                 size={28}
-                color={COLORS.neutral.normal}
-                onPress={onEdit}
+                color={COLORS.red.light}
+                onPress={() => setAlertVisible(true)}
               />
-              <View className="w-2" />
-            </>
-          )}
-          {onRemove && (
-            <MaterialIcons
-              name="delete"
-              size={28}
-              color={COLORS.red.light}
-              onPress={() => setAlertVisible(true)}
-            />
-          )}
+            )}
+          </View>
         </View>
+        {uploadProgress !== undefined && uploading && (
+          <ProgressBar progress={uploadProgress} />
+        )}
       </TouchableOpacity>
     </>
   );
@@ -96,15 +112,18 @@ export default AudioDetailsCard;
 
 const styles = StyleSheet.create({
   cardRoot: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.neutral.normal,
     borderRadius: 10,
     padding: 10,
     marginVertical: 10,
     width: '100%',
+  },
+  detailsWrapper: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });

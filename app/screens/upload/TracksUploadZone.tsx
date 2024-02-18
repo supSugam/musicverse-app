@@ -38,7 +38,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   const isUploadTypeSingle = uploadType === 'single';
 
-  const { upload, progressDetails } = useUploadAssets({
+  const { upload, progressDetails, cancelUpload } = useUploadAssets({
     endpoint: '/tracks',
     requestType: 'POST',
   });
@@ -60,7 +60,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   };
 
   const onAddTrack = () => {
-    console.log('bruh', uploadType, album, track);
     if (isUploadTypeSingle && track !== null) {
       toastResponseMessage({
         content: 'You can only upload one track at a time',
@@ -213,6 +212,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
                 });
                 removeTrackFromAlbum(track.title);
               }}
+              uploadProgress={progressDetails.progress}
+              uploading={progressDetails.isUploading}
             />
           ))}
         {isUploadTypeSingle && track && (
@@ -229,23 +230,30 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               });
               removeTrack();
             }}
+            uploadProgress={progressDetails.progress}
+            uploading={progressDetails.isUploading}
           />
         )}
       </ScrollView>
-      <StyledText
-        weight="extralight"
-        size="xs"
-        className="mt-2 text-gray-400 text-center"
-        uppercase
-      >
-        {progressDetails.isUploading}
-        {progressDetails.progress}
-      </StyledText>
+
       <View className="flex flex-col px-4 mt-4 w-full">
+        {progressDetails.isUploading && (
+          <StyledButton
+            variant="secondary"
+            fullWidth
+            onPress={() => {
+              cancelUpload();
+            }}
+          >
+            <StyledText weight="bold" size="lg">
+              Cancel Upload
+            </StyledText>
+          </StyledButton>
+        )}
         <StyledButton
           variant="primary"
           fullWidth
-          loading={loading}
+          loading={loading || progressDetails.isUploading}
           onPress={handleSubmit}
         >
           <StyledText weight="bold" size="lg">

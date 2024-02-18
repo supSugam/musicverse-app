@@ -11,6 +11,7 @@ import * as yup from 'yup';
 import { useImagePicker } from '@/hooks/useImagePicker';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { toastResponseMessage } from '@/utils/toast';
+import { imageAssetToFile } from '@/utils/helpers/file';
 const schema = yup.object().shape({
   title: yup.string().required('Album Name is Required'),
   description: yup
@@ -26,10 +27,11 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
 
   const handlePress = (data: any) => {
     setLoading(true);
+    const coverFile = imageAssetToFile(image?.[0]);
     setAlbum({
       title: data.title,
       description: data.description,
-      ...(image && { cover: image }),
+      ...(coverFile && { cover: coverFile }),
     });
     setLoading(false);
     navigation.navigate('AlbumDetailsSC2');
@@ -79,7 +81,7 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           wrapperClassName="my-2 mb-8"
         />
         <ImageDisplay
-          source={image}
+          source={image?.[0]?.uri}
           placeholder="Select Album Cover"
           width={164}
           height={164}

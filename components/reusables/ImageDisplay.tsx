@@ -6,7 +6,7 @@ import StyledText from './StyledText';
 
 interface IImageDisplayProps
   extends React.ComponentProps<typeof TouchableOpacity> {
-  source: string | null;
+  source?: string | null;
   placeholder: string;
   width?: number;
   height?: number;

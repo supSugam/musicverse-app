@@ -17,7 +17,9 @@ export const useImagePicker = ({
   aspect = [1, 1],
   mediaTypes = ImagePicker.MediaTypeOptions.Images,
 }: IImagePickerProps) => {
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<ImagePicker.ImagePickerAsset[] | null>(
+    null
+  );
 
   const pickImage = async () => {
     let permissionResult =
@@ -42,7 +44,7 @@ export const useImagePicker = ({
     console.log(result);
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImage(result.assets);
     }
   };
 

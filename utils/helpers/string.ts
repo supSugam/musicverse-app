@@ -1,3 +1,17 @@
+function splitStringFromLastDot(
+  inputString: string
+): [string, string | undefined] {
+  const lastDotIndex = inputString.lastIndexOf('.');
+
+  if (lastDotIndex === -1) {
+    return [inputString, undefined];
+  } else {
+    const firstPart = inputString.slice(0, lastDotIndex);
+    const secondPart = inputString.slice(lastDotIndex + 1);
+    return [firstPart, secondPart];
+  }
+}
+
 export const joinClassNames = (classes: string[]): string => {
   return classes.join(' ');
 };
@@ -15,11 +29,13 @@ export const isValidEmail = (email: string): boolean => {
 };
 
 export const extractExtension = (filename: string = ''): string => {
-  return (filename.match(/(?<=\.)[^.]+$/) || [])[0] || '';
+  return filename.split('.').pop() || '';
 };
 
 export const extractFilename = (filename?: string): string => {
-  return (filename?.match(/[^./]+(?=\.)/) || [])[0] || '';
+  if (!filename) return '';
+  const [fileName] = splitStringFromLastDot(filename);
+  return fileName;
 };
 
 export const formatBytes = (bytes?: number, decimals = 2): string => {

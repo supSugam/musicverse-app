@@ -21,6 +21,7 @@ import {
 } from '@/utils/helpers/string';
 import { EmptyGhostLA } from '@/assets/lottie';
 import LottieView from 'lottie-react-native';
+import useUploadAssets from '@/hooks/react-query/useUploadAssets';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -37,7 +38,27 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   const isUploadTypeSingle = uploadType === 'single';
 
-  const handleSubmit = () => {};
+  const { upload, progressDetails } = useUploadAssets({
+    endpoint: '/tracks',
+    requestType: 'POST',
+  });
+
+  const handleSubmit = async () => {
+    switch (uploadType) {
+      case 'album':
+
+      case 'single':
+        if (!track) {
+          toastResponseMessage({
+            content: 'Add a track first',
+            type: 'error',
+          });
+          return;
+        }
+        const { previewSource, trackSource, ...rest } = track;
+        await upload(rest);
+    }
+  };
 
   const onAddTrack = () => {
     console.log('bruh', uploadType, album, track);
@@ -200,7 +221,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             title={track.title}
             size={formatBytes(track.trackSource.size)}
             duration={formatDuration(track.trackSource.duration, true)}
-            extension={extractExtension(track.trackSource.file?.name)}
+            extension={extractExtension(track.trackSource.name)}
             onEdit={() => {}}
             onRemove={() => {
               toastResponseMessage({
@@ -212,6 +233,15 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           />
         )}
       </ScrollView>
+      <StyledText
+        weight="extralight"
+        size="xs"
+        className="mt-2 text-gray-400 text-center"
+        uppercase
+      >
+        {progressDetails.isUploading}
+        {progressDetails.progress}
+      </StyledText>
       <View className="flex flex-col px-4 mt-4 w-full">
         <StyledButton
           variant="primary"

@@ -38,7 +38,10 @@ import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 import { ITrack } from '@/utils/Interfaces/ITrack';
 import { UserRole } from '@/utils/enums/IUser';
-import { USER_LIMITS, uuid } from '@/utils/constants';
+import { USER_LIMITS, USER_PERMISSIONS, uuid } from '@/utils/constants';
+import Switch from '@/components/reusables/StyledSwitch';
+import { ReviewStatus } from '@/utils/enums/ReviewStatus';
+import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 const schema = yup.object().shape({
   title: yup
     .string()
@@ -95,6 +98,8 @@ const TrackDetailsModal = ({
   const [lyricsSource, setLyricsSource] = useState<DocumentPickerAsset | null>(
     null
   );
+  const [requestPublicUpload, setRequestPublicUpload] =
+    useState<boolean>(false);
 
   const { pickImage, image: cover } = useImagePicker({
     selectionLimit: 1,
@@ -158,18 +163,32 @@ const TrackDetailsModal = ({
         setLoading(false);
         return;
       }
+
+      const originalFile = cover?.[0];
+      const srcFile = assetToFile(trackSource);
+
+      if (!srcFile) {
+        setLoading(false);
+        return;
+      }
+
       const trackDetails: ITrack = {
         title: data.title,
         description: data.description,
         lyrics,
         genreId: genre,
         tags: chosenTags,
-        src: trackSource.uri,
-        preview: trackPreview?.uri,
-        cover: cover || undefined,
-        isPublic: isTrackPublic,
-        trackSource,
+        src: trackSource,
+        preview: trackPreview || undefined,
+        publicStatus: requestPublicUpload
+          ? ReviewStatus.REQUESTED
+          : ReviewStatus.NOT_REQUESTED,
+        trackDuration: trackSource.duration?.toString() || '0',
+        trackSize: trackSource.size?.toString() || '0',
+        previewDuration: trackPreview?.duration?.toString() || '0',
+        cover: originalFile,
       };
+
       console.log('track lyrics', lyrics);
       // TODO: Every song shall have same genre and tags as the album
 
@@ -347,6 +366,16 @@ const TrackDetailsModal = ({
                 backgroundColor="transparent"
               />
             )}
+            {USER_PERMISSIONS.canPublicUpload(
+              currentUser?.role as UserRole
+            ) && (
+              <Switch
+                value={requestPublicUpload}
+                onToggle={setRequestPublicUpload}
+                label="Request Public Upload"
+                className="mt-2"
+              />
+            )}
           </>
         ) : (
           <>
@@ -377,7 +406,7 @@ const TrackDetailsModal = ({
               borderColor={COLORS.neutral.normal}
             />
             <ImageDisplay
-              source={cover}
+              source={cover?.[0].uri}
               placeholder="Select Track Cover"
               width={164}
               height={164}

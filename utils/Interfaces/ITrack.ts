@@ -1,23 +1,18 @@
 import { AssetWithDuration } from '@/hooks/useAssetsPicker';
-
-export enum ReviewStatus {
-  REQUESTED = 'REQUESTED',
-  NOT_REQUESTED = 'NOT_REQUESTED',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-}
+import { ReviewStatus } from '../enums/ReviewStatus';
+import { ImagePickerAsset } from 'expo-image-picker';
 
 export interface ITrack {
   title: string;
   description?: string;
-  src: string;
-  preview?: string;
-  cover?: string;
+  src: AssetWithDuration;
+  preview?: AssetWithDuration;
+  cover?: ImagePickerAsset;
   lyrics?: string;
+  publicStatus?: ReviewStatus;
+  trackDuration: string; // in seconds
+  previewDuration: string;
+  trackSize: string; // in bytes
   genreId: string;
   tags?: string[];
-  publicStatus?: ReviewStatus;
-  trackSource: AssetWithDuration;
-  trackDuration: string;
-  previewSource: AssetWithDuration;
 }

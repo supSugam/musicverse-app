@@ -20,16 +20,22 @@ type UploadOptions = {
   payload: Payload;
   endpoint: string;
   requestType: Method;
-  onEnd?: () => void;
-  onError?: (error: AxiosError) => void;
-  onSettled?: () => void;
-  onCancel?: () => void;
+  onUploadStart?: () => void;
+  onUploadProgress?: (progress: number) => void;
+  onUploadComplete?: () => void;
+  onUploadError?: (error: any) => void;
+  onUploadCancel?: () => void;
 };
 
 const useUploadAssets = ({
   payload,
   endpoint,
   requestType = 'POST',
+  onUploadCancel,
+  onUploadComplete,
+  onUploadError,
+  onUploadProgress,
+  onUploadStart,
 }: UploadOptions) => {
   const { api } = useAuthStore((state) => state);
   const uploadEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -78,17 +84,25 @@ const useUploadAssets = ({
         },
       };
       const response = await api(config);
+      onUploadStart?.();
+      console.log('response', response);
       return response.data;
     },
     onError: (error: any) => {
+      console.log('error', error);
       if (axios.isCancel(error)) {
+        onUploadCancel?.();
         console.log('Request canceled', error.message);
       } else {
+        onUploadError?.(error);
         console.log('Error', error.message);
       }
     },
     onSettled: () => {
       setProgressDetails((prev) => ({ ...prev, isUploading: false }));
+    },
+    onSuccess: () => {
+      onUploadComplete?.();
     },
   });
 
@@ -101,7 +115,7 @@ const useUploadAssets = ({
   };
 
   const cancelUpload = () => {
-    cancelTokenSource.cancel('Upload cancelled');
+    cancelTokenSource.cancel('Upload Cancelled');
     mutation.reset();
   };
 

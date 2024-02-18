@@ -14,12 +14,12 @@ export type AssetWithDuration = DocumentPicker.DocumentPickerAsset & {
   duration?: number;
 };
 
-export const useAssetsPicker = ({
-  selectionLimit = 1,
-  mediaTypes = ['audio/wav', 'audio/mpeg', 'audio/x-wav'],
-  maxFileSize,
-}: IAudioPickerProps) => {
-  const pickAssets = async (): Promise<AssetWithDuration[] | null> => {
+export const useAssetsPicker = () => {
+  const pickAssets = async ({
+    selectionLimit = 1,
+    mediaTypes = ['audio/wav', 'audio/mpeg', 'audio/x-wav'],
+    maxFileSize,
+  }: IAudioPickerProps): Promise<AssetWithDuration[] | null> => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: mediaTypes,
@@ -60,7 +60,12 @@ export const useAssetsPicker = ({
                 ? soundObject.durationMillis
                 : 0;
               await sound.unloadAsync();
-              return { ...asset, duration };
+              return {
+                ...asset,
+                duration,
+                lastModified: undefined,
+                file: undefined,
+              }; // added to satisfy condition where its checked for custom type (length)
             } catch (error) {
               console.error('Error getting duration:', error);
               return asset;

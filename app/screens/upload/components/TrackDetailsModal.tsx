@@ -83,12 +83,7 @@ const TrackDetailsModal = ({
     'textfield' | 'textfile'
   >('textfield');
 
-  const { pickAssets: pickAudio } = useAssetsPicker({
-    maxFileSize: USER_LIMITS.getMaxTrackSize(currentUser?.role as UserRole),
-  });
-  const { pickAssets: pickText } = useAssetsPicker({
-    mediaTypes: ['text/plain'],
-  });
+  const { pickAssets } = useAssetsPicker();
   const [trackSource, setTrackSource] = useState<AssetWithDuration | null>(
     null
   );
@@ -165,12 +160,6 @@ const TrackDetailsModal = ({
       }
 
       const originalFile = cover?.[0];
-      const srcFile = assetToFile(trackSource);
-
-      if (!srcFile) {
-        setLoading(false);
-        return;
-      }
 
       const trackDetails: ITrack = {
         title: data.title,
@@ -283,7 +272,10 @@ const TrackDetailsModal = ({
             ) : (
               <FilePicker
                 onPress={async () => {
-                  const file = await pickAudio();
+                  const file = await pickAssets({
+                    maxFileSize: USER_LIMITS.getMaxTrackSize(currentUser?.role),
+                  });
+                  console.log(file?.[0].file);
                   setTrackSource(file?.[0] ?? null);
                 }}
                 caption="Select your track"
@@ -302,7 +294,12 @@ const TrackDetailsModal = ({
             ) : (
               <FilePicker
                 onPress={async () => {
-                  const file = await pickAudio();
+                  const file = await pickAssets({
+                    maxFileSize: USER_LIMITS.getMaxTrackPreviewSize(
+                      currentUser?.role
+                    ),
+                  });
+
                   setTrackPreview(file?.[0] ?? null);
                 }}
                 caption="Select preview (Optional)"
@@ -339,7 +336,9 @@ const TrackDetailsModal = ({
                 ) : (
                   <FilePicker
                     onPress={async () => {
-                      const file = await pickText();
+                      const file = await pickAssets({
+                        mediaTypes: ['text/plain'],
+                      });
                       setLyricsSource(file?.[0] ?? null);
                     }}
                     caption="Select lyrics file"

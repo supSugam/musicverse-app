@@ -55,8 +55,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           });
           return;
         }
-        const { previewSource, trackSource, ...rest } = track;
-        await upload(rest);
+        await upload(track);
     }
   };
 
@@ -203,9 +202,9 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             <AudioDetailsCard
               key={index}
               title={track.title}
-              size={formatBytes(track.trackSource.size)}
-              duration={formatDuration(track.trackSource.duration, true)}
-              extension={extractExtension(track.trackSource.file?.name)}
+              size={formatBytes(track.src.size)}
+              duration={formatDuration(track.src.duration, true)}
+              extension={extractExtension(track.src.file?.name)}
               onEdit={() => {}}
               onRemove={() => {
                 toastResponseMessage({
@@ -219,9 +218,9 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         {isUploadTypeSingle && track && (
           <AudioDetailsCard
             title={track.title}
-            size={formatBytes(track.trackSource.size)}
-            duration={formatDuration(track.trackSource.duration, true)}
-            extension={extractExtension(track.trackSource.name)}
+            size={formatBytes(track.src.size)}
+            duration={formatDuration(track.src.duration, true)}
+            extension={extractExtension(track.src.name)}
             onEdit={() => {}}
             onRemove={() => {
               toastResponseMessage({

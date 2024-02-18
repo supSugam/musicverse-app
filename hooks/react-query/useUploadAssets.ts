@@ -11,7 +11,9 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 import { AssetWithDuration } from '../useAssetsPicker';
-
+import { isMyCustomType } from '@/utils/helpers/ts-utilities';
+import { IFilePayload } from '@/utils/Interfaces/IFilePayload';
+import { ImageWithRotation } from '../useImagePicker';
 type Payload = {
   [key: string]: any;
 };
@@ -48,23 +50,41 @@ const useUploadAssets = ({
     axios.CancelToken.source()
   );
 
-  const stringifyValue = async (value: any) => {
+  const stringifyValue = (value: any) => {
     if (!value) return value;
 
     switch (typeof value) {
       case 'object':
         // Check for custom Type
-        const isImage = isMyCustomType<ImagePickerAsset>(value);
+
+        // If Image
+        const isImage = isMyCustomType<ImageWithRotation>(value);
         if (isImage) {
-          const file = await imageAssetToFile(value);
-          if (file) return file;
-        }
-        const isAudio = isMyCustomType<AssetWithDuration>(value);
-        if (isAudio) {
-          const file = await assetToFile(value);
-          if (file) return file;
+          const img = value as ImagePickerAsset;
+          const imgFile: IFilePayload = {
+            name: img.fileName || 'Untitled',
+            type: img.mimeType || img.type || '',
+            uri: img.uri,
+          };
+          console.log(imgFile, 'image');
+          return imgFile;
         }
 
+        // If Audio
+        const isAudio = isMyCustomType<AssetWithDuration>(value);
+        console.log(isAudio);
+        if (isAudio) {
+          const audio = value as AssetWithDuration;
+          const audioFile: IFilePayload = {
+            name: audio.file?.name || audio.name || 'Untitled',
+            type: audio.mimeType || audio.file?.type || '',
+            uri: audio.uri,
+          };
+          console.log(audioFile, 'audio');
+          return audioFile;
+        }
+
+        // Else
         if (typeof value.toJSON === 'function') {
           return value.toJSON();
         }
@@ -76,16 +96,16 @@ const useUploadAssets = ({
     }
   };
 
-  const getFormData = async (payload: Payload) => {
+  const getFormData = (payload: Payload) => {
     const formData = new FormData();
     for (const key in payload) {
       const value = payload[key];
       if (Array.isArray(value)) {
-        value.forEach(async (item: any, index: number) => {
-          formData.append(`${key}[${index}]`, await stringifyValue(item));
+        value.forEach((item: any, index: number) => {
+          formData.append(`${key}[${index}]`, stringifyValue(item));
         });
       } else {
-        formData.append(key, await stringifyValue(value));
+        formData.append(key, stringifyValue(value));
       }
     }
     return formData;
@@ -97,6 +117,7 @@ const useUploadAssets = ({
         const config: AxiosRequestConfig = {
           ...api,
           headers: {
+            Accept: 'application/json',
             'Content-Type': 'multipart/form-data',
             Authorization: api.defaults.headers['Authorization'],
           },
@@ -142,12 +163,8 @@ const useUploadAssets = ({
 
   const upload = async (payload: Payload) => {
     setProgressDetails({ isUploading: true, progress: 0 });
-    const payloadFormData = await getFormData(payload);
-
-    // but this results in error: Possible promise rejection TypeError: payloadFormData.vaues
-    for (const val in payloadFormData.values()) {
-      console.log(val);
-    }
+    const payloadFormData = getFormData(payload);
+    // mutation.mutate(payloadFormData);
   };
 
   // mutation.mutate(payloadFormData);

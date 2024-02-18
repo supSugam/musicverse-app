@@ -10,6 +10,10 @@ interface IImagePickerProps {
   mediaTypes?: ImagePicker.MediaTypeOptions;
 }
 
+export type ImageWithRotation = ImagePicker.ImagePickerAsset & {
+  rotation?: number;
+};
+
 export const useImagePicker = ({
   allowsEditing = false,
   selectionLimit = 1,
@@ -17,9 +21,7 @@ export const useImagePicker = ({
   aspect = [1, 1],
   mediaTypes = ImagePicker.MediaTypeOptions.Images,
 }: IImagePickerProps) => {
-  const [image, setImage] = useState<ImagePicker.ImagePickerAsset[] | null>(
-    null
-  );
+  const [image, setImage] = useState<ImageWithRotation[] | null>(null);
 
   const pickImage = async () => {
     let permissionResult =

@@ -8,11 +8,15 @@ export const api = axios.create({
 });
 
 export const USER_LIMITS = {
-  getMaxTrackSize: (role: UserRole) =>
+  getMaxTrackSize: (role?: UserRole) =>
     role === UserRole.ARTIST || role === UserRole.MEMBER
       ? 200 * 1024 * 1024
       : 20 * 1024 * 1024,
   MAX_TRACKS_PER_ALBUM: 10,
+  getMaxTrackPreviewSize: (role?: UserRole) =>
+    role === UserRole.ARTIST || role === UserRole.MEMBER
+      ? 100 * 1024 * 1024
+      : 10 * 1024 * 1024,
 };
 export const USER_PERMISSIONS = {
   canPublicUpload: (role: UserRole) => role === UserRole.ARTIST,

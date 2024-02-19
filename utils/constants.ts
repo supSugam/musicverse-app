@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { BASE_URL } from '@env';
+import 'react-native-get-random-values';
 import { v4 } from 'uuid';
 import { UserRole } from './enums/IUser';
 

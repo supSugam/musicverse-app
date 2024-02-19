@@ -46,7 +46,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const { uploadTracks, progressDetails, cancelUpload } = useUploadAssets({
     endpoint: '/tracks',
     requestType: 'POST',
-    payload: isUploadTypeSingle ? track : album?.tracks,
+    payload: isUploadTypeSingle && track ? [track] : [...(album?.tracks || [])],
     multiple: !isUploadTypeSingle,
   });
   const { create: createAlbum } = useAlbumQuery();
@@ -231,7 +231,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
                 title={track.title}
                 size={formatBytes(track.src.size)}
                 duration={formatDuration(track.src.duration, true)}
-                extension={extractExtension(track.src.file?.name)}
+                extension={extractExtension(track.src.name)}
                 onEdit={() => {}}
                 onRemove={() => {
                   toastResponseMessage({

@@ -35,7 +35,7 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
     setLoading(false);
   };
   useEffect(() => {
-    if (uploadType === 'album' && album?.tracks?.length) {
+    if (uploadType === 'album' && album?.title) {
       navigation.navigate('TracksUploadZone');
       toastResponseMessage({
         content: 'Continue where you left off',

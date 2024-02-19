@@ -9,6 +9,7 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 import { AssetWithDuration } from '../useAssetsPicker';
+import { toastResponseMessage } from '@/utils/toast';
 
 type Payload = {
   [key: string]: any;
@@ -19,7 +20,7 @@ type UploadOptions = {
   endpoint: string;
   requestType: 'POST' | 'PATCH';
   multiple?: boolean;
-  payload?: Payload | Payload[] | null;
+  payload?: Payload[] | null;
   onUploadStart?: () => void;
   onUploadProgress?: (progress: number) => void;
   onUploadComplete?: () => void;
@@ -46,32 +47,18 @@ const useUploadAssets = ({
   onUploadProgress,
   onUploadStart,
 }: UploadOptions) => {
-  if (!payload) throw new Error('Payload is required');
-  if (multiple && !Array.isArray(payload))
-    throw new Error('Payload should be an array');
-  if (!multiple && Array.isArray(payload))
-    throw new Error('Payload should be an object');
-
   const { api } = useAuthStore((state) => state);
 
   const InitialProgressDetails = useMemo(() => {
-    if (multiple) {
-      const progressDetails: ProgressDetails = {};
-      payload?.forEach((item: any, index: number) => {
-        progressDetails[index] = {
-          progress: 0,
-          isUploading: false,
-        };
-      });
-      return progressDetails;
-    } else {
-      return {
-        single: {
-          progress: 0,
-          isUploading: false,
-        },
+    const progressDetails: ProgressDetails = {};
+    if (!payload) return progressDetails;
+    payload?.forEach((item: Payload, index: number) => {
+      progressDetails[item.uploadKey] = {
+        progress: 0,
+        isUploading: false,
       };
-    }
+    });
+    return progressDetails;
   }, [multiple, payload]);
 
   const [progressDetails, setProgressDetails] = useState<ProgressDetails>(
@@ -160,15 +147,20 @@ const useUploadAssets = ({
           maxRate: 1,
         };
         const response = await api(config);
-        console.log(response.data);
         onUploadStart?.();
+        console.log(response.data);
         return response.data;
       } catch (error) {
         console.log(error, 'try catch wala error');
+        setProgressDetails((prev) => ({
+          ...prev,
+          [uploadKey]: { progress: 0, isUploading: false },
+        }));
         throw error;
       }
     },
     onError: (error: AxiosError) => {
+      setProgressDetails(InitialProgressDetails);
       if (axios.isCancel(error)) {
         onUploadCancel?.();
         console.log('Request canceled', error.message);
@@ -178,33 +170,34 @@ const useUploadAssets = ({
     },
     onSettled: () => {},
     onSuccess: () => {
+      setProgressDetails(InitialProgressDetails);
       onUploadComplete?.();
     },
   });
 
-  const uploadTracks = async () => {
+  const uploadTracks = async (payloadData?: Payload[]) => {
     // payload example [{file: 'file'}, {file: 'file'}]
-    switch (multiple) {
-      case true:
-        if (!Array.isArray(payload))
-          throw new Error('Payload should be an array');
-        payload.forEach(async (item: any, index: number) => {
-          const payloadFormData = getFormData(item);
-          await mutation.mutateAsync(payloadFormData);
-        });
-        break;
 
-      case false:
-        if (Array.isArray(payload))
-          throw new Error('Payload should be an object');
-        const payloadFormData = getFormData(payload);
-        await mutation.mutateAsync(payloadFormData);
-        break;
+    if (!payload && !payloadData) {
+      toastResponseMessage({
+        content: 'No files to upload',
+        type: 'error',
+      });
+      return;
     }
+
+    (payload || payloadData || []).forEach(async (item: Payload) => {
+      const payloadFormData = getFormData(item);
+      await mutation.mutateAsync({
+        payload: payloadFormData,
+        uploadKey: item.uploadKey,
+      });
+    });
   };
 
   // mutation.mutate(payloadFormData);
   const cancelUpload = () => {
+    setProgressDetails(InitialProgressDetails);
     cancelTokenSource.cancel('Upload Cancelled');
     setCancelTokenSource(axios.CancelToken.source());
     mutation.reset();

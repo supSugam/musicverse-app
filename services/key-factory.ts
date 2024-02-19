@@ -30,3 +30,12 @@ export const PROFILE_QUERY_KEY = (...args: string[]) => [
 ];
 export const GENRES_QUERY_KEY = 'genres';
 export const TAGS_QUERY_KEY = 'tags';
+
+export const albumKeyFactory = {
+  getAlbums: () => ['albums'],
+  getAlbum: (id: string) => ['albums', id],
+  createAlbum: () => ['albums'],
+  updateAlbum: (id: string) => ['albums', id],
+  deleteAlbum: (id: string) => ['albums', id],
+  getAlbumTracks: (id: string) => ['albums', id, 'tracks'],
+};

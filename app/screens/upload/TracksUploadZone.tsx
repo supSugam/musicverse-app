@@ -4,14 +4,12 @@ import Container from '@/components/Container';
 import StyledText from '@/components/reusables/StyledText';
 import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
-
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { UserRole } from '@/utils/enums/IUser';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '@/constants/Colors';
 import TrackDetailsModal from './components/TrackDetailsModal';
-import { ActionsEnum } from '@/utils/enums/Action';
 import { MaterialIcons } from '@expo/vector-icons';
 import AudioDetailsCard from './components/AudioDetailsCard';
 import {
@@ -22,6 +20,9 @@ import {
 import { EmptyGhostLA } from '@/assets/lottie';
 import LottieView from 'lottie-react-native';
 import useUploadAssets from '@/hooks/react-query/useUploadAssets';
+import { useAlbumQuery } from '@/hooks/react-query/useAlbumQuery';
+import { ICreateAlbumPayload } from '@/utils/Interfaces/IAlbum';
+import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,14 +39,48 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   const isUploadTypeSingle = uploadType === 'single';
 
-  const { upload, progressDetails, cancelUpload } = useUploadAssets({
+  const { uploadTracks, progressDetails, cancelUpload } = useUploadAssets({
     endpoint: '/tracks',
     requestType: 'POST',
   });
+  const { create: createAlbum } = useAlbumQuery();
 
   const handleSubmit = async () => {
     switch (uploadType) {
       case 'album':
+        if (!album?.tracks?.length) {
+          toastResponseMessage({
+            content: 'Add a track first',
+            type: 'error',
+          });
+          return;
+        }
+        const { tracks, cover, ...rest } = album;
+
+        // createAlbum.mutate(
+        //   {
+        //     ...rest,
+        //     cover: imageAssetToFile(cover),
+        //   } as ICreateAlbumPayload,
+        //   {
+        //     onSuccess: (data) => {
+        //       toastResponseMessage({
+        //         content: 'Album Created, Uploading tracks...',
+        //         type: 'success',
+        //       });
+        //     },
+        //     onError: (error) => {
+        //       toastResponseMessage({
+        //         content: error,
+        //         type: 'error',
+        //       });
+        //       return;
+        //     },
+        //   }
+        // );
+
+        await uploadTracks(tracks, true);
+        break;
 
       case 'single':
         if (!track) {
@@ -55,7 +90,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           });
           return;
         }
-        await upload(track);
+        await uploadTracks(track, false);
     }
   };
 

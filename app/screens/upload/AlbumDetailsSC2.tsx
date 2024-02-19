@@ -62,7 +62,6 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
 
     setAlbum({
       ...album,
-      releaseDate: date?.toISOString(),
       ...(selectedGenre.length > 0 && { genreId: genre }),
       ...(selectedTags.length > 0 && { tags: selectedTags }),
     });

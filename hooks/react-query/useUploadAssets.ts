@@ -69,22 +69,14 @@ const useUploadAssets = ({
       case 'object':
         if (value.type === 'image') {
           const img = value as ImagePickerAsset;
-          const imgFile: IFilePayload = {
-            name: img.fileName || 'Untitled',
-            type: img.mimeType || img.type || '',
-            uri: img.uri,
-          };
+          const imgFile = imageAssetToFile(img);
           return imgFile;
         }
 
         // If Audio
         if (value.type === 'audio') {
           const audio = value as AssetWithDuration;
-          const audioFile: IFilePayload = {
-            name: audio.file?.name || audio.name || 'Untitled',
-            type: audio.mimeType || audio.file?.type || '',
-            uri: audio.uri,
-          };
+          const audioFile = assetToFile(audio);
           return audioFile;
         }
 
@@ -173,7 +165,7 @@ const useUploadAssets = ({
     },
   });
 
-  const upload = async (payload: Payload, multiple = false) => {
+  const uploadTracks = async (payload: Payload, multiple = false) => {
     setProgressDetails((prev) => [{ ...prev, progress: 0, isUploading: true }]);
     switch (multiple) {
       case true:
@@ -203,7 +195,7 @@ const useUploadAssets = ({
 
   return {
     progressDetails,
-    upload,
+    uploadTracks,
     cancelUpload,
   };
 };

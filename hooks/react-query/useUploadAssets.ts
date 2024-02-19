@@ -144,7 +144,6 @@ const useUploadAssets = ({
               [uploadKey]: { progress, isUploading: true },
             }));
           },
-          maxRate: 1,
         };
         const response = await api(config);
         onUploadStart?.();

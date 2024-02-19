@@ -212,8 +212,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
                 });
                 removeTrackFromAlbum(track.title);
               }}
-              uploadProgress={progressDetails.progress}
-              uploading={progressDetails.isUploading}
+              uploadProgress={progressDetails[index].progress}
+              uploading={progressDetails[index].isUploading}
             />
           ))}
         {isUploadTypeSingle && track && (
@@ -230,14 +230,14 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               });
               removeTrack();
             }}
-            uploadProgress={progressDetails.progress}
-            uploading={progressDetails.isUploading}
+            uploadProgress={progressDetails[0].progress}
+            uploading={progressDetails[0].isUploading}
           />
         )}
       </ScrollView>
 
       <View className="flex flex-col px-4 mt-4 w-full">
-        {progressDetails.isUploading && (
+        {progressDetails.some((upload) => upload.isUploading) && (
           <StyledButton
             variant="secondary"
             fullWidth
@@ -253,7 +253,9 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         <StyledButton
           variant="primary"
           fullWidth
-          loading={loading || progressDetails.isUploading}
+          loading={
+            loading || progressDetails.some((upload) => upload.isUploading)
+          }
           onPress={handleSubmit}
         >
           <StyledText weight="bold" size="lg">

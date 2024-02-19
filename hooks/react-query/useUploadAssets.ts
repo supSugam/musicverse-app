@@ -13,6 +13,8 @@ import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 import { AssetWithDuration } from '../useAssetsPicker';
 import { IFilePayload } from '@/utils/Interfaces/IFilePayload';
 import { ImageWithRotation } from '../useImagePicker';
+import { set } from 'react-hook-form';
+
 type Payload = {
   [key: string]: any;
 };
@@ -20,12 +22,20 @@ type Payload = {
 type UploadOptions = {
   endpoint: string;
   requestType: 'POST' | 'PATCH';
+  multiple?: boolean;
   onUploadStart?: () => void;
   onUploadProgress?: (progress: number) => void;
   onUploadComplete?: () => void;
   onUploadError?: (error: any) => void;
   onUploadCancel?: () => void;
 };
+
+// uploadId: T extends true ? string : string | undefined;
+
+type ProgressDetails = {
+  progress: number;
+  isUploading: boolean;
+}[];
 
 const useUploadAssets = ({
   endpoint,
@@ -37,14 +47,17 @@ const useUploadAssets = ({
   onUploadStart,
 }: UploadOptions) => {
   const { api } = useAuthStore((state) => state);
-  const uploadEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const [progressDetails, setProgressDetails] = useState<{
-    progress: number;
-    isUploading: boolean;
-  }>({
-    progress: 0,
-    isUploading: false,
-  });
+
+  const initialProgressDetails: ProgressDetails = [
+    {
+      // uploadId: multiple ? '' : undefined,
+      progress: 0,
+      isUploading: false,
+    },
+  ];
+  const [progressDetails, setProgressDetails] = useState<ProgressDetails>(
+    initialProgressDetails
+  );
   const [cancelTokenSource, setCancelTokenSource] = useState<CancelTokenSource>(
     axios.CancelToken.source()
   );
@@ -90,6 +103,7 @@ const useUploadAssets = ({
   const getFormData = (payload: Payload) => {
     const formData = new FormData();
     for (const key in payload) {
+      if (key === 'uploadId') continue;
       const value = payload[key];
       if (Array.isArray(value)) {
         value.forEach((item: any, index: number) => {
@@ -103,7 +117,7 @@ const useUploadAssets = ({
   };
 
   const mutation = useMutation<void, AxiosError, Payload>({
-    mutationFn: async (payload) => {
+    mutationFn: async ({ payload, index }) => {
       try {
         const config: AxiosRequestConfig = {
           ...api,
@@ -120,11 +134,11 @@ const useUploadAssets = ({
             const progress = Math.round(
               (progressEvent.loaded * 100) / (progressEvent.total || 0)
             );
-            setProgressDetails((prev) => ({
-              ...prev,
-              progress,
-              isUploading: true,
-            }));
+            setProgressDetails((prev) => {
+              const updatedProgressDetails = [...prev];
+              updatedProgressDetails[index] = { progress, isUploading: true };
+              return updatedProgressDetails;
+            });
           },
           maxRate: 1,
         };
@@ -138,6 +152,9 @@ const useUploadAssets = ({
       }
     },
     onError: (error: AxiosError) => {
+      setProgressDetails((prev) => {
+        return prev.map((item) => ({ ...item, isUploading: false }));
+      });
       if (axios.isCancel(error)) {
         onUploadCancel?.();
         console.log('Request canceled', error.message);
@@ -150,13 +167,31 @@ const useUploadAssets = ({
     },
     onSuccess: () => {
       onUploadComplete?.();
+      setProgressDetails((prev) => {
+        return prev.map((item) => ({ ...item, isUploading: false }));
+      });
     },
   });
 
-  const upload = async (payload: Payload) => {
-    setProgressDetails({ isUploading: true, progress: 0 });
-    const payloadFormData = getFormData(payload);
-    mutation.mutate(payloadFormData);
+  const upload = async (payload: Payload, multiple = false) => {
+    setProgressDetails((prev) => [{ ...prev, progress: 0, isUploading: true }]);
+    switch (multiple) {
+      case true:
+        if (!Array.isArray(payload))
+          throw new Error('Payload should be an array');
+        payload.forEach((item: any, index: number) => {
+          const payloadFormData = getFormData(item);
+          mutation.mutate({ payloadFormData, index });
+        });
+        break;
+
+      case false:
+        if (Array.isArray(payload))
+          throw new Error('Payload should be an object');
+        const payloadFormData = getFormData(payload);
+        mutation.mutate({ payloadFormData, index: 0 });
+        break;
+    }
   };
 
   // mutation.mutate(payloadFormData);
@@ -166,7 +201,11 @@ const useUploadAssets = ({
     mutation.reset();
   };
 
-  return { ...mutation, progressDetails, upload, cancelUpload };
+  return {
+    progressDetails,
+    upload,
+    cancelUpload,
+  };
 };
 
 export default useUploadAssets;

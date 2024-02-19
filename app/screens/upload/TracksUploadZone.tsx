@@ -1,5 +1,5 @@
 import { ScrollView, TouchableOpacity, View } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Container from '@/components/Container';
 import StyledText from '@/components/reusables/StyledText';
 import { StyledButton } from '@/components/reusables/StyledButton';
@@ -23,6 +23,8 @@ import useUploadAssets from '@/hooks/react-query/useUploadAssets';
 import { useAlbumQuery } from '@/hooks/react-query/useAlbumQuery';
 import { ICreateAlbumPayload } from '@/utils/Interfaces/IAlbum';
 import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
+import { uuid } from '@/utils/constants';
+import { getValueFromRecordByIndex } from '@/utils/helpers/ts-utilities';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -39,47 +41,35 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   const isUploadTypeSingle = uploadType === 'single';
 
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
   const { uploadTracks, progressDetails, cancelUpload } = useUploadAssets({
     endpoint: '/tracks',
     requestType: 'POST',
+    payload: isUploadTypeSingle ? track : album?.tracks,
+    multiple: !isUploadTypeSingle,
   });
   const { create: createAlbum } = useAlbumQuery();
+
+  useEffect(() => {
+    const isUploading = Object.values(progressDetails).some(
+      (upload) => upload.isUploading
+    );
+    setIsUploading(isUploading);
+  }, [progressDetails]);
 
   const handleSubmit = async () => {
     switch (uploadType) {
       case 'album':
         if (!album?.tracks?.length) {
           toastResponseMessage({
-            content: 'Add a track first',
+            content: 'Add tracks first',
             type: 'error',
           });
           return;
         }
         const { tracks, cover, ...rest } = album;
-
-        // createAlbum.mutate(
-        //   {
-        //     ...rest,
-        //     cover: imageAssetToFile(cover),
-        //   } as ICreateAlbumPayload,
-        //   {
-        //     onSuccess: (data) => {
-        //       toastResponseMessage({
-        //         content: 'Album Created, Uploading tracks...',
-        //         type: 'success',
-        //       });
-        //     },
-        //     onError: (error) => {
-        //       toastResponseMessage({
-        //         content: error,
-        //         type: 'error',
-        //       });
-        //       return;
-        //     },
-        //   }
-        // );
-
-        await uploadTracks(tracks, true);
+        await uploadTracks();
         break;
 
       case 'single':
@@ -90,7 +80,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           });
           return;
         }
-        await uploadTracks(track, false);
+        await uploadTracks();
     }
   };
 
@@ -115,7 +105,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const onModalClose = () => {
     setTrackModalVisible(false);
   };
-
   return (
     <Container includeNavBar navbarTitle="Upload">
       <View className="flex justify-between items-center mt-12 px-6">
@@ -232,25 +221,30 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         )}
         {!isUploadTypeSingle &&
           album?.tracks?.length &&
-          album?.tracks?.map((track, index) => (
-            <AudioDetailsCard
-              key={index}
-              title={track.title}
-              size={formatBytes(track.src.size)}
-              duration={formatDuration(track.src.duration, true)}
-              extension={extractExtension(track.src.file?.name)}
-              onEdit={() => {}}
-              onRemove={() => {
-                toastResponseMessage({
-                  content: 'Track removed successfully.',
-                  type: 'success',
-                });
-                removeTrackFromAlbum(track.title);
-              }}
-              uploadProgress={progressDetails[index].progress}
-              uploading={progressDetails[index].isUploading}
-            />
-          ))}
+          album?.tracks?.map((track) => {
+            const { progress, isUploading } = progressDetails?.[
+              track.uploadKey
+            ] || { progress: 0, isUploading: false };
+            return (
+              <AudioDetailsCard
+                key={track.uploadKey}
+                title={track.title}
+                size={formatBytes(track.src.size)}
+                duration={formatDuration(track.src.duration, true)}
+                extension={extractExtension(track.src.file?.name)}
+                onEdit={() => {}}
+                onRemove={() => {
+                  toastResponseMessage({
+                    content: 'Track removed successfully.',
+                    type: 'success',
+                  });
+                  removeTrackFromAlbum(track.title);
+                }}
+                uploadProgress={progress}
+                uploading={isUploading}
+              />
+            );
+          })}
         {isUploadTypeSingle && track && (
           <AudioDetailsCard
             title={track.title}
@@ -265,14 +259,18 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               });
               removeTrack();
             }}
-            uploadProgress={progressDetails[0].progress}
-            uploading={progressDetails[0].isUploading}
+            uploadProgress={
+              getValueFromRecordByIndex(progressDetails, 0)?.progress
+            }
+            uploading={
+              getValueFromRecordByIndex(progressDetails, 0)?.isUploading
+            }
           />
         )}
       </ScrollView>
 
       <View className="flex flex-col px-4 mt-4 w-full">
-        {progressDetails.some((upload) => upload.isUploading) && (
+        {isUploading && (
           <StyledButton
             variant="secondary"
             fullWidth
@@ -288,9 +286,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         <StyledButton
           variant="primary"
           fullWidth
-          loading={
-            loading || progressDetails.some((upload) => upload.isUploading)
-          }
+          loading={loading || isUploading}
           onPress={handleSubmit}
         >
           <StyledText weight="bold" size="lg">

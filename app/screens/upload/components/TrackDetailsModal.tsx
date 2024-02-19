@@ -176,6 +176,7 @@ const TrackDetailsModal = ({
         trackSize: trackSource.size?.toString() || '0',
         previewDuration: trackPreview?.duration?.toString() || '0',
         cover: originalFile,
+        uploadKey: uuid(),
       };
 
       console.log('track lyrics', lyrics);
@@ -414,10 +415,9 @@ const TrackDetailsModal = ({
 
             <SelectOption
               options={tags.map((tag) => tag.name)}
-              placeholder="Select Tags"
+              placeholder="Select Tags (Optional, Max 3)"
               selected={selectedTags}
               onChange={onSelectedTagsChange}
-              single
               minSelection={0}
               maxSelection={3}
             />

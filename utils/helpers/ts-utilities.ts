@@ -14,3 +14,19 @@
 
 //   return isValidKeys && hasValidLength;
 // }
+
+export const getValueFromRecordByIndex = <T extends Record<string, any>>(
+  record: T,
+  index = 0
+): T[keyof T] => {
+  const keys = Object.keys(record);
+  return record[keys[index]];
+};
+
+export const getKeyFromRecordByIndex = <T extends Record<string, any>>(
+  record: T,
+  index = 0
+): keyof T => {
+  const keys = Object.keys(record);
+  return keys[index] as keyof T;
+};

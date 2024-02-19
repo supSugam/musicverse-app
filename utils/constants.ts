@@ -7,6 +7,8 @@ export const api = axios.create({
   baseURL: BASE_URL,
 });
 
+export const UPLOAD_KEY = 'uploadKey' as const;
+
 export const USER_LIMITS = {
   getMaxTrackSize: (role?: UserRole) =>
     role === UserRole.ARTIST || role === UserRole.MEMBER

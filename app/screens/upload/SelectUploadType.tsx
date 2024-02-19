@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Container from '@/components/Container';
 import StyledText from '@/components/reusables/StyledText';
 import { FontAwesome6, Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -34,6 +34,15 @@ const SelectUploadType = ({ navigation }: { navigation: any }) => {
     }
     setLoading(false);
   };
+  useEffect(() => {
+    if (uploadType === 'album' && album?.tracks?.length) {
+      navigation.navigate('TracksUploadZone');
+      toastResponseMessage({
+        content: 'Continue where you left off',
+        type: 'success',
+      });
+    }
+  }, []);
 
   return (
     <Container includeNavBar navbarTitle="Upload">

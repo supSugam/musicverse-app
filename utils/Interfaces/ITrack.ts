@@ -15,4 +15,5 @@ export interface ITrack {
   trackSize: string; // in bytes
   genreId: string;
   tags?: string[];
+  uploadKey: string;
 }

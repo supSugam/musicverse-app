@@ -14,12 +14,7 @@ import {
 
 interface IProfileQuery {
   // get: UseQueryResult<AxiosResponse<any, any>, Error>;
-  create: UseMutationResult<
-    AxiosResponse<any, any>,
-    Error,
-    ICreateAlbumPayload,
-    unknown
-  >;
+  create: UseMutationResult<AxiosResponse<any, any>, Error, FormData, unknown>;
   update: UseMutationResult<
     AxiosResponse<any, any>,
     Error,
@@ -34,8 +29,13 @@ export const useAlbumQuery = (): IProfileQuery => {
 
   const create = useMutation({
     mutationKey: albumKeyFactory.createAlbum(),
-    mutationFn: async (data: ICreateAlbumPayload) =>
-      await api.post('/albums', data),
+    mutationFn: async (data: FormData) => {
+      return await api.post('/albums', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    },
     onSuccess: (data) => {
       console.log('hook success');
       queryClient.invalidateQueries({

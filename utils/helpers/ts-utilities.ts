@@ -30,3 +30,27 @@ export const getKeyFromRecordByIndex = <T extends Record<string, any>>(
   const keys = Object.keys(record);
   return keys[index] as keyof T;
 };
+
+const stringifyValue = (value: any) => {
+  if (!value) return value;
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  return value.toString();
+};
+
+export const getObjectAsFormData = <T extends Object>(data: T): FormData => {
+  const formData = new FormData();
+  for (const key in data) {
+    const value = data[key];
+    if (Array.isArray(value)) {
+      value.forEach((item: any, index: number) => {
+        formData.append(`${key}[${index}]`, stringifyValue(item));
+      });
+    } else {
+      formData.append(key, stringifyValue(value));
+    }
+  }
+  return formData;
+};

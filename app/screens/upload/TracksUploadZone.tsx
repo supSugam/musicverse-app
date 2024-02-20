@@ -24,7 +24,10 @@ import { useAlbumQuery } from '@/hooks/react-query/useAlbumQuery';
 import { ICreateAlbumPayload } from '@/utils/Interfaces/IAlbum';
 import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 import { uuid } from '@/utils/constants';
-import { getValueFromRecordByIndex } from '@/utils/helpers/ts-utilities';
+import {
+  getObjectAsFormData,
+  getValueFromRecordByIndex,
+} from '@/utils/helpers/ts-utilities';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -69,9 +72,17 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           return;
         }
         const { tracks, ...rest } = album;
-        await createAlbum.mutateAsync(rest as ICreateAlbumPayload, {
+
+        const formData = getObjectAsFormData<ICreateAlbumPayload>(
+          rest as ICreateAlbumPayload
+        );
+        await createAlbum.mutateAsync(formData, {
           onSuccess: (data) => {
             console.log('Album created', data.data);
+            toastResponseMessage({
+              content: 'Album Created, Uploading tracks now...',
+              type: 'success',
+            });
           },
         });
         // await uploadTracks();

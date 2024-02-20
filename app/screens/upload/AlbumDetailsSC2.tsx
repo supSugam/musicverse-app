@@ -10,6 +10,7 @@ import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTagsQuery } from '@/hooks/react-query/useTagsQuery';
 import { toastResponseMessage } from '@/utils/toast';
 import Switch from '@/components/reusables/StyledSwitch';
+import { ReviewStatus } from '@/utils/enums/ReviewStatus';
 const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
   const { album, setAlbum } = useUploadStore((state) => state);
 
@@ -40,7 +41,6 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
 
   const handleSubmit = () => {
     setLoading(true);
-    console.log(album?.title, 'album');
     if (!album?.title) {
       toastResponseMessage({
         type: 'error',
@@ -73,6 +73,9 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
       ...album,
       ...(selectedGenre.length > 0 && { genreId: genre }),
       ...(selectedTags.length > 0 && { tags: selectedTags }),
+      publicStatus: requestPublicUpload
+        ? ReviewStatus.REQUESTED
+        : ReviewStatus.NOT_REQUESTED,
     });
     setLoading(false);
     navigation.navigate('TracksUploadZone');

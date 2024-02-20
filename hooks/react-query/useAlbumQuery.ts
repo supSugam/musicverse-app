@@ -37,7 +37,7 @@ export const useAlbumQuery = (): IProfileQuery => {
     mutationFn: async (data: ICreateAlbumPayload) =>
       await api.post('/albums', data),
     onSuccess: (data) => {
-      console.log(data);
+      console.log('hook success');
       queryClient.invalidateQueries({
         queryKey: albumKeyFactory.createAlbum(),
       });
@@ -62,7 +62,6 @@ export const useAlbumQuery = (): IProfileQuery => {
     mutationFn: async (data: IUpdateAlbumPayload) =>
       await api.patch('/albums', data),
     onSuccess: (data) => {
-      console.log(data);
       queryClient.invalidateQueries({
         queryKey: albumKeyFactory.updateAlbum(''), // TODO: add album id
       });
@@ -70,14 +69,12 @@ export const useAlbumQuery = (): IProfileQuery => {
         content: 'Album Updated',
         type: 'success',
       });
-      return data;
     },
     onError: (error) => {
       toastResponseMessage({
         content: error,
         type: 'error',
       });
-      return error;
     },
   });
 

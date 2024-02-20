@@ -146,9 +146,7 @@ const TrackDetailsModal = ({
           lyrics = await FileSystem.readAsStringAsync(lyricsSource.uri, {
             encoding: FileSystem.EncodingType.UTF8,
           });
-        } catch (error) {
-          console.error('Error reading file:', error);
-        }
+        } catch (error) {}
       }
 
       const chosenTags = tags
@@ -180,7 +178,6 @@ const TrackDetailsModal = ({
         uploadKey: uuid(),
       };
 
-      console.log('track lyrics', lyrics);
       // TODO: Every song shall have same genre and tags as the album
 
       if (uploadType === 'album') {
@@ -277,7 +274,6 @@ const TrackDetailsModal = ({
                   const file = await pickAssets({
                     maxFileSize: USER_LIMITS.getMaxTrackSize(currentUser?.role),
                   });
-                  console.log(file?.[0].file);
                   setTrackSource(file?.[0] ?? null);
                 }}
                 caption="Select your track"

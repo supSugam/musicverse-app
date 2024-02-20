@@ -68,8 +68,13 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           });
           return;
         }
-        const { tracks, cover, ...rest } = album;
-        await uploadTracks();
+        const { tracks, ...rest } = album;
+        await createAlbum.mutateAsync(rest as ICreateAlbumPayload, {
+          onSuccess: (data) => {
+            console.log('Album created', data.data);
+          },
+        });
+        // await uploadTracks();
         break;
 
       case 'single':

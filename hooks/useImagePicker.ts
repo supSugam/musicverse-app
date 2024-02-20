@@ -43,8 +43,6 @@ export const useImagePicker = ({
       allowsMultipleSelection: selectionLimit > 1,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
       setImage(result.assets);
     }

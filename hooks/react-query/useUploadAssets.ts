@@ -161,7 +161,6 @@ const useUploadAssets = ({
       setProgressDetails(InitialProgressDetails);
       if (axios.isCancel(error)) {
         onUploadCancel?.();
-        console.log('Request canceled', error.message);
       } else {
         onUploadError?.(error);
       }

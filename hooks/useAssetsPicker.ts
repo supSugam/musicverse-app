@@ -73,11 +73,9 @@ export const useAssetsPicker = () => {
 
         return assetsWithDuration;
       } else {
-        console.log('Document picking cancelled');
         return null;
       }
     } catch (error) {
-      console.error('Error picking document:', error);
       toastResponseMessage({
         content: 'Error picking document',
         type: 'error',

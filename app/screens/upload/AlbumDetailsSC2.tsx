@@ -1,11 +1,10 @@
 import { View } from 'react-native';
-import { useEffect, useState } from 'react';
-import Container from '@/components/Container';
+import { useState } from 'react';
 import StyledText from '@/components/reusables/StyledText';
 import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 
-import useDatePicker from '@/hooks/useDatePicker';
+// import useDatePicker from '@/hooks/useDatePicker';
 import SelectOption from '@/components/reusables/SelectOption';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTagsQuery } from '@/hooks/react-query/useTagsQuery';
@@ -18,13 +17,13 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
   const [requestPublicUpload, setRequestPublicUpload] =
     useState<boolean>(false);
 
-  const {
-    date,
-    showDatePicker,
-    hideDatePicker,
-    renderDatePicker,
-    formattedDate,
-  } = useDatePicker();
+  // const {
+  //   date,
+  //   showDatePicker,
+  //   hideDatePicker,
+  //   renderDatePicker,
+  //   formattedDate,
+  // } = useDatePicker();
 
   const [selectedGenre, setSelectedGenre] = useState<string[]>([]);
   const onSelectedGenreChange = (selected: string[]) => {
@@ -41,15 +40,25 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
 
   const handleSubmit = () => {
     setLoading(true);
-
-    if (!date) {
+    console.log(album?.title, 'album');
+    if (!album?.title) {
       toastResponseMessage({
         type: 'error',
-        content: 'Please select a date of release',
+        content: 'Please fill in required details first',
       });
+      navigation.navigate('AlbumDetailsSC1');
       setLoading(false);
       return;
     }
+
+    // if (!date) {
+    //   toastResponseMessage({
+    //     type: 'error',
+    //     content: 'Please select a date of release',
+    //   });
+    //   setLoading(false);
+    //   return;
+    // }
     if (selectedGenre.length === 0) {
       toastResponseMessage({
         type: 'error',
@@ -85,8 +94,8 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
         </StyledText>
       </View>
 
-      <View className="flex flex-col px-4 mt-4 w-full">
-        <StyledText
+      <View className="flex flex-col px-4 mt-6 w-full">
+        {/* <StyledText
           weight="bold"
           size="lg"
           className="border-b w-full text-center my-3 pb-2"
@@ -96,9 +105,9 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
           }}
         >
           {`Date of Release: ${formattedDate}`}
-        </StyledText>
+        </StyledText> */}
 
-        {renderDatePicker()}
+        {/* {renderDatePicker()} */}
 
         <SelectOption
           options={genres.map((genre) => genre.name)}

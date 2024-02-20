@@ -6,7 +6,7 @@ import { IFilePayload } from './IFilePayload';
 export interface IAlbum {
   title: string;
   description?: string;
-  cover?: ImageWithRotation;
+  cover?: IFilePayload;
   genreId: string;
   tracks: ITrack[];
   tags?: string[];

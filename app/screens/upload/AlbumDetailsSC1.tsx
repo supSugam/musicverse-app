@@ -27,12 +27,12 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
 
   const handlePress = (data: any) => {
     setLoading(true);
-    // const coverFile = imageAssetToFile(image?.[0]);
-    // setAlbum({
-    //   title: data.title,
-    //   description: data.description,
-    //   ...(coverFile && { cover: coverFile }),
-    // });
+    const coverFile = imageAssetToFile(image?.[0]);
+    setAlbum({
+      title: data.title,
+      description: data.description,
+      ...(coverFile && { cover: coverFile }),
+    });
     setLoading(false);
     navigation.navigate('AlbumDetailsSC2');
   };
@@ -78,6 +78,7 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           textSize="xl"
           textAlign="center"
           errorMessage={errors.title?.message}
+          autoCapitalize="words"
           wrapperClassName="my-2 mb-8"
         />
         <ImageDisplay
@@ -102,6 +103,7 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           wrapperClassName="my-2 mt-8"
           backgroundColor="transparent"
           borderColor="#ffffff60"
+          autoCapitalize="sentences"
         />
       </View>
 

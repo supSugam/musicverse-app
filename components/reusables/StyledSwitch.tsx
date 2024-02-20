@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   Easing,
+  withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import StyledText from './StyledText';
@@ -35,9 +36,11 @@ const Switch: React.FC<SwitchProps> = ({
   };
 
   const thumbStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
+    transform: [
+      { translateX: translateX.value },
+      { scale: withSpring(value ? 0.9 : 1) }, // Scale down when active
+    ],
   }));
-
   const switchContainerStyle = StyleSheet.flatten([
     styles.switchContainer,
     position === 'start' && styles.alignStart,
@@ -45,8 +48,14 @@ const Switch: React.FC<SwitchProps> = ({
     label !== undefined && { marginLeft: 8 },
   ]);
 
+  const leaveAnimation = () => {
+    translateX.value = withTiming(0, { duration: 250 });
+  };
   return (
-    <TouchableWithoutFeedback onPress={toggleSwitch}>
+    <TouchableWithoutFeedback
+      onPress={toggleSwitch}
+      onPressOut={leaveAnimation}
+    >
       <View {...rest} style={[styles.container, rest.style]}>
         {label && (
           <>

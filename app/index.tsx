@@ -1,17 +1,14 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View } from 'react-native';
-import { StyleSheet } from 'react-native';
 import Welcome from './screens/get-started/Welcome';
-import COLORS from '@/constants/Colors';
-import { StatusBar } from 'expo-status-bar';
-import Container from '@/components/Container';
 import Register from './screens/get-started/Register';
 import OTPVerification from './screens/get-started/OTPVerification';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import TabsLayout from './(tabs)/_layout';
 import Login from './screens/Login';
-
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
 
 export default function index() {

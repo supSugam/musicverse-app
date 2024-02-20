@@ -50,7 +50,8 @@ const schema = yup.object().shape({
   description: yup
     .string()
     .nullable()
-    .min(20, 'No Description or must be atleast 20 characters'),
+    .min(20, 'No Description or must be atleast 20 characters')
+    .transform((value, originalValue) => (originalValue === '' ? null : value)),
   lyrics: yup.string().nullable(),
 });
 
@@ -364,6 +365,7 @@ const TrackDetailsModal = ({
                 wrapperClassName="my-2 mt-4"
                 borderColor={COLORS.neutral.normal}
                 backgroundColor="transparent"
+                autoCapitalize="sentences"
               />
             )}
             {USER_PERMISSIONS.canPublicUpload(
@@ -388,6 +390,7 @@ const TrackDetailsModal = ({
               textAlign="center"
               textSize="xl"
               fontWeight="bold"
+              autoCapitalize="words"
             />
             <StyledTextField
               variant="default"
@@ -404,6 +407,7 @@ const TrackDetailsModal = ({
               wrapperClassName="my-2"
               backgroundColor="transparent"
               borderColor={COLORS.neutral.normal}
+              autoCapitalize="sentences"
             />
             <ImageDisplay
               source={cover?.[0].uri}

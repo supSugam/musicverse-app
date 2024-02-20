@@ -100,9 +100,7 @@ const AudioDetailsCard = ({
             )}
           </View>
         </View>
-        {uploadProgress !== undefined && uploading && (
-          <ProgressBar progress={uploadProgress} />
-        )}
+        <ProgressBar progress={uploadProgress || 0} />
       </TouchableOpacity>
     </>
   );

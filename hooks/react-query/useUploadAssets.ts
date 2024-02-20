@@ -150,7 +150,6 @@ const useUploadAssets = ({
         console.log(response.data);
         return response.data;
       } catch (error) {
-        console.log(error, 'try catch wala error');
         setProgressDetails((prev) => ({
           ...prev,
           [uploadKey]: { progress: 0, isUploading: false },

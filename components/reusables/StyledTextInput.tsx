@@ -52,7 +52,7 @@ export default function StyledTextField({
   });
 
   useEffect(() => {
-    errorMessageHeight.value = withTiming(errorMessage ? 30 : 0);
+    errorMessageHeight.value = withTiming(errorMessage ? 35 : 0);
   }, [errorMessage]);
 
   return (
@@ -90,7 +90,7 @@ export default function StyledTextField({
                 onBlur();
                 setBorderOpacity(40);
               }}
-              onChangeText={onChange}
+              onChangeText={(text) => onChange(text)}
               value={value}
               placeholderTextColor={'#ffffff80'}
               className={`text-${textSize} font-${fontWeight} text-${textAlign} text-white rounded-md p-3 px-4 w-full placeholder:white placeholder-opacity-50`}

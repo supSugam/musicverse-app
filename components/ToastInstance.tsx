@@ -67,7 +67,8 @@ const ToastInstance = () => {
               size="lg"
               tracking="tighter"
               weight="semibold"
-              className="text-ellipsis line-clamp-1 leading-tighter"
+              // numberOfLines={1}//TODO: Add this prop
+              className="text-ellipsis leading-tighter"
             >
               {text1 || text2 || 'No Message was passed.'}
             </StyledText>

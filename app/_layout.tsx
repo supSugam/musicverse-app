@@ -65,7 +65,7 @@ function RootLayoutNav() {
             gestureEnabled: true,
           }}
         />
-        <StatusBar style="light" backgroundColor="#171717" />
+        <StatusBar style="light" />
       </QueryClientProvider>
       <ToastInstance />
     </ThemeProvider>

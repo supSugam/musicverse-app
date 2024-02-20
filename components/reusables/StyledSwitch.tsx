@@ -5,7 +5,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  Easing,
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,6 +25,7 @@ const Switch: React.FC<SwitchProps> = ({
   ...rest
 }) => {
   const translateX = useSharedValue(value ? 30 : 0);
+  const scale = useSharedValue(1);
 
   const toggleSwitch = () => {
     onToggle(!value);
@@ -36,11 +36,13 @@ const Switch: React.FC<SwitchProps> = ({
   };
 
   const thumbStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { scale: withSpring(value ? 0.9 : 1) }, // Scale down when active
-    ],
+    transform: [{ translateX: translateX.value }],
   }));
+
+  const scaleStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   const switchContainerStyle = StyleSheet.flatten([
     styles.switchContainer,
     position === 'start' && styles.alignStart,
@@ -50,13 +52,19 @@ const Switch: React.FC<SwitchProps> = ({
 
   const leaveAnimation = () => {
     translateX.value = withTiming(0, { duration: 250 });
+    scale.value = withTiming(1, { duration: 250 });
   };
+
   return (
     <TouchableWithoutFeedback
       onPress={toggleSwitch}
+      onPressIn={() => (scale.value = withTiming(0.95, { duration: 500 }))}
       onPressOut={leaveAnimation}
     >
-      <View {...rest} style={[styles.container, rest.style]}>
+      <Animated.View
+        {...rest}
+        style={[styles.container, rest.style, scaleStyle]}
+      >
         {label && (
           <>
             {typeof label === 'string' ? (
@@ -86,7 +94,7 @@ const Switch: React.FC<SwitchProps> = ({
             <Animated.View style={[styles.thumb, thumbStyle]} />
           </LinearGradient>
         </View>
-      </View>
+      </Animated.View>
     </TouchableWithoutFeedback>
   );
 };

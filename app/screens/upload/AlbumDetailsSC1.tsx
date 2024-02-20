@@ -1,6 +1,5 @@
 import { ScrollView, View } from 'react-native';
 import React, { useState } from 'react';
-import Container from '@/components/Container';
 import StyledText from '@/components/reusables/StyledText';
 import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
@@ -10,14 +9,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useImagePicker } from '@/hooks/useImagePicker';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
-import { toastResponseMessage } from '@/utils/toast';
 import { imageAssetToFile } from '@/utils/helpers/file';
 const schema = yup.object().shape({
   title: yup.string().required('Album Name is Required'),
   description: yup
     .string()
     .nullable()
-    .min(50, 'Description must be at least 50 characters')
+    .min(10, 'Description must be at least 10 characters')
     .transform((value, originalValue) => (originalValue === '' ? null : value)),
 });
 const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {

@@ -33,6 +33,10 @@ const COLORS = {
   gradient: {
     primary: ['#b11fc8', '#5b21b6'],
   },
+  green: {
+    light: '#22c55e',
+    dark: '#14532d',
+  },
 };
 
 export default COLORS;

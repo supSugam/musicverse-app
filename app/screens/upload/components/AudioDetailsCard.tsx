@@ -67,7 +67,17 @@ const AudioDetailsCard = ({
         ]}
         disabled={uploadStatus === UploadStatus.UPLOADING}
       >
-        <View style={styles.detailsWrapper}>
+        <View
+          style={[
+            styles.detailsWrapper,
+            uploadStatus === UploadStatus.FAILED ||
+            uploadStatus === UploadStatus.CANCELLED
+              ? styles.error
+              : uploadStatus === UploadStatus.SUCCESS
+              ? styles.success
+              : {},
+          ]}
+        >
           <MaterialIcons name={icon} size={30} color={COLORS.neutral.normal} />
           <View className="flex flex-col ml-2 items-start justify-center flex-1">
             <StyledText
@@ -128,6 +138,12 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 10,
     width: '100%',
+  },
+  error: {
+    borderColor: COLORS.red.light,
+  },
+  success: {
+    borderColor: COLORS.green.light,
   },
   detailsWrapper: {
     width: '100%',

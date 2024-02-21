@@ -177,9 +177,9 @@ const TrackDetailsModal = ({
         publicStatus: requestPublicUpload
           ? ReviewStatus.REQUESTED
           : ReviewStatus.NOT_REQUESTED,
-        trackDuration: trackSource.duration?.toString() || '0',
-        trackSize: trackSource.size?.toString() || '0',
-        previewDuration: trackPreview?.duration?.toString() || '0',
+        trackDuration: trackSource.duration || 0,
+        trackSize: trackSource.size || 0,
+        previewDuration: trackPreview?.duration || 0,
         cover: originalFile,
         uploadKey: uuid(),
       };

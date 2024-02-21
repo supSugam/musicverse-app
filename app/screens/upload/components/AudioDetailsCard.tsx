@@ -6,6 +6,7 @@ import StyledText from '@/components/reusables/StyledText';
 import ReusableAlert from '@/components/reusables/ReusableAlert';
 import ProgressBar from '@/components/reusables/ProgressBar';
 import { GLOBAL_STYLES } from '@/utils/constants';
+import { UploadStatus } from '@/utils/enums/IUploadStatus';
 
 export interface IAudioDetailsCardProps {
   title: string;
@@ -16,7 +17,7 @@ export interface IAudioDetailsCardProps {
   onEdit?: () => void;
   icon?: keyof typeof MaterialIcons.glyphMap;
   uploadProgress?: number;
-  uploading?: boolean;
+  uploadStatus?: UploadStatus;
   alwaysShowProgressBar?: boolean;
 }
 const AudioDetailsCard = ({
@@ -28,7 +29,7 @@ const AudioDetailsCard = ({
   onEdit,
   icon = 'audio-file',
   uploadProgress,
-  uploading = false,
+  uploadStatus,
   alwaysShowProgressBar = false,
 }: IAudioDetailsCardProps) => {
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
@@ -58,8 +59,13 @@ const AudioDetailsCard = ({
       )}
       <TouchableOpacity
         activeOpacity={0.8}
-        style={[styles.cardRoot, GLOBAL_STYLES.getDisabledStyles(uploading)]}
-        disabled={uploading}
+        style={[
+          styles.cardRoot,
+          GLOBAL_STYLES.getDisabledStyles(
+            uploadStatus === UploadStatus.UPLOADING
+          ),
+        ]}
+        disabled={uploadStatus === UploadStatus.UPLOADING}
       >
         <View style={styles.detailsWrapper}>
           <MaterialIcons name={icon} size={30} color={COLORS.neutral.normal} />
@@ -103,9 +109,10 @@ const AudioDetailsCard = ({
           </View>
         </View>
         {alwaysShowProgressBar ||
-          (uploading && uploadProgress !== undefined && (
-            <ProgressBar progress={uploadProgress || 0} />
-          ))}
+          (uploadStatus === UploadStatus.UPLOADING &&
+            uploadProgress !== undefined && (
+              <ProgressBar progress={uploadProgress || 0} />
+            ))}
       </TouchableOpacity>
     </>
   );

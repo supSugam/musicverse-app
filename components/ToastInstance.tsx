@@ -47,6 +47,8 @@ const ToastInstance = () => {
               tracking="tighter"
               weight="semibold"
               className="text-ellipsis leading-tighter"
+              numberOfLines={3}
+              ellipsizeMode="tail"
             >
               {text1 || text2 || 'No Message was passed.'}
             </StyledText>
@@ -67,7 +69,8 @@ const ToastInstance = () => {
               size="lg"
               tracking="tighter"
               weight="semibold"
-              // numberOfLines={1}//TODO: Add this prop
+              numberOfLines={3}
+              ellipsizeMode="tail"
               className="text-ellipsis leading-tighter"
             >
               {text1 || text2 || 'No Message was passed.'}

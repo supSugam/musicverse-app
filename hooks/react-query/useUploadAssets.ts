@@ -10,6 +10,7 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 import { AssetWithDuration } from '../useAssetsPicker';
 import { toastResponseMessage } from '@/utils/toast';
+import { UploadStatus } from '@/utils/enums/IUploadStatus';
 
 type Payload = {
   [key: string]: any;
@@ -32,7 +33,7 @@ type ProgressDetails = Record<
   string,
   {
     progress: number;
-    isUploading: boolean;
+    uploadStatus: UploadStatus;
   }
 >;
 
@@ -49,13 +50,23 @@ const useUploadAssets = ({
 }: UploadOptions) => {
   const { api } = useAuthStore((state) => state);
 
+  const resetUploadStatus = (uploadStatus: UploadStatus) => {
+    setProgressDetails((prev) => {
+      const newProgressDetails = { ...prev };
+      for (const key in newProgressDetails) {
+        newProgressDetails[key] = { progress: 0, uploadStatus };
+      }
+      return newProgressDetails;
+    });
+  };
+
   const InitialProgressDetails = useMemo(() => {
     const progressDetails: ProgressDetails = {};
     if (!payload) return progressDetails;
     payload?.forEach((item: Payload, index: number) => {
       progressDetails[item.uploadKey] = {
         progress: 0,
-        isUploading: false,
+        uploadStatus: UploadStatus.QUEUED,
       };
     });
     return progressDetails;
@@ -141,7 +152,7 @@ const useUploadAssets = ({
 
             setProgressDetails((prev) => ({
               ...prev,
-              [uploadKey]: { progress, isUploading: true },
+              [uploadKey]: { progress, uploadStatus: UploadStatus.UPLOADING },
             }));
           },
         };
@@ -152,13 +163,13 @@ const useUploadAssets = ({
       } catch (error) {
         setProgressDetails((prev) => ({
           ...prev,
-          [uploadKey]: { progress: 0, isUploading: false },
+          [uploadKey]: { progress: 0, uploadStatus: UploadStatus.FAILED },
         }));
         throw error;
       }
     },
     onError: (error: AxiosError) => {
-      setProgressDetails(InitialProgressDetails);
+      resetUploadStatus(UploadStatus.FAILED);
       if (axios.isCancel(error)) {
         onUploadCancel?.();
       } else {
@@ -166,7 +177,7 @@ const useUploadAssets = ({
       }
     },
     onSuccess: (data) => {
-      setProgressDetails(InitialProgressDetails);
+      resetUploadStatus(UploadStatus.SUCCESS);
       onUploadSuccess?.(data);
     },
   });

@@ -28,6 +28,7 @@ import {
   getObjectAsFormData,
   getValueFromRecordByIndex,
 } from '@/utils/helpers/ts-utilities';
+import { UploadStatus } from '@/utils/enums/IUploadStatus';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -84,7 +85,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   useEffect(() => {
     const isUploading = Object.values(progressDetails).some(
-      (upload) => upload.isUploading
+      (upload) => upload.uploadStatus === UploadStatus.UPLOADING
     );
     setIsUploading(isUploading);
   }, [progressDetails]);
@@ -271,9 +272,9 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         {!isUploadTypeSingle &&
           album?.tracks?.length &&
           album?.tracks?.map((track) => {
-            const { progress, isUploading } = progressDetails?.[
+            const { progress, uploadStatus } = progressDetails?.[
               track.uploadKey
-            ] || { progress: 0, isUploading: false };
+            ] || { progress: 0, uploadStatus: UploadStatus.QUEUED };
             return (
               <AudioDetailsCard
                 key={track.uploadKey}
@@ -290,7 +291,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
                   removeTrackFromAlbum(track.title);
                 }}
                 uploadProgress={progress}
-                uploading={isUploading}
+                uploadStatus={uploadStatus}
               />
             );
           })}
@@ -311,8 +312,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             uploadProgress={
               getValueFromRecordByIndex(progressDetails, 0)?.progress
             }
-            uploading={
-              getValueFromRecordByIndex(progressDetails, 0)?.isUploading
+            uploadStatus={
+              getValueFromRecordByIndex(progressDetails, 0)?.uploadStatus
             }
           />
         )}

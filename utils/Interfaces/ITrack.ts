@@ -10,9 +10,9 @@ export interface ITrack {
   cover?: ImagePickerAsset;
   lyrics?: string;
   publicStatus?: ReviewStatus;
-  trackDuration: string; // in seconds
-  previewDuration: string;
-  trackSize: string; // in bytes
+  trackDuration: number; // in seconds
+  previewDuration: number;
+  trackSize: number; // in bytes
   genreId: string;
   tags?: string[];
   uploadKey: string;

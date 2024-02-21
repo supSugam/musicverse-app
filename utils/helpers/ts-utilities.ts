@@ -35,7 +35,7 @@ const stringifyValue = (value: any) => {
   if (!value) return value;
 
   if (typeof value === 'object') {
-    return JSON.stringify(value);
+    return value;
   }
   return value.toString();
 };

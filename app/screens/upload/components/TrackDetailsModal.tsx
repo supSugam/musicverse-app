@@ -66,8 +66,14 @@ const TrackDetailsModal = ({
   visible,
   onClose,
 }: TrackDetailsModalProps) => {
-  const { uploadType, album, addTrackToAlbum, setTrack, track } =
-    useUploadStore((state) => state);
+  const {
+    uploadType,
+    album,
+    addTrackToAlbum,
+    setTrack,
+    track,
+    removeTrackFromAlbum,
+  } = useUploadStore((state) => state);
   const { currentUser } = useAuthStore((state) => state);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedGenre, setSelectedGenre] = useState<string[]>([]);

@@ -34,3 +34,12 @@ export const GLOBAL_STYLES = {
   }),
 };
 export const uuid = () => v4();
+
+export const ALLOWED_IMAGE_MIMETYPES = ['image/png', 'image/jpg', 'image/jpeg'];
+export const ALLOWED_AUDIO_MIMETYPES = [
+  'audio/wav',
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/x-wav',
+  'audio/wave',
+];

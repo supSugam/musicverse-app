@@ -5,7 +5,6 @@ import COLORS from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
-import { useEffect } from 'react';
 
 const Tab = createBottomTabNavigator();
 
@@ -31,11 +30,11 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 
   Animated.parallel([
     Animated.spring(scale, {
-      toValue: focused ? 1.2 : 1,
+      toValue: focused ? 1.3 : 1,
       useNativeDriver: true,
     }),
     Animated.spring(translateY, {
-      toValue: focused ? -10 : 0,
+      toValue: focused ? -5 : 0,
       useNativeDriver: true,
     }),
   ]).start();

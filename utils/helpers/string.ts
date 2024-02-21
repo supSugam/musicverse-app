@@ -1,4 +1,4 @@
-function splitStringFromLastDot(
+export function splitStringFromLastDot(
   inputString: string
 ): [string, string | undefined] {
   const lastDotIndex = inputString.lastIndexOf('.');

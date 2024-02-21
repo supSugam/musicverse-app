@@ -23,7 +23,7 @@ type UploadOptions = {
   payload?: Payload[] | null;
   onUploadStart?: () => void;
   onUploadProgress?: (progress: number) => void;
-  onUploadComplete?: () => void;
+  onUploadSuccess?: (data: any) => void;
   onUploadError?: (error: any) => void;
   onUploadCancel?: () => void;
 };
@@ -42,7 +42,7 @@ const useUploadAssets = ({
   multiple = false,
   payload,
   onUploadCancel,
-  onUploadComplete,
+  onUploadSuccess,
   onUploadError,
   onUploadProgress,
   onUploadStart,
@@ -165,14 +165,13 @@ const useUploadAssets = ({
         onUploadError?.(error);
       }
     },
-    onSettled: () => {},
-    onSuccess: () => {
+    onSuccess: (data) => {
       setProgressDetails(InitialProgressDetails);
-      onUploadComplete?.();
+      onUploadSuccess?.(data);
     },
   });
 
-  const uploadTracks = async (payloadData?: Payload[]) => {
+  const uploadAssets = async (payloadData?: Payload[]) => {
     // payload example [{file: 'file'}, {file: 'file'}]
 
     if (!payload && !payloadData) {
@@ -202,7 +201,7 @@ const useUploadAssets = ({
 
   return {
     progressDetails,
-    uploadTracks,
+    uploadAssets,
     cancelUpload,
   };
 };

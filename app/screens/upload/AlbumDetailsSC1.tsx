@@ -10,6 +10,7 @@ import * as yup from 'yup';
 import { useImagePicker } from '@/hooks/useImagePicker';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { imageAssetToFile } from '@/utils/helpers/file';
+import { getAssetInfoAsync } from 'expo-media-library';
 const schema = yup.object().shape({
   title: yup.string().required('Album Name is Required'),
   description: yup
@@ -23,9 +24,15 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handlePress = (data: any) => {
+  const handlePress = async (data: any) => {
     setLoading(true);
     const coverFile = imageAssetToFile(image?.[0]);
+    console.log('coverFile (before)', image?.[0]);
+    console.log('coverFile (after)', coverFile);
+    console.log('-----------------------------------');
+    const fileInfo = await getAssetInfoAsync(coverFile.uri);
+    // console.log('fileInfo', fileInfo);
+    console.log('-----------------------------------');
     setAlbum({
       title: data.title,
       description: data.description,
@@ -35,9 +42,9 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
     navigation.navigate('AlbumDetailsSC2');
   };
 
-  const { pickImage, image } = useImagePicker({
+  const { pickImage, image, deleteAllImages, reselectImage } = useImagePicker({
     selectionLimit: 1,
-    allowsEditing: true,
+    allowsEditing: false,
   });
 
   const {
@@ -85,6 +92,8 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           width={164}
           height={164}
           onPress={pickImage}
+          onEdit={reselectImage}
+          onDelete={deleteAllImages}
         />
         <StyledTextField
           variant="default"

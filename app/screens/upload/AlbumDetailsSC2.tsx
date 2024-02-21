@@ -68,11 +68,14 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
       return;
     }
     const genre = genres.find((g) => g.name === selectedGenre[0])?.id;
+    const tagsToUpload = selectedTags.map(
+      (tag) => tags.find((t) => t.name === tag)?.id
+    );
 
     setAlbum({
       ...album,
       ...(selectedGenre.length > 0 && { genreId: genre }),
-      ...(selectedTags.length > 0 && { tags: selectedTags }),
+      ...(tagsToUpload.length > 0 && { tags: selectedTags }),
       publicStatus: requestPublicUpload
         ? ReviewStatus.REQUESTED
         : ReviewStatus.NOT_REQUESTED,

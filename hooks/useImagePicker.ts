@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { toastResponseMessage } from '@/utils/toast';
+import { ALLOWED_IMAGE_MIMETYPES } from '@/utils/constants';
 
 interface IImagePickerProps {
   allowsEditing?: boolean;
@@ -44,9 +45,41 @@ export const useImagePicker = ({
     });
 
     if (!result.canceled) {
+      if (
+        !result.assets.every((image) =>
+          ALLOWED_IMAGE_MIMETYPES.includes(image?.mimeType || '')
+        )
+      ) {
+        toastResponseMessage({
+          content: `Only png, jpg, jpeg images are allowed`,
+          type: 'error',
+        });
+        return;
+      }
       setImage(result.assets);
     }
   };
 
-  return { image, pickImage };
+  const deleteImageByIndex = (index: number) => {
+    if (image) {
+      const newImage = image.filter((_, i) => i !== index);
+      setImage(newImage);
+    }
+  };
+
+  const deleteAllImages = () => {
+    setImage(null);
+  };
+
+  const reselectImage = () => {
+    pickImage();
+  };
+
+  return {
+    image,
+    pickImage,
+    deleteImageByIndex,
+    deleteAllImages,
+    reselectImage,
+  };
 };

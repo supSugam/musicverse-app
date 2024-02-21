@@ -46,11 +46,39 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const { uploadTracks, progressDetails, cancelUpload } = useUploadAssets({
+  const {
+    uploadAssets: uploadTracks,
+    progressDetails,
+    cancelUpload,
+  } = useUploadAssets({
     endpoint: '/tracks',
     requestType: 'POST',
     payload: isUploadTypeSingle && track ? [track] : [...(album?.tracks || [])],
     multiple: !isUploadTypeSingle,
+    onUploadError(error) {
+      toastResponseMessage({
+        content: error,
+        type: 'error',
+      });
+      setLoading(false);
+    },
+    onUploadSuccess() {
+      toastResponseMessage({
+        content: 'Tracks uploaded successfully',
+        type: 'success',
+      });
+      setLoading(false);
+    },
+    onUploadStart() {
+      setLoading(true);
+    },
+    onUploadCancel() {
+      toastResponseMessage({
+        content: 'Upload cancelled',
+        type: 'error',
+      });
+      setLoading(false);
+    },
   });
   const { create: createAlbum } = useAlbumQuery();
 
@@ -77,15 +105,20 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           rest as ICreateAlbumPayload
         );
         await createAlbum.mutateAsync(formData, {
-          onSuccess: (data) => {
+          onSuccess: async (data) => {
             console.log('Album created', data.data);
             toastResponseMessage({
               content: 'Album Created, Uploading tracks now...',
               type: 'success',
             });
+            const albumTracksWithAlbumId = album?.tracks?.map((track) => ({
+              ...track,
+              albumId: data?.data?.result.id,
+            }));
+            await uploadTracks(albumTracksWithAlbumId);
           },
         });
-        // await uploadTracks();
+
         break;
 
       case 'single':

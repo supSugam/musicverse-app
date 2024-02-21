@@ -17,6 +17,7 @@ export interface IAudioDetailsCardProps {
   icon?: keyof typeof MaterialIcons.glyphMap;
   uploadProgress?: number;
   uploading?: boolean;
+  alwaysShowProgressBar?: boolean;
 }
 const AudioDetailsCard = ({
   title,
@@ -28,6 +29,7 @@ const AudioDetailsCard = ({
   icon = 'audio-file',
   uploadProgress,
   uploading = false,
+  alwaysShowProgressBar = false,
 }: IAudioDetailsCardProps) => {
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
 
@@ -100,7 +102,10 @@ const AudioDetailsCard = ({
             )}
           </View>
         </View>
-        <ProgressBar progress={uploadProgress || 0} />
+        {alwaysShowProgressBar ||
+          (uploading && uploadProgress !== undefined && (
+            <ProgressBar progress={uploadProgress || 0} />
+          ))}
       </TouchableOpacity>
     </>
   );

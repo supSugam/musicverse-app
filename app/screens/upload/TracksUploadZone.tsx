@@ -7,10 +7,8 @@ import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { UserRole } from '@/utils/enums/IUser';
-import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '@/constants/Colors';
 import TrackDetailsModal from './components/TrackDetailsModal';
-import { MaterialIcons } from '@expo/vector-icons';
 import AudioDetailsCard from './components/AudioDetailsCard';
 import {
   extractExtension,
@@ -22,13 +20,14 @@ import LottieView from 'lottie-react-native';
 import useUploadAssets from '@/hooks/react-query/useUploadAssets';
 import { useAlbumQuery } from '@/hooks/react-query/useAlbumQuery';
 import { ICreateAlbumPayload } from '@/utils/Interfaces/IAlbum';
-import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
-import { uuid } from '@/utils/constants';
+
 import {
   getObjectAsFormData,
   getValueFromRecordByIndex,
 } from '@/utils/helpers/ts-utilities';
 import { UploadStatus } from '@/utils/enums/IUploadStatus';
+import Animated from 'react-native-reanimated';
+import AddTrackButton from './components/AddTrackButton';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -100,6 +99,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           });
           return;
         }
+        setLoading(true);
         const { tracks, ...rest } = album;
 
         const formData = getObjectAsFormData<ICreateAlbumPayload>(
@@ -155,6 +155,21 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const onModalClose = () => {
     setTrackModalVisible(false);
   };
+
+  // Animations
+
+  useEffect(() => {
+    setLoading(true);
+    console.log(
+      'isUploading || loading) && (track || album?.tracks?.length',
+      album
+    );
+
+    console.log(
+      (isUploading || loading) &&
+        (track || album?.tracks?.length ? true : false)
+    );
+  }, []);
   return (
     <Container includeNavBar navbarTitle="Upload">
       <View className="flex justify-between items-center mt-12 px-6">
@@ -195,42 +210,16 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         />
       )}
 
-      <TouchableOpacity
-        onPress={onAddTrack}
-        activeOpacity={0.8}
-        style={{ marginVertical: 20 }}
-        className="mt-8 px-6"
-      >
-        <LinearGradient
-          colors={[
-            COLORS.neutral.black,
-            COLORS.neutral.dark,
-            COLORS.neutral.dense,
-          ]}
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            alignSelf: 'center',
-            borderWidth: 1,
-            borderColor: `${COLORS.neutral.light}60`,
-            borderRadius: 6,
-            padding: 20,
-            width: '100%',
-          }}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <MaterialIcons name="add-box" size={28} color="white" />
-          <StyledText size="2xl" weight="bold" className="text-center mt-3">
-            Add Track
-          </StyledText>
-          <StyledText size="sm" weight="medium" className="text-center mt-1">
-            {isUploadTypeSingle
-              ? 'Add your track to MusicVerse! You can only upload one track at a time.'
-              : 'Add multiple tracks to MusicVerse! You can only upload a maximum of 10 tracks for an album.'}
-          </StyledText>
-        </LinearGradient>
-      </TouchableOpacity>
+      <AddTrackButton
+        onAddTrack={onAddTrack}
+        isUploadTypeSingle={isUploadTypeSingle}
+        collapse={
+          (isUploading || loading) && (track || album?.tracks?.length)
+            ? true
+            : false
+        }
+      />
+
       <ScrollView
         contentContainerStyle={{
           flexDirection: 'column',
@@ -239,6 +228,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           padding: 10,
           backgroundColor: COLORS.neutral.dark,
           marginTop: 6,
+          height: '100%',
         }}
         showsVerticalScrollIndicator
         persistentScrollbar
@@ -253,18 +243,18 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               speed={0.5}
               style={{
                 width: '100%',
-                height: 125,
+                height: 140,
                 transform: [
                   {
-                    scale: 1.7,
+                    scale: 1.5,
                   },
                   {
-                    translateY: -10,
+                    translateY: -5,
                   },
                 ],
               }}
             />
-            <StyledText weight="bold" size="xl" className="text-center">
+            <StyledText weight="bold" size="xl" className="text-center mt-2">
               Waiting for tracks...
             </StyledText>
           </View>
@@ -292,6 +282,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
                 }}
                 uploadProgress={progress}
                 uploadStatus={uploadStatus}
+                alwaysShowProgressBar
               />
             );
           })}
@@ -302,6 +293,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             duration={formatDuration(track.src.duration, true)}
             extension={extractExtension(track.src.name)}
             onEdit={() => {}}
+            alwaysShowProgressBar
             onRemove={() => {
               toastResponseMessage({
                 content: 'Track removed successfully.',
@@ -318,7 +310,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           />
         )}
       </ScrollView>
-
       <View className="flex flex-col px-4 mt-4 w-full">
         {isUploading && (
           <StyledButton

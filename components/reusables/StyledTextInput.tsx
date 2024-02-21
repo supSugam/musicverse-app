@@ -84,7 +84,7 @@ export default function StyledTextField({
           rules={{
             ...(rules || {}),
           }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({ field: { onChange, onBlur, value, ref } }) => (
             <TextInput
               onBlur={() => {
                 onBlur();
@@ -97,6 +97,8 @@ export default function StyledTextField({
               autoCorrect={false}
               autoComplete="off"
               autoCapitalize="none"
+              onSubmitEditing={() => onBlur()}
+              blurOnSubmit
               onFocus={() => setBorderOpacity(100)}
               style={{
                 borderColor: errorMessage
@@ -110,6 +112,7 @@ export default function StyledTextField({
                 borderRightWidth: isUnderlined ? 0 : 1,
                 // TODO: Border optacity animation on blur and focus
               }}
+              ref={ref}
               {...rest}
             />
           )}

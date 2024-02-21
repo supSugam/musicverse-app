@@ -10,7 +10,7 @@ import * as yup from 'yup';
 import { useImagePicker } from '@/hooks/useImagePicker';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { imageAssetToFile } from '@/utils/helpers/file';
-import { getAssetInfoAsync } from 'expo-media-library';
+
 const schema = yup.object().shape({
   title: yup.string().required('Album Name is Required'),
   description: yup
@@ -27,12 +27,6 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
   const handlePress = async (data: any) => {
     setLoading(true);
     const coverFile = imageAssetToFile(image?.[0]);
-    console.log('coverFile (before)', image?.[0]);
-    console.log('coverFile (after)', coverFile);
-    console.log('-----------------------------------');
-    const fileInfo = await getAssetInfoAsync(coverFile.uri);
-    // console.log('fileInfo', fileInfo);
-    console.log('-----------------------------------');
     setAlbum({
       title: data.title,
       description: data.description,
@@ -50,6 +44,7 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
   const {
     control,
     handleSubmit,
+    setFocus,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),

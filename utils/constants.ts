@@ -30,7 +30,7 @@ export const USER_PERMISSIONS = {
 
 export const GLOBAL_STYLES = {
   getDisabledStyles: (disabled: boolean) => ({
-    opacity: disabled ? 0.5 : 1,
+    opacity: disabled ? 0.7 : 1,
   }),
 };
 export const uuid = () => v4();

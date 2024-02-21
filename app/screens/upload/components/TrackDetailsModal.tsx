@@ -41,7 +41,7 @@ import { UserRole } from '@/utils/enums/IUser';
 import { USER_LIMITS, USER_PERMISSIONS, uuid } from '@/utils/constants';
 import Switch from '@/components/reusables/StyledSwitch';
 import { ReviewStatus } from '@/utils/enums/ReviewStatus';
-import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
+
 const schema = yup.object().shape({
   title: yup
     .string()
@@ -84,7 +84,6 @@ const TrackDetailsModal = ({
   const onSelectedTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
   };
-  const [isTrackPublic, setIsTrackPublic] = useState<boolean>(true);
   const [is2ndStep, setIs2ndStep] = useState<boolean>(false);
   const [lyricsInputType, setLyricsInputType] = useState<
     'textfield' | 'textfile'
@@ -112,6 +111,7 @@ const TrackDetailsModal = ({
     handleSubmit,
     control,
     setValue,
+    setFocus,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -393,6 +393,9 @@ const TrackDetailsModal = ({
               textSize="xl"
               fontWeight="bold"
               autoCapitalize="words"
+              onBlur={() => {
+                setFocus('description');
+              }}
             />
             <StyledTextField
               variant="default"

@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.neutral.normal,
   },
   selectedOptionItem: {
-    backgroundColor: COLORS.neutral.normal,
+    backgroundColor: COLORS.neutral.semidark,
   },
   optionText: {
     fontWeight: 'normal',

@@ -28,6 +28,8 @@ import {
 import { UploadStatus } from '@/utils/enums/IUploadStatus';
 import Animated from 'react-native-reanimated';
 import AddTrackButton from './components/AddTrackButton';
+import { cleanObject } from '@/utils/helpers/Object';
+import { ITrack } from '@/utils/Interfaces/ITrack';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -100,7 +102,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           return;
         }
         setLoading(true);
-        const { tracks, ...rest } = album;
+        const { tracks, ...rest } = cleanObject(album);
 
         const formData = getObjectAsFormData<ICreateAlbumPayload>(
           rest as ICreateAlbumPayload
@@ -112,11 +114,15 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               content: 'Album Created, Uploading tracks now...',
               type: 'success',
             });
-            const albumTracksWithAlbumId = album?.tracks?.map((track) => ({
-              ...track,
-              albumId: data?.data?.result.id,
-            }));
+            const albumTracksWithAlbumId = tracks?.map((track) =>
+              cleanObject({ ...track, albumIds: [data.data.result.id] })
+            );
+            console.log('Album tracks with album id', albumTracksWithAlbumId);
             await uploadTracks(albumTracksWithAlbumId);
+          },
+
+          onError: () => {
+            setLoading(false);
           },
         });
 
@@ -156,31 +162,22 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
     setTrackModalVisible(false);
   };
 
-  // Animations
-
   useEffect(() => {
-    setLoading(true);
-    console.log(
-      'isUploading || loading) && (track || album?.tracks?.length',
-      album
-    );
+    console.log('Album', album);
+  }, [album?.tracks]);
 
-    console.log(
-      (isUploading || loading) &&
-        (track || album?.tracks?.length ? true : false)
-    );
-  }, []);
   return (
     <Container includeNavBar navbarTitle="Upload">
       <View className="flex justify-between items-center mt-12 px-6">
         <StyledText weight="bold" size="2xl">
-          {isUploadTypeSingle ? 'Upload your track here' : 'Upload tracks for'}{' '}
+          {isUploadTypeSingle ? 'Upload your track here' : 'Upload tracks for'}
           {!isUploadTypeSingle && (
             <StyledText
               weight="extrabold"
               size="2xl"
               className="text-purple-400"
             >
+              {' '}
               {album?.title}
             </StyledText>
           )}
@@ -259,9 +256,11 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             </StyledText>
           </View>
         )}
+
         {!isUploadTypeSingle &&
-          album?.tracks?.length &&
-          album?.tracks?.map((track) => {
+          album?.tracks &&
+          album.tracks.length > 0 &&
+          album.tracks.map((track) => {
             const { progress, uploadStatus } = progressDetails?.[
               track.uploadKey
             ] || { progress: 0, uploadStatus: UploadStatus.QUEUED };
@@ -288,6 +287,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           })}
         {isUploadTypeSingle && track && (
           <AudioDetailsCard
+            key={track.uploadKey}
             title={track.title}
             size={formatBytes(track.src.size)}
             duration={formatDuration(track.src.duration, true)}

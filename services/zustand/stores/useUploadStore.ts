@@ -99,21 +99,19 @@ export const useUploadStore = create<IUploadStore>(
 
     removeTrackFromAlbum: (trackTitle: string) => {
       set((state) => {
-        if (state.album && state.album.tracks) {
-          return {
-            album: {
-              ...state.album,
-              tracks: state.album.tracks.filter((t) => t.title !== trackTitle),
-            },
-          };
-        } else {
-          return {
-            album: {
-              ...state.album,
-              tracks: [],
-            },
-          };
+        if (!state.album) {
+          return state;
         }
+
+        const { album } = state;
+        const { tracks } = album;
+        if (tracks) {
+          const newTracks = tracks.filter(
+            (track) => track.title.toLowerCase() !== trackTitle.toLowerCase()
+          );
+          return { album: { ...album, tracks: newTracks } };
+        }
+        return state;
       });
     },
   })

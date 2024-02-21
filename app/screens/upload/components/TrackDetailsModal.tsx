@@ -41,6 +41,7 @@ import { UserRole } from '@/utils/enums/IUser';
 import { USER_LIMITS, USER_PERMISSIONS, uuid } from '@/utils/constants';
 import Switch from '@/components/reusables/StyledSwitch';
 import { ReviewStatus } from '@/utils/enums/ReviewStatus';
+import { cleanObject } from '@/utils/helpers/Object';
 
 const schema = yup.object().shape({
   title: yup
@@ -166,7 +167,7 @@ const TrackDetailsModal = ({
 
       const originalFile = cover?.[0];
 
-      const trackDetails: ITrack = {
+      const trackDetails: ITrack = cleanObject({
         title: data.title,
         description: data.description,
         lyrics,
@@ -182,7 +183,7 @@ const TrackDetailsModal = ({
         previewDuration: trackPreview?.duration || 0,
         cover: originalFile,
         uploadKey: uuid(),
-      };
+      });
 
       // TODO: Every song shall have same genre and tags as the album
 

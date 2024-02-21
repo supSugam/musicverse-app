@@ -29,14 +29,8 @@ export const getFileInfoFromUri = (uri: string): IFileInfoProps => {
 
 export const assetToFile = (
   asset?: AssetWithDuration | DocumentPickerAsset | null
-): IFilePayload => {
-  if (!asset) {
-    return {
-      uri: '',
-      type: '',
-      name: '',
-    };
-  }
+): IFilePayload | null => {
+  if (!asset) return null;
   const uri = asset.uri;
   const fileInfo = getFileInfoFromUri(uri);
   const type = asset.mimeType || asset.file?.type || '';
@@ -51,14 +45,9 @@ export const assetToFile = (
 
 export const imageAssetToFile = (
   asset?: ImagePickerAsset | ImageWithRotation | null
-): IFilePayload => {
-  if (!asset) {
-    return {
-      uri: '',
-      type: '',
-      name: '',
-    };
-  }
+): IFilePayload | null => {
+  if (!asset) return null;
+
   const fileInfo = getFileInfoFromUri(asset.uri);
   const uri = asset.uri;
   const type = asset.mimeType || asset.type || '';

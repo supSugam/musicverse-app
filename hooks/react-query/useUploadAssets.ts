@@ -114,8 +114,12 @@ const useUploadAssets = ({
     for (const key in payload) {
       if (key === 'uploadKey') continue; // make constant for uploadKey
       const value = payload[key];
+      console.log('Key:', key);
+      console.log('Value:', value);
       if (Array.isArray(value)) {
+        console.log('Array', value);
         value.forEach((item: any, index: number) => {
+          // Handle arrays properly by appending each item with the same key
           formData.append(`${key}[${index}]`, stringifyValue(item));
         });
       } else {
@@ -193,7 +197,7 @@ const useUploadAssets = ({
       return;
     }
 
-    (payload || payloadData || []).forEach(async (item: Payload) => {
+    (payloadData || payload || []).forEach(async (item: Payload) => {
       const payloadFormData = getFormData(item);
       await mutation.mutateAsync({
         payload: payloadFormData,

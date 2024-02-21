@@ -16,4 +16,5 @@ export interface ITrack {
   genreId: string;
   tags?: string[];
   uploadKey: string;
+  albumIds?: string[];
 }

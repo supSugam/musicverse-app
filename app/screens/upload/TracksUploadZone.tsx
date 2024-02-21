@@ -64,7 +64,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
       });
       setLoading(false);
     },
-    onUploadSuccess() {
+    onUploadSuccess(data) {
+      console.log('Tracks uploaded successfully', data);
       toastResponseMessage({
         content: 'Tracks uploaded successfully',
         type: 'success',
@@ -109,19 +110,30 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         );
         await createAlbum.mutateAsync(formData, {
           onSuccess: async (data) => {
-            console.log('Album created', data.data);
             toastResponseMessage({
               content: 'Album Created, Uploading tracks now...',
               type: 'success',
             });
-            const albumTracksWithAlbumId = tracks?.map((track) =>
-              cleanObject({ ...track, albumIds: [data.data.result.id] })
-            );
-            console.log('Album tracks with album id', albumTracksWithAlbumId);
-            await uploadTracks(albumTracksWithAlbumId);
+            const albumId = data.data.result.id;
+
+            if (!albumId || !tracks?.length) {
+              toastResponseMessage({
+                content: 'Album ID not found',
+                type: 'error',
+              });
+              setLoading(false);
+              return;
+            }
+            const albumTracksWithAlbumId = tracks.map((track) => ({
+              ...track,
+              albumIds: [albumId] as string[],
+            }));
+
+            uploadTracks(albumTracksWithAlbumId);
           },
 
-          onError: () => {
+          onError: (e) => {
+            console.log('Error creating album', e);
             setLoading(false);
           },
         });
@@ -163,8 +175,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   };
 
   useEffect(() => {
-    console.log('Album', album);
-  }, [album?.tracks]);
+    setLoading(false);
+  }, []);
 
   return (
     <Container includeNavBar navbarTitle="Upload">

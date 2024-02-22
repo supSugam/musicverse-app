@@ -7,7 +7,7 @@ import {
   IRegisterUserDTO,
   IVerifyOtpDTO,
 } from '@/services/auth/IAuth';
-import { ICurrentUser, IUser, IUserProfile } from '@/utils/enums/IUser';
+import { ICurrentUser, IUserProfile } from '@/utils/enums/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob'; // <- polyfill here

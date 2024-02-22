@@ -197,6 +197,8 @@ const useUploadAssets = ({
       return;
     }
 
+    // This made me look for albumIds for 5 hours, just because the payload was priorized over the payloadData
+    // (payload || payloadData || []).forEach(async (item: Payload) => {
     (payloadData || payload || []).forEach(async (item: Payload) => {
       const payloadFormData = getFormData(item);
       await mutation.mutateAsync({

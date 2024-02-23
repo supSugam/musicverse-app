@@ -39,3 +39,13 @@ export const albumKeyFactory = {
   deleteAlbum: (id: string) => ['albums', id],
   getAlbumTracks: (id: string) => ['albums', id, 'tracks'],
 };
+
+export const TRACK_QUERY_KEY = 'tracks';
+
+export const trackKeyFactory = {
+  getTracks: () => [TRACK_QUERY_KEY],
+  getTrack: (id: string) => [TRACK_QUERY_KEY, id],
+  createTrack: () => [TRACK_QUERY_KEY],
+  updateTrack: (id: string) => [TRACK_QUERY_KEY, id],
+  deleteTrack: (id: string) => [TRACK_QUERY_KEY, id],
+};

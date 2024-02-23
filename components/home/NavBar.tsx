@@ -8,7 +8,7 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { Image } from 'expo-image';
 import COLORS from '@/constants/Colors';
 import { toastResponseMessage } from '@/utils/toast';
-import { IUserProfile } from '@/utils/enums/IUser';
+import { IUserProfile } from '@/utils/Interfaces/IUser';
 import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 import { Link } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';

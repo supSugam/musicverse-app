@@ -1,3 +1,5 @@
+import { ReviewStatus } from '../enums/ReviewStatus';
+
 export enum UserRole {
   ADMIN = 'ADMIN',
   USER = 'USER',
@@ -24,6 +26,7 @@ export interface IUser {
   createdAt: string;
   updatedAt: string;
   isVerified: boolean;
+  artistStatus: ReviewStatus;
 }
 
 export interface IUserProfile {
@@ -35,4 +38,8 @@ export interface IUserProfile {
   name: string;
   updatedAt: string;
   userId: string;
+}
+
+export interface IUserWithProfile extends IUser {
+  profile: IUserProfile;
 }

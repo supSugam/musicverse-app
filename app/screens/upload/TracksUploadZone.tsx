@@ -6,7 +6,7 @@ import { StyledButton } from '@/components/reusables/StyledButton';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { UserRole } from '@/utils/enums/IUser';
+import { UserRole } from '@/utils/Interfaces/IUser';
 import COLORS from '@/constants/Colors';
 import TrackDetailsModal from './components/TrackDetailsModal';
 import AudioDetailsCard from './components/AudioDetailsCard';

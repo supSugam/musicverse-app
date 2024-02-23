@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { IUser, IUserProfile } from '@/utils/enums/IUser';
+import { IUser, IUserProfile } from '@/utils/Interfaces/IUser';
 
 interface IUserStore {
   user: IUser | null;

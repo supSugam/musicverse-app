@@ -2,7 +2,7 @@ import axios from 'axios';
 import { BASE_URL } from '@env';
 import 'react-native-get-random-values';
 import { v4 } from 'uuid';
-import { UserRole } from './enums/IUser';
+import { UserRole } from './Interfaces/IUser';
 
 export const api = axios.create({
   baseURL: BASE_URL,

@@ -1,4 +1,4 @@
-import { UserRole } from '@/utils/enums/IUser';
+import { UserRole } from '@/utils/Interfaces/IUser';
 
 export enum CredentialsType {
   USERNAME = 'USERNAME',

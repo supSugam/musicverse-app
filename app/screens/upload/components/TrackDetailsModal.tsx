@@ -37,7 +37,7 @@ import { useImagePicker } from '@/hooks/useImagePicker';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 import { ITrack } from '@/utils/Interfaces/ITrack';
-import { UserRole } from '@/utils/enums/IUser';
+import { UserRole } from '@/utils/Interfaces/IUser';
 import { USER_LIMITS, USER_PERMISSIONS, uuid } from '@/utils/constants';
 import Switch from '@/components/reusables/StyledSwitch';
 import { ReviewStatus } from '@/utils/enums/ReviewStatus';

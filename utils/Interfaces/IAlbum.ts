@@ -1,7 +1,11 @@
 import { ImageWithRotation } from '@/hooks/useImagePicker';
 import { ReviewStatus } from '../enums/ReviewStatus';
-import { ITrack } from './ITrack';
+import { ITrack, ITrackDetails } from './ITrack';
 import { IFilePayload } from './IFilePayload';
+import { IGenre } from './IGenre';
+import { ITag } from './ITag';
+import { SuccessResponse } from './IApiResponse';
+import { IUserProfile, IUserWithProfile } from './IUser';
 
 export interface IAlbum {
   title: string;
@@ -18,3 +22,27 @@ export interface ICreateAlbumPayload extends Omit<IAlbum, 'tracks' | 'cover'> {
 }
 
 export interface IUpdateAlbumPayload extends Partial<ICreateAlbumPayload> {}
+
+export interface IAlbumDetails {
+  id: string;
+  title: string;
+  description: string | null;
+  cover: string | null;
+  createdAt: string;
+  updatedAt: string;
+  genreId: string;
+  publicStatus: string;
+  creatorId: string;
+  creator?: IUserWithProfile;
+  genre?: IGenre;
+  tags?: ITag[];
+  tracks?: ITrackDetails[];
+  // savedBy?:
+  // Add savedBy
+}
+export interface IGetAllAlbumsResponse {
+  items: IAlbumDetails[];
+  totalCount: number;
+}
+
+export type GetAllAlbumsResponse = SuccessResponse<IGetAllAlbumsResponse>;

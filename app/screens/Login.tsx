@@ -16,7 +16,7 @@ import { CredentialsType } from '@/services/auth/IAuth';
 import Toast from 'react-native-toast-message';
 import { toastResponseMessage } from '@/utils/toast';
 import { jwtDecode } from 'jwt-decode';
-import { ICurrentUser } from '@/utils/enums/IUser';
+import { ICurrentUser } from '@/utils/Interfaces/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'core-js/stable/atob';
 const schema = yup.object().shape({

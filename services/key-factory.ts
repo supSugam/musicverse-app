@@ -47,5 +47,5 @@ export const trackKeyFactory = {
   getTrack: (id: string) => [TRACK_QUERY_KEY, id],
   createTrack: () => [TRACK_QUERY_KEY],
   updateTrack: (id: string) => [TRACK_QUERY_KEY, id],
-  deleteTrack: (id: string) => [TRACK_QUERY_KEY, id],
+  deleteTrack: (id?: string) => [TRACK_QUERY_KEY, ...(id ? [id] : [])],
 };

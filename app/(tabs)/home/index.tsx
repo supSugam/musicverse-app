@@ -1,13 +1,11 @@
 // app/tabs/home/HomeScreen.tsx
 import Container from '@/components/Container';
 import GenreScrollView from '@/components/home/GenreScrollView';
-import NavBar from '@/components/home/NavBar';
-import StyledText from '@/components/reusables/StyledText';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
+import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { toastResponseMessage } from '@/utils/toast';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 const HomeScreen: React.FC = () => {
   const { currentUser, currentUserProfile } = useAuthStore((state) => state);
@@ -16,6 +14,17 @@ const HomeScreen: React.FC = () => {
   const { genres, isLoading: isGenresLoading } = useGenreQuery();
 
   const [selectedGenre, setSelectedGenre] = useState<string>('All');
+
+  // Tracks
+
+  const { getAllTracks } = useTracksQuery('ok');
+
+  const { data } = getAllTracks;
+  useEffect(() => {
+    if (data) {
+      console.log(data.data);
+    }
+  }, [data]);
 
   return (
     <Container includeNavBar navbarTitle="Home">

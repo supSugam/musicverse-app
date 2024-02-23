@@ -1,7 +1,12 @@
 import COLORS from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import StyledText from './StyledText';
 import Animated, {
   useAnimatedStyle,
@@ -12,7 +17,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 interface IImageDisplayProps
   extends React.ComponentProps<typeof TouchableOpacity> {
-  source?: string | null;
+  source?: ImageSourcePropType | null;
   placeholder: string | React.ReactNode;
   width?: number;
   height?: number;
@@ -90,11 +95,7 @@ const ImageDisplay = ({
         end={{ x: 1, y: 1 }}
       >
         {source ? (
-          <Image
-            source={{ uri: source }}
-            style={styles.image}
-            resizeMode="cover"
-          />
+          <Image source={source} style={styles.image} resizeMode="cover" />
         ) : typeof placeholder === 'string' ? (
           <StyledText size="2xl" weight="bold" className="text-center">
             {placeholder}

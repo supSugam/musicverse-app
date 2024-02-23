@@ -29,7 +29,7 @@ const HomeScreen: React.FC = () => {
       genre: true,
       creator: true,
       ...(selectedGenre !== 'All' && {
-        selectedGenre: genres.find((genre) => genre.id === selectedGenre)?.id,
+        selectedGenre: genres.find((genre) => genre.name === selectedGenre)?.id,
       }),
     },
   });
@@ -58,13 +58,7 @@ const HomeScreen: React.FC = () => {
           onGenreChange={setSelectedGenre}
         />
 
-        <View className="mt-4">
-          <StyledText size="xl" weight="bold" tracking="tighter">
-            {selectedGenre} Tracks
-          </StyledText>
-        </View>
-
-        <View className="flex flex-col mt-4">
+        <View className="flex flex-col mt-8">
           {tracksOfSelectedGenre.map((track) => (
             <TrackListItem
               key={track.id}

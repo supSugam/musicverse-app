@@ -416,7 +416,7 @@ const TrackDetailsModal = ({
               autoCapitalize="sentences"
             />
             <ImageDisplay
-              source={cover?.[0].uri}
+              source={cover?.[0]}
               placeholder="Select Track Cover"
               width={164}
               height={164}

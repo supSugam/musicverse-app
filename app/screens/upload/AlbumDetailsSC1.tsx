@@ -82,7 +82,7 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           wrapperClassName="my-2 mb-8"
         />
         <ImageDisplay
-          source={image?.[0]?.uri}
+          source={image?.[0]}
           placeholder="Select Album Cover"
           width={164}
           height={164}

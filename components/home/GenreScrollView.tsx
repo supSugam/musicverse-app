@@ -36,7 +36,7 @@ const GenreScrollView = ({
               borderRadius: 20,
             }}
           >
-            <StyledText size="lg" weight="bold">
+            <StyledText size="base" weight="semibold">
               {genre}
             </StyledText>
           </Pressable>

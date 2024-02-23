@@ -1,11 +1,14 @@
 // app/tabs/home/HomeScreen.tsx
 import Container from '@/components/Container';
+import TrackListItem from '@/components/Tracks/TrackListItem';
 import GenreScrollView from '@/components/home/GenreScrollView';
+import StyledText from '@/components/reusables/StyledText';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 const HomeScreen: React.FC = () => {
   const { currentUser, currentUserProfile } = useAuthStore((state) => state);
@@ -17,12 +20,24 @@ const HomeScreen: React.FC = () => {
 
   // Tracks
 
-  const { getAllTracks } = useTracksQuery('ok');
+  const [tracksOfSelectedGenre, setTracksOfSelectedGenre] = useState<
+    ITrackDetails[]
+  >([]);
+
+  const { getAllTracks } = useTracksQuery({
+    params: {
+      genre: true,
+      creator: true,
+      ...(selectedGenre !== 'All' && {
+        selectedGenre: genres.find((genre) => genre.id === selectedGenre)?.id,
+      }),
+    },
+  });
 
   const { data } = getAllTracks;
   useEffect(() => {
     if (data) {
-      console.log(data.data);
+      setTracksOfSelectedGenre(data.data.result.items);
     }
   }, [data]);
 
@@ -42,6 +57,26 @@ const HomeScreen: React.FC = () => {
           selectedGenre={selectedGenre}
           onGenreChange={setSelectedGenre}
         />
+
+        <View className="mt-4">
+          <StyledText size="xl" weight="bold" tracking="tighter">
+            {selectedGenre} Tracks
+          </StyledText>
+        </View>
+
+        <View className="flex flex-col mt-4">
+          {tracksOfSelectedGenre.map((track) => (
+            <TrackListItem
+              key={track.id}
+              id={track.id}
+              title={track.title}
+              artistName={track?.creator?.username}
+              artistId={track?.creator?.id}
+              cover={track.cover}
+              duration={track.trackDuration}
+            />
+          ))}
+        </View>
       </ScrollView>
     </Container>
   );

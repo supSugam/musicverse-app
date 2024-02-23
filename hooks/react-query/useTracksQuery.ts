@@ -11,6 +11,7 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { TRACK_QUERY_KEY, trackKeyFactory } from '@/services/key-factory';
 import { IBasePaginationParams } from '@/utils/Interfaces/IPagination';
 import { GetAllTracksResponse } from '@/utils/Interfaces/ITrack';
+import { cleanObject } from '@/utils/helpers/Object';
 
 export interface ITracksPaginationQueryParams extends IBasePaginationParams {
   creator?: boolean;
@@ -19,10 +20,13 @@ export interface ITracksPaginationQueryParams extends IBasePaginationParams {
   albums?: boolean;
   likedBy?: boolean;
   playlists?: boolean;
+  selectedGenre?: string;
+  selectedTag?: string;
 }
 
 type TracksQuery<T extends string | undefined = undefined> = {
   getAllTracks: UseQueryResult<AxiosResponse<GetAllTracksResponse, any>, Error>;
+  params?: ITracksPaginationQueryParams;
 } & (T extends string
   ? {
       getTrackById: UseQueryResult<AxiosResponse<any, any>, Error>;
@@ -35,15 +39,19 @@ type TracksQuery<T extends string | undefined = undefined> = {
     }
   : {});
 
-export const useTracksQuery = <T extends string | undefined = undefined>(
-  id?: T
-): TracksQuery<T> => {
+export const useTracksQuery = <T extends string | undefined = undefined>({
+  id,
+  params,
+}: {
+  id?: T;
+  params?: ITracksPaginationQueryParams;
+}): TracksQuery<T> => {
   const { api } = useAuthStore();
   const queryClient = useQueryClient();
-
   const getAllTracks = useQuery<AxiosResponse<GetAllTracksResponse, any>>({
     queryKey: [TRACK_QUERY_KEY],
-    queryFn: async (params) => await api.get('/tracks', { params }),
+    queryFn: async () =>
+      await api.get('/tracks', { params: cleanObject(params || {}) }),
   });
 
   const deleteTrackById = useMutation({

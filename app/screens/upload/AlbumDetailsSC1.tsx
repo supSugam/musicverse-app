@@ -89,6 +89,8 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           onPress={pickImage}
           onEdit={reselectImage}
           onDelete={deleteAllImages}
+          bordered
+          shadows
         />
         <StyledTextField
           variant="default"

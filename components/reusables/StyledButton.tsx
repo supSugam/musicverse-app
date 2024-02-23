@@ -56,17 +56,19 @@ export function StyledButton(props: StyledButtonProps) {
 
 interface IStyledTouchableOpacityProps
   extends React.ComponentProps<typeof TouchableOpacity> {
+  bordered?: boolean;
   children: React.ReactNode;
 }
 
 export const StyledTouchableOpacity = ({
   children,
+  bordered = true,
   ...rest
 }: IStyledTouchableOpacityProps) => {
   return (
     <TouchableOpacity
       {...rest}
-      style={[styles.root, rest.style]}
+      style={[styles.root, bordered && styles.bordered, rest.style]}
       className={`flex flex-row items-center justify-center px-3 py-1 rounded-md ${rest.className}`}
       activeOpacity={rest.activeOpacity || 0.8}
     >
@@ -77,6 +79,8 @@ export const StyledTouchableOpacity = ({
 const styles = StyleSheet.create({
   root: {
     backgroundColor: COLORS.neutral.dark,
+  },
+  bordered: {
     borderColor: COLORS.neutral.normal,
     borderWidth: 1,
   },

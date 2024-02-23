@@ -421,6 +421,8 @@ const TrackDetailsModal = ({
               width={164}
               height={164}
               onPress={pickImage}
+              bordered
+              shadows
             />
 
             <SelectOption

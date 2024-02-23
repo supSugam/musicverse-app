@@ -13,13 +13,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 interface IImageDisplayProps
   extends React.ComponentProps<typeof TouchableOpacity> {
   source?: string | null;
-  placeholder: string;
+  placeholder: string | React.ReactNode;
   width?: number;
   height?: number;
   borderRadius?: 'full' | number;
   onPress?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  bordered?: boolean;
+  shadows?: boolean;
 }
 
 const ImageDisplay = ({
@@ -31,6 +33,8 @@ const ImageDisplay = ({
   onPress,
   onEdit,
   onDelete,
+  bordered = false,
+  shadows = false,
   ...rest
 }: IImageDisplayProps) => {
   const borderRadiusStyle =
@@ -75,7 +79,13 @@ const ImageDisplay = ({
           COLORS.neutral.dark,
           COLORS.neutral.dense,
         ]}
-        style={[styles.container, { width, height }, borderRadiusStyle]}
+        style={[
+          styles.container,
+          { width, height },
+          borderRadiusStyle,
+          bordered && styles.bordered,
+          shadows && styles.shadows,
+        ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
@@ -85,10 +95,12 @@ const ImageDisplay = ({
             style={styles.image}
             resizeMode="cover"
           />
-        ) : (
+        ) : typeof placeholder === 'string' ? (
           <StyledText size="2xl" weight="bold" className="text-center">
             {placeholder}
           </StyledText>
+        ) : (
+          placeholder
         )}
         <Animated.View style={[styles.editIcon, editAnimatedStyle]}>
           <TouchableOpacity onPress={onEdit} activeOpacity={0.8}>
@@ -112,8 +124,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
+  },
+  bordered: {
+    borderColor: COLORS.neutral.normal,
     borderWidth: 1,
-    borderColor: COLORS.neutral.gray,
+  },
+  shadows: {
     shadowColor: COLORS.neutral.white,
     shadowOffset: {
       width: 0,
@@ -122,7 +138,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 5,
     elevation: 5,
-    marginTop: 6,
   },
   // ...
   image: {

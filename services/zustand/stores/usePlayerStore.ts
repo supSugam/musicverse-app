@@ -1,8 +1,8 @@
-import create from 'zustand';
-import { Audio } from 'expo-av';
+import { create } from 'zustand';
+import { Audio, AVPlaybackStatus } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 
-type PlayerState = {
+interface PlayerState {
   isPlaying: boolean;
   currentTrackIndex: number;
   tracks: ITrackDetails[];
@@ -13,10 +13,22 @@ type PlayerState = {
   isLooping: boolean;
   isQueueLooping: boolean;
   playbackError: string | null;
-  loadTrack: (index: number) => Promise<void>;
-};
 
-const usePlayerStore = create<PlayerState>((set, get) => ({
+  loadTrack: (index: number) => Promise<void>;
+  updateTracks: (tracks: ITrackDetails[]) => void;
+  playPause: () => Promise<void>;
+  nextTrack: () => Promise<void>;
+  prevTrack: () => Promise<void>;
+  seek: (position: number) => Promise<void>;
+  setSpeed: (speed: number) => Promise<void>;
+  setLooping: (looping: boolean) => Promise<void>;
+  setQueueLooping: (looping: boolean) => void;
+  seekBackward: (seconds: number) => Promise<void>;
+  seekForward: (seconds: number) => Promise<void>;
+  toggleQueueLooping: () => void;
+}
+
+export const usePlayerStore = create<PlayerState>((set, get) => ({
   isPlaying: false,
   currentTrackIndex: 0,
   tracks: [],
@@ -28,97 +40,117 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
   isQueueLooping: false,
   playbackError: null,
 
+  updateTracks: (tracks: ITrackDetails[]) => set({ tracks }),
+
   loadTrack: async (index: number) => {
     try {
       const { tracks, playbackInstance } = get();
-      if (playbackInstance) await playbackInstance.unloadAsync();
+
+      if (playbackInstance) {
+        await playbackInstance.unloadAsync();
+      }
+
       const newPlaybackInstance = new Audio.Sound();
+
       const { src } = tracks[index];
+
       await newPlaybackInstance.loadAsync({ uri: src }, {}, false);
+
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
-          set((state) => ({
+          set({
             playbackPosition: status.positionMillis,
-            playbackDuration: status.durationMillis,
+            playbackDuration: status.durationMillis ?? 0,
             isPlaying: status.isPlaying,
-          }));
+          });
         }
       });
 
-      set((state) => ({
+      set({
         playbackInstance: newPlaybackInstance,
         currentTrackIndex: index,
         playbackError: null,
-      }));
-    } catch (error: any) {
-      set((state) => ({ playbackError: error.message }));
+      });
+    } catch (error) {
+      set({ playbackError: error as string });
     }
   },
 
   playPause: async () => {
     const { isPlaying, playbackInstance } = get();
+
     if (playbackInstance) {
-      if (isPlaying) await playbackInstance.pauseAsync();
-      else await playbackInstance.playAsync();
+      if (isPlaying) {
+        await playbackInstance.pauseAsync();
+      } else {
+        await playbackInstance.playAsync();
+      }
     }
   },
 
-  nextTrack: () => {
+  nextTrack: async () => {
     const { currentTrackIndex, tracks } = get();
+
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
-    usePlayerStore.getState().loadTrack(nextIndex);
+
+    await usePlayerStore.getState().loadTrack(nextIndex);
   },
 
-  prevTrack: () => {
+  prevTrack: async () => {
     const { currentTrackIndex, tracks } = get();
+
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-    usePlayerStore.getState().loadTrack(prevIndex);
+
+    await usePlayerStore.getState().loadTrack(prevIndex);
   },
 
-  seek: (position: number) => {
+  seek: async (position: number) => {
     const { playbackInstance } = get();
+
     if (playbackInstance) {
-      playbackInstance.setPositionAsync(position);
+      await playbackInstance.setPositionAsync(position);
     }
   },
 
-  setSpeed: (speed: number) => {
+  setSpeed: async (speed: number) => {
     const { playbackInstance } = get();
+
     if (playbackInstance) {
-      playbackInstance.setRateAsync(speed, true);
+      await playbackInstance.setRateAsync(speed, true);
     }
   },
 
-  setLooping: (isLooping: boolean) => {
+  setLooping: async (looping: boolean) => {
     const { playbackInstance } = get();
+
     if (playbackInstance) {
-      playbackInstance.setIsLoopingAsync(isLooping);
+      await playbackInstance.setIsLoopingAsync(looping);
     }
   },
 
-  setQueueLooping: (isQueueLooping: boolean) =>
-    set((state) => ({ isQueueLooping })),
+  setQueueLooping: (looping: boolean) => set({ isQueueLooping: looping }),
 
-  // Additional features
-  seekBackward: (seconds: number) => {
+  seekBackward: async (seconds: number) => {
     const { playbackInstance, playbackPosition } = get();
+
     const newPosition = Math.max(playbackPosition - seconds * 1000, 0);
-    playbackInstance?.setPositionAsync(newPosition);
+
+    await playbackInstance?.setPositionAsync(newPosition);
   },
 
-  seekForward: (seconds: number) => {
+  seekForward: async (seconds: number) => {
     const { playbackInstance, playbackPosition, playbackDuration } = get();
+
     const newPosition = Math.min(
       playbackPosition + seconds * 1000,
       playbackDuration
     );
-    playbackInstance?.setPositionAsync(newPosition);
+
+    await playbackInstance?.setPositionAsync(newPosition);
   },
 
-  toggleQueueLooping: () => {
-    const { isQueueLooping } = get();
-    usePlayerStore.setState({ isQueueLooping: !isQueueLooping });
-  },
+  toggleQueueLooping: () =>
+    set((state) => ({
+      isQueueLooping: !state.isQueueLooping,
+    })),
 }));
-
-export default usePlayerStore;

@@ -44,8 +44,14 @@ const HomeScreen: React.FC = () => {
     }
   }, [data]);
 
-  const { updateTracks, playPause, loadTrack, currentTrack, isPlaying } =
-    usePlayerStore((state) => state);
+  const {
+    updateTracks,
+    playPause,
+    loadTrack,
+    currentTrack,
+    isPlaying,
+    tracks: playerTracks,
+  } = usePlayerStore((state) => state);
 
   return (
     <Container includeNavBar navbarTitle="Home">
@@ -65,13 +71,14 @@ const HomeScreen: React.FC = () => {
         />
 
         <View className="flex flex-col mt-8">
-          {tracksOfSelectedGenre.map((track, i) => (
+          {tracksOfSelectedGenre.map((track) => (
             <TrackListItem
               key={track.id}
               id={track.id}
               title={track.title}
               onPlayClick={async () => {
-                await playPause(i);
+                console.log('play clicked');
+                await playPause(track.id);
               }}
               isPlaying={currentTrack()?.id === track.id && isPlaying}
               artistName={track?.creator?.username}

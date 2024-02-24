@@ -107,7 +107,7 @@ const TrackListItem = ({
         </TouchableOpacity>
 
         <ImageDisplay
-          source={TRACK_PLACEHOLDER_IMAGE}
+          source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
           placeholder={''}
           width={45}
           height={45}

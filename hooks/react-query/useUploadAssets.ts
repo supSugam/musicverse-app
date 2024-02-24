@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios, {
   AxiosError,
   AxiosRequestConfig,
@@ -11,6 +11,7 @@ import { assetToFile, imageAssetToFile } from '@/utils/helpers/file';
 import { AssetWithDuration } from '../useAssetsPicker';
 import { toastResponseMessage } from '@/utils/toast';
 import { UploadStatus } from '@/utils/enums/IUploadStatus';
+import { TRACK_QUERY_KEY } from '@/services/key-factory';
 
 type Payload = {
   [key: string]: any;
@@ -78,6 +79,8 @@ const useUploadAssets = ({
   const [cancelTokenSource, setCancelTokenSource] = useState<CancelTokenSource>(
     axios.CancelToken.source()
   );
+
+  const queryClient = useQueryClient();
 
   const stringifyValue = (value: any) => {
     if (!value) return value;
@@ -181,6 +184,9 @@ const useUploadAssets = ({
       }
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [TRACK_QUERY_KEY],
+      });
       resetUploadStatus(UploadStatus.SUCCESS);
       onUploadSuccess?.(data);
     },

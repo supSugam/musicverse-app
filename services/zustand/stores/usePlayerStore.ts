@@ -18,7 +18,7 @@ interface PlayerState {
   updateTracks: (tracks: ITrackDetails[]) => void;
   isNextTrackAvailable: () => boolean;
   isPrevTrackAvailable: () => boolean;
-  playPause: (index?: number) => Promise<void>;
+  playPause: (id?: string, play?: boolean) => Promise<void>;
   nextTrack: () => Promise<void>;
   prevTrack: () => Promise<void>;
   currentTrack: () => ITrackDetails | null;
@@ -74,6 +74,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       const { src } = tracks[index];
 
+      if (!src) return;
+
       await newPlaybackInstance.loadAsync({ uri: src }, {}, false);
 
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
@@ -96,19 +98,40 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  playPause: async (index?: number) => {
-    const { isPlaying, playbackInstance, loadTrack, playPause } = get();
+  playPause: async (id?: string, play = false) => {
+    const {
+      isPlaying,
+      playbackInstance,
+      loadTrack,
+      playPause,
+      tracks,
+      currentTrack,
+    } = get();
+    if (!id && !playbackInstance) return;
 
     if (playbackInstance) {
-      if (isPlaying) {
-        await playbackInstance.pauseAsync();
+      if (id) {
+        if (id === currentTrack()?.id) {
+          if (isPlaying) {
+            await playbackInstance.pauseAsync();
+          } else {
+            await playbackInstance.playAsync();
+          }
+        } else {
+          await loadTrack(tracks.findIndex((track) => track.id === id));
+          await playPause(undefined, true);
+        }
       } else {
-        await playbackInstance.playAsync();
+        if (isPlaying && !play) {
+          await playbackInstance.pauseAsync();
+        } else {
+          await playbackInstance.playAsync();
+        }
       }
     } else {
-      if (index !== undefined) {
-        await loadTrack(index);
-        await playPause();
+      if (id) {
+        await loadTrack(tracks.findIndex((track) => track.id === id));
+        await playPause(undefined, true);
       }
     }
   },

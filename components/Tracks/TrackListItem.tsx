@@ -24,6 +24,8 @@ interface ITrackListItemProps {
   artistId?: string;
   cover: string | null;
   duration: number;
+  onPlayClick?: () => void;
+  isPlaying?: boolean;
 }
 const TRACK_PLACEHOLDER_IMAGE = require('@/assets/images/placeholder/track.jpg');
 
@@ -34,6 +36,8 @@ const TrackListItem = ({
   artistId,
   cover,
   duration,
+  onPlayClick,
+  isPlaying,
 }: ITrackListItemProps) => {
   const translateX = useSharedValue(500); // Start position outside the screen
 
@@ -94,11 +98,13 @@ const TrackListItem = ({
         end={{ x: 1, y: 1 }}
       />
       <View className="flex flex-row items-center px-2">
-        <MaterialIcons
-          name="play-arrow"
-          size={28}
-          color={COLORS.neutral.light}
-        />
+        <TouchableOpacity onPress={onPlayClick} activeOpacity={0.8}>
+          <MaterialIcons
+            name={isPlaying ? 'pause' : 'play-arrow'}
+            size={28}
+            color={COLORS.neutral.light}
+          />
+        </TouchableOpacity>
 
         <ImageDisplay
           source={TRACK_PLACEHOLDER_IMAGE}
@@ -172,3 +178,18 @@ const TrackListItem = ({
 };
 
 export default TrackListItem;
+
+{
+  /* <LottieView
+source={PlayingMusicLA}
+autoPlay
+loop
+speed={0.8}
+style={{
+  alignSelf: 'center',
+  transform: [{ scaleX: 5 }, { scaleY: 5 }],
+  width: 42,
+  height: 42,
+}}
+/> */
+}

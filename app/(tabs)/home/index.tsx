@@ -6,6 +6,7 @@ import StyledText from '@/components/reusables/StyledText';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -37,9 +38,14 @@ const HomeScreen: React.FC = () => {
   const { data } = getAllTracks;
   useEffect(() => {
     if (data) {
-      setTracksOfSelectedGenre(data.data.result.items);
+      const { items: tracks } = data.data.result;
+      setTracksOfSelectedGenre(tracks);
+      updateTracks(tracks);
     }
   }, [data]);
+
+  const { updateTracks, playPause, loadTrack, currentTrack, isPlaying } =
+    usePlayerStore((state) => state);
 
   return (
     <Container includeNavBar navbarTitle="Home">
@@ -59,11 +65,15 @@ const HomeScreen: React.FC = () => {
         />
 
         <View className="flex flex-col mt-8">
-          {tracksOfSelectedGenre.map((track) => (
+          {tracksOfSelectedGenre.map((track, i) => (
             <TrackListItem
               key={track.id}
               id={track.id}
               title={track.title}
+              onPlayClick={async () => {
+                await playPause(i);
+              }}
+              isPlaying={currentTrack()?.id === track.id && isPlaying}
               artistName={track?.creator?.username}
               artistId={track?.creator?.id}
               cover={track.cover}

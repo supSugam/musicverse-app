@@ -18,9 +18,10 @@ interface PlayerState {
   updateTracks: (tracks: ITrackDetails[]) => void;
   isNextTrackAvailable: () => boolean;
   isPrevTrackAvailable: () => boolean;
-  playPause: () => Promise<void>;
+  playPause: (index?: number) => Promise<void>;
   nextTrack: () => Promise<void>;
   prevTrack: () => Promise<void>;
+  currentTrack: () => ITrackDetails | null;
   seek: (position: number) => Promise<void>;
   setSpeed: (speed: number) => Promise<void>;
   setLooping: (looping: boolean) => Promise<void>;
@@ -41,6 +42,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   isLooping: false,
   isQueueLooping: false,
   playbackError: null,
+
+  currentTrack: () => {
+    const { currentTrackIndex, tracks } = get();
+
+    return tracks[currentTrackIndex] || null;
+  },
 
   isNextTrackAvailable: () => {
     const { currentTrackIndex, tracks, isQueueLooping } = get();
@@ -63,7 +70,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       if (playbackInstance) {
         await playbackInstance.unloadAsync();
       }
-
       const newPlaybackInstance = new Audio.Sound();
 
       const { src } = tracks[index];
@@ -90,14 +96,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  playPause: async () => {
-    const { isPlaying, playbackInstance } = get();
+  playPause: async (index?: number) => {
+    const { isPlaying, playbackInstance, loadTrack, playPause } = get();
 
     if (playbackInstance) {
       if (isPlaying) {
         await playbackInstance.pauseAsync();
       } else {
         await playbackInstance.playAsync();
+      }
+    } else {
+      if (index !== undefined) {
+        await loadTrack(index);
+        await playPause();
       }
     }
   },

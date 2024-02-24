@@ -16,6 +16,8 @@ interface PlayerState {
 
   loadTrack: (index: number) => Promise<void>;
   updateTracks: (tracks: ITrackDetails[]) => void;
+  isNextTrackAvailable: () => boolean;
+  isPrevTrackAvailable: () => boolean;
   playPause: () => Promise<void>;
   nextTrack: () => Promise<void>;
   prevTrack: () => Promise<void>;
@@ -39,6 +41,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   isLooping: false,
   isQueueLooping: false,
   playbackError: null,
+
+  isNextTrackAvailable: () => {
+    const { currentTrackIndex, tracks, isQueueLooping } = get();
+
+    return currentTrackIndex < tracks.length - 1 || isQueueLooping;
+  },
+
+  isPrevTrackAvailable: () => {
+    const { currentTrackIndex, isQueueLooping } = get();
+
+    return currentTrackIndex > 0 || isQueueLooping;
+  },
 
   updateTracks: (tracks: ITrackDetails[]) => set({ tracks }),
 

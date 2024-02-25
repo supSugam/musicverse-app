@@ -23,6 +23,7 @@ interface IModalWrapperProps extends ModalProps {
   closeOnOutsideClick?: boolean;
   position?: 'start' | 'center' | 'end';
   fullWidth?: boolean;
+  transparentWrapper?: boolean;
 }
 
 const ModalWrapper = ({
@@ -36,6 +37,7 @@ const ModalWrapper = ({
   closeOnOutsideClick,
   position = 'center',
   fullWidth = false,
+  transparentWrapper = false,
 }: IModalWrapperProps) => {
   const positionStyle: FlexAlignType =
     position === 'center' ? position : `flex-${position}`;
@@ -98,13 +100,17 @@ const ModalWrapper = ({
             <TouchableWithoutFeedback>
               <LinearGradient
                 colors={[
-                  COLORS.neutral.black,
-                  COLORS.neutral.dark,
-                  COLORS.neutral.dense,
-                  COLORS.neutral.dense,
+                  ...(transparentWrapper
+                    ? [COLORS.transparent, COLORS.transparent]
+                    : [
+                        COLORS.neutral.black,
+                        COLORS.neutral.dark,
+                        COLORS.neutral.dense,
+                        COLORS.neutral.dense,
+                      ]),
                 ]}
                 style={{
-                  borderWidth: 1,
+                  borderWidth: transparentWrapper ? 0 : 1,
                   borderColor: `${COLORS.neutral.light}20`,
                   padding: 16,
                   width: '100%',

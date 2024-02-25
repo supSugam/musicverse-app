@@ -1,26 +1,32 @@
-// components/global/LoadingModal.tsx
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
 import ModalWrapper from '../reusables/ModalWrapper';
 import LottieView from 'lottie-react-native';
-import { PlayingMusicLA } from '@/assets/lottie';
-import { View } from 'react-native';
+import { LoadingIndicatorLA } from '@/assets/lottie';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
 const LoadingModal: React.FC = () => {
   const { isLoading } = useAppState((state) => state);
-  const [constantlyIncreasingSpeed, setConstantlyIncreasingSpeed] =
-    useState<number>(0);
+
+  const scale = useSharedValue(0);
+
+  const animationStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (constantlyIncreasingSpeed >= 1.6) {
-        clearInterval(interval);
-      }
-      setConstantlyIncreasingSpeed((prev) => prev + 0.1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    scale.value = withSpring(isLoading ? 1 : 0, {
+      duration: 500,
+      stiffness: 100,
+    });
+  }, [isLoading]);
+
   return (
     <ModalWrapper
       fullWidth
@@ -28,20 +34,24 @@ const LoadingModal: React.FC = () => {
       animationType="fade"
       transparent
     >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View
+        style={[
+          { flex: 1, justifyContent: 'center', alignItems: 'center' },
+          animationStyle,
+        ]}
+      >
         <LottieView
-          source={PlayingMusicLA}
+          source={LoadingIndicatorLA}
           autoPlay
           loop
-          speed={constantlyIncreasingSpeed}
+          speed={1}
           style={{
-            width: 100,
-            height: 100,
+            width: 111,
+            height: 111,
             alignSelf: 'center',
-            transform: [{ scaleX: 3.5 }, { scaleY: 3.5 }],
           }}
         />
-      </View>
+      </Animated.View>
     </ModalWrapper>
   );
 };

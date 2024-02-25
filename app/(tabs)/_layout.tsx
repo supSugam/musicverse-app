@@ -5,6 +5,8 @@ import COLORS from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
+import { GLOBAL_STYLES } from '@/utils/constants';
+import MiniPlayer from '@/components/Player/MiniPlayer';
 
 const Tab = createBottomTabNavigator();
 
@@ -52,84 +54,87 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 
 export default function TabsLayout() {
   return (
-    <Tab.Navigator
-      initialRouteName="Home"
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused }) => (
-          <TabBarIcon focused={focused} route={route} />
-        ),
+    <>
+      <MiniPlayer />
+      <Tab.Navigator
+        initialRouteName="Home"
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon focused={focused} route={route} />
+          ),
 
-        tabBarLabel: ({ focused, color }) => {
-          const routeName = route.name as string;
-          return (
-            <StyledText
-              size="xs"
-              tracking="tight"
-              weight={focused ? 'bold' : 'normal'}
-              dimness={focused ? 'none' : 'extra'}
-              style={{
-                color: focused ? COLORS.neutral.light : COLORS.neutral.normal,
-              }}
-            >
-              {routeName}
-            </StyledText>
-          );
-        },
-        headerShown: Platform.OS === 'ios' ? true : false,
-        headerStyle: {
-          backgroundColor: 'transparent',
-        },
-        tabBarStyle: {
-          paddingBottom: 10,
-          paddingTop: 10,
-          height: 70,
-          backgroundColor: 'transparent',
-          borderTopWidth: 0,
-          elevation: 0,
-        },
-        tabBarOptions: {
-          tabBarPosition: 'bottom',
-          swipeEnabled: true,
-          animationEnabled: true,
-        },
-        tabBarHideOnKeyboard: true,
-      })}
-    >
-      <Tab.Screen
-        name="Home"
-        component={Home}
-        options={{
-          headerTitle: 'Home',
-        }}
-      />
-      <Tab.Screen
-        name="Search"
-        component={Home}
-        options={{
-          headerTitle: 'Search',
-        }}
-      />
-      <Tab.Screen
-        name="Feed"
-        component={Home}
-        options={{
-          headerTitle: 'Feed',
-        }}
-      />
-      <Tab.Screen
-        name="MyLibrary"
-        component={Home}
-        options={{
-          headerTitle: 'My Library',
-        }}
-      />
-      <Tab.Screen
-        component={UploadStackScreen}
-        name="Upload"
-        options={{
-          headerTitle: 'Upload',
-        }}
-      />
-    </Tab.Navigator>
+          tabBarLabel: ({ focused, color }) => {
+            const routeName = route.name as string;
+            return (
+              <StyledText
+                size="xs"
+                tracking="tight"
+                weight={focused ? 'bold' : 'normal'}
+                dimness={focused ? 'none' : 'extra'}
+                style={{
+                  color: focused ? COLORS.neutral.light : COLORS.neutral.normal,
+                }}
+              >
+                {routeName}
+              </StyledText>
+            );
+          },
+          headerShown: Platform.OS === 'ios' ? true : false,
+          headerStyle: {
+            backgroundColor: 'transparent',
+          },
+          tabBarStyle: {
+            paddingBottom: 10,
+            paddingTop: 10,
+            height: GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT,
+            backgroundColor: 'transparent',
+            borderTopWidth: 0,
+            elevation: 0,
+          },
+          tabBarOptions: {
+            tabBarPosition: 'bottom',
+            swipeEnabled: true,
+            animationEnabled: true,
+          },
+          tabBarHideOnKeyboard: true,
+        })}
+      >
+        <Tab.Screen
+          name="Home"
+          component={Home}
+          options={{
+            headerTitle: 'Home',
+          }}
+        />
+        <Tab.Screen
+          name="Search"
+          component={Home}
+          options={{
+            headerTitle: 'Search',
+          }}
+        />
+        <Tab.Screen
+          name="Feed"
+          component={Home}
+          options={{
+            headerTitle: 'Feed',
+          }}
+        />
+        <Tab.Screen
+          name="MyLibrary"
+          component={Home}
+          options={{
+            headerTitle: 'My Library',
+          }}
+        />
+        <Tab.Screen
+          component={UploadStackScreen}
+          name="Upload"
+          options={{
+            headerTitle: 'Upload',
+          }}
+        />
+      </Tab.Navigator>
+    </>
   );
 }

@@ -32,6 +32,7 @@ export const GLOBAL_STYLES = {
   getDisabledStyles: (disabled: boolean) => ({
     opacity: disabled ? 0.7 : 1,
   }),
+  BOTTOM_TAB_BAR_HEIGHT: 70,
 };
 export const uuid = () => v4();
 

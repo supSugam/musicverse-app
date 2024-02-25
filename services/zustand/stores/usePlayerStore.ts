@@ -4,8 +4,12 @@ import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 
 interface PlayerState {
   isPlaying: boolean;
+  isBuffering: boolean;
+  isMuted: boolean;
+  isLoaded: boolean;
   currentTrackIndex: number;
   tracks: ITrackDetails[];
+  volume?: number;
   playbackInstance: Audio.Sound | null;
   playbackPosition: number;
   playbackDuration: number;
@@ -24,6 +28,7 @@ interface PlayerState {
   currentTrack: () => ITrackDetails | null;
   seek: (position: number) => Promise<void>;
   setSpeed: (speed: number) => Promise<void>;
+  setVolume: (volume: number) => Promise<void>;
   setLooping: (looping: boolean) => Promise<void>;
   setQueueLooping: (looping: boolean) => void;
   seekBackward: (seconds: number) => Promise<void>;
@@ -33,6 +38,10 @@ interface PlayerState {
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   isPlaying: false,
+  isBuffering: false,
+  isMuted: false,
+  isLoaded: false,
+  volume: 1.0,
   currentTrackIndex: 0,
   tracks: [],
   playbackInstance: null,
@@ -84,6 +93,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             playbackPosition: status.positionMillis,
             playbackDuration: status.durationMillis ?? 0,
             isPlaying: status.isPlaying,
+            isBuffering: status.isBuffering,
+            playbackSpeed: status.rate,
+            isLooping: status.isLooping,
+            isMuted: status.isMuted,
+            isLoaded: status.isLoaded,
+            volume: status.volume,
           });
         }
       });
@@ -103,53 +118,43 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isPlaying,
       playbackInstance,
       loadTrack,
-      playPause,
       tracks,
       currentTrack,
+      playPause,
     } = get();
+
     if (!id && !playbackInstance) return;
 
+    if (id && id !== currentTrack()?.id) {
+      await loadTrack(tracks.findIndex((track) => track.id === id));
+      await playPause(undefined, true);
+      return;
+    }
+
     if (playbackInstance) {
-      if (id) {
-        if (id === currentTrack()?.id) {
-          if (isPlaying) {
-            await playbackInstance.pauseAsync();
-          } else {
-            await playbackInstance.playAsync();
-          }
-        } else {
-          await loadTrack(tracks.findIndex((track) => track.id === id));
-          await playPause(undefined, true);
-        }
+      if (isPlaying && !play) {
+        await playbackInstance.pauseAsync();
       } else {
-        if (isPlaying && !play) {
-          await playbackInstance.pauseAsync();
-        } else {
-          await playbackInstance.playAsync();
-        }
+        await playbackInstance.playAsync();
       }
-    } else {
-      if (id) {
-        await loadTrack(tracks.findIndex((track) => track.id === id));
-        await playPause(undefined, true);
-      }
+    } else if (id) {
+      await loadTrack(tracks.findIndex((track) => track.id === id));
+      await playPause(undefined, true);
     }
   },
 
   nextTrack: async () => {
-    const { currentTrackIndex, tracks } = get();
+    const { currentTrackIndex, tracks, loadTrack } = get();
 
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
 
-    await usePlayerStore.getState().loadTrack(nextIndex);
+    await loadTrack(nextIndex);
   },
 
   prevTrack: async () => {
-    const { currentTrackIndex, tracks } = get();
-
+    const { currentTrackIndex, tracks, loadTrack } = get();
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-
-    await usePlayerStore.getState().loadTrack(prevIndex);
+    await loadTrack(prevIndex);
   },
 
   seek: async (position: number) => {
@@ -157,6 +162,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
     if (playbackInstance) {
       await playbackInstance.setPositionAsync(position);
+    }
+  },
+
+  setVolume: async (volume: number) => {
+    const { playbackInstance } = get();
+
+    if (playbackInstance) {
+      await playbackInstance.setVolumeAsync(volume);
     }
   },
 

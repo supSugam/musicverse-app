@@ -39,7 +39,7 @@ const TrackListItem = ({
   onPlayClick,
   isPlaying,
 }: ITrackListItemProps) => {
-  const translateX = useSharedValue(500); // Start position outside the screen
+  const translateX = useSharedValue(400); // Start position outside the screen
 
   // Favorite button animations
   const favoriteButtonScale = useSharedValue(1);
@@ -57,7 +57,7 @@ const TrackListItem = ({
   }));
 
   useEffect(() => {
-    translateX.value = withTiming(0, { duration: 500 });
+    translateX.value = withTiming(0, { duration: 400 });
   }, []);
 
   const leaveAnimation = () => {

@@ -9,6 +9,7 @@ import { useFonts } from 'expo-font';
 
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import ToastInstance from '@/components/ToastInstance';
+import LoadingModal from '@/components/global/LoadingModal';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -58,6 +59,7 @@ export default function RootLayout() {
 function RootLayoutNav() {
   return (
     <ThemeProvider value={DarkTheme}>
+      <LoadingModal />
       <QueryClientProvider client={queryClient}>
         <Stack
           screenOptions={{

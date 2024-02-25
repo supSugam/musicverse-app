@@ -5,6 +5,7 @@ import GenreScrollView from '@/components/home/GenreScrollView';
 import StyledText from '@/components/reusables/StyledText';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
+import { useAppState } from '@/hooks/useAppState';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
@@ -36,7 +37,11 @@ const HomeScreen: React.FC = () => {
   });
 
   const { data } = getAllTracks;
+  const { api } = useAuthStore();
+  const { setIsLoading } = useAppState();
   useEffect(() => {
+    setIsLoading(true);
+    console.log(api.defaults.baseURL, 'api');
     if (data) {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);

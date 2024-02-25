@@ -2,6 +2,24 @@ import { create } from 'zustand';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 
+const InitialState = {
+  isPlaying: false,
+  isBuffering: false,
+  isMuted: false,
+  isLoaded: false,
+  currentTrackIndex: 0,
+  tracks: [],
+  playbackInstance: null,
+  playbackPosition: 0,
+  playbackDuration: 0,
+  playbackSpeed: 1,
+  isLoopingSingle: false,
+  isLoopingQueue: false,
+  playUntilLastTrack: true,
+  stopAfterCurrentTrack: false,
+  playbackError: null,
+};
+
 interface PlayerState {
   isPlaying: boolean;
   isBuffering: boolean;
@@ -14,8 +32,10 @@ interface PlayerState {
   playbackPosition: number;
   playbackDuration: number;
   playbackSpeed: number;
-  isLooping: boolean;
-  isQueueLooping: boolean;
+  isLoopingSingle: boolean;
+  isLoopingQueue: boolean;
+  playUntilLastTrack: boolean;
+  stopAfterCurrentTrack: boolean;
   playbackError: string | null;
 
   loadTrack: (index: number) => Promise<void>;
@@ -29,28 +49,22 @@ interface PlayerState {
   seek: (position: number) => Promise<void>;
   setSpeed: (speed: number) => Promise<void>;
   setVolume: (volume: number) => Promise<void>;
-  setLooping: (looping: boolean) => Promise<void>;
-  setQueueLooping: (looping: boolean) => void;
+  enableSingleLooping: () => Promise<void>;
+  disableSingleLooping: () => Promise<void>;
+  enableQueueLooping: () => Promise<void>;
+  enablePlayUntilLastTrack: () => Promise<void>;
+  enableStopAfterCurrentTrack: () => Promise<void>;
+
   seekBackward: (seconds: number) => Promise<void>;
   seekForward: (seconds: number) => Promise<void>;
-  toggleQueueLooping: () => void;
+  toggleLoopStates: () => Promise<void>;
+
+  resetPlayer: () => void;
 }
+// TODO : Sleep Timer
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
-  isPlaying: false,
-  isBuffering: false,
-  isMuted: false,
-  isLoaded: false,
-  volume: 1.0,
-  currentTrackIndex: 0,
-  tracks: [],
-  playbackInstance: null,
-  playbackPosition: 0,
-  playbackDuration: 0,
-  playbackSpeed: 1.0,
-  isLooping: false,
-  isQueueLooping: false,
-  playbackError: null,
+  ...InitialState,
 
   currentTrack: () => {
     const { currentTrackIndex, tracks } = get();
@@ -59,22 +73,38 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   isNextTrackAvailable: () => {
-    const { currentTrackIndex, tracks, isQueueLooping } = get();
+    const { currentTrackIndex, tracks, isLoopingQueue } = get();
 
-    return currentTrackIndex < tracks.length - 1 || isQueueLooping;
+    return currentTrackIndex < tracks.length - 1 || isLoopingQueue;
   },
 
   isPrevTrackAvailable: () => {
-    const { currentTrackIndex, isQueueLooping } = get();
+    const { currentTrackIndex, isLoopingQueue } = get();
 
-    return currentTrackIndex > 0 || isQueueLooping;
+    return currentTrackIndex > 0 || isLoopingQueue;
   },
 
-  updateTracks: (tracks: ITrackDetails[]) => set({ tracks }),
+  updateTracks: (tracks: ITrackDetails[]) => {
+    set({ tracks });
+    const { playbackInstance } = get();
+    tracks.forEach((track) => {
+      if (track.id === get().currentTrack()?.id) {
+        playbackInstance?.loadAsync({ uri: track.src }, {}, false);
+      }
+    });
+  },
 
   loadTrack: async (index: number) => {
     try {
-      const { tracks, playbackInstance } = get();
+      const {
+        tracks,
+        playbackInstance,
+        isLoopingSingle,
+        isLoopingQueue,
+        playUntilLastTrack,
+        stopAfterCurrentTrack,
+        nextTrack,
+      } = get();
 
       if (playbackInstance) {
         await playbackInstance.unloadAsync();
@@ -87,7 +117,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       await newPlaybackInstance.loadAsync({ uri: src }, {}, false);
 
-      newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
+      newPlaybackInstance.setOnPlaybackStatusUpdate(async (status) => {
         if (status.isLoaded) {
           set({
             playbackPosition: status.positionMillis,
@@ -95,11 +125,31 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             isPlaying: status.isPlaying,
             isBuffering: status.isBuffering,
             playbackSpeed: status.rate,
-            isLooping: status.isLooping,
+            isLoopingSingle: status.isLooping,
             isMuted: status.isMuted,
             isLoaded: status.isLoaded,
             volume: status.volume,
           });
+
+          if (status.didJustFinish) {
+            console.log('didJustFinish');
+            console.log('isLoopingSingle', isLoopingSingle);
+            console.log('stopAfterCurrentTrack', stopAfterCurrentTrack);
+            console.log('playUntilLastTrack', playUntilLastTrack);
+            console.log('isLoopingQueue', isLoopingQueue);
+
+            if (isLoopingSingle || stopAfterCurrentTrack) {
+              return;
+            }
+            if (isLoopingQueue) {
+              await nextTrack();
+              return;
+            }
+            if (playUntilLastTrack && index === tracks.length - 1) {
+              await nextTrack();
+              return;
+            }
+          }
         }
       });
 
@@ -144,17 +194,31 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   nextTrack: async () => {
-    const { currentTrackIndex, tracks, loadTrack } = get();
-
+    const {
+      currentTrackIndex,
+      tracks,
+      loadTrack,
+      isNextTrackAvailable,
+      playPause,
+    } = get();
+    if (!isNextTrackAvailable()) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
-
     await loadTrack(nextIndex);
+    await playPause();
   },
 
   prevTrack: async () => {
-    const { currentTrackIndex, tracks, loadTrack } = get();
+    const {
+      currentTrackIndex,
+      tracks,
+      loadTrack,
+      isPrevTrackAvailable,
+      playPause,
+    } = get();
+    if (!isPrevTrackAvailable()) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     await loadTrack(prevIndex);
+    await playPause();
   },
 
   seek: async (position: number) => {
@@ -181,15 +245,86 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  setLooping: async (looping: boolean) => {
+  // setLooping: async () => {
+  //   const { playbackInstance } = get();
+
+  //   if (playbackInstance) {
+  //     await playbackInstance.setIsLoopingAsync(
+  //   }
+  // },
+
+  enableSingleLooping: async () => {
     const { playbackInstance } = get();
 
+    set({
+      isLoopingSingle: true,
+      isLoopingQueue: false,
+      playUntilLastTrack: false,
+      stopAfterCurrentTrack: false,
+    });
+
     if (playbackInstance) {
-      await playbackInstance.setIsLoopingAsync(looping);
+      await playbackInstance.setIsLoopingAsync(true);
     }
   },
 
-  setQueueLooping: (looping: boolean) => set({ isQueueLooping: looping }),
+  disableSingleLooping: async () => {
+    const { playbackInstance } = get();
+    set({ isLoopingSingle: false });
+    if (playbackInstance) {
+      await playbackInstance.setIsLoopingAsync(false);
+    }
+  },
+
+  enableQueueLooping: async () => {
+    const { disableSingleLooping } = get();
+    await disableSingleLooping();
+    set({
+      isLoopingQueue: true,
+      playUntilLastTrack: false,
+      stopAfterCurrentTrack: false,
+    });
+  },
+
+  enableStopAfterCurrentTrack: async () => {
+    const { disableSingleLooping } = get();
+    await disableSingleLooping();
+    set({
+      stopAfterCurrentTrack: true,
+      isLoopingSingle: false,
+      playUntilLastTrack: false,
+      isLoopingQueue: false,
+    });
+  },
+
+  enablePlayUntilLastTrack: async () => {
+    const { disableSingleLooping } = get();
+    await disableSingleLooping();
+    set({
+      playUntilLastTrack: true,
+      isLoopingSingle: false,
+      stopAfterCurrentTrack: false,
+      isLoopingQueue: false,
+    });
+  },
+
+  toggleLoopStates: async () => {
+    const {
+      isLoopingSingle,
+      isLoopingQueue,
+      playUntilLastTrack,
+      stopAfterCurrentTrack,
+    } = get();
+    if (isLoopingSingle) {
+      await get().enableQueueLooping();
+    } else if (isLoopingQueue) {
+      await get().enablePlayUntilLastTrack();
+    } else if (playUntilLastTrack) {
+      await get().enableStopAfterCurrentTrack();
+    } else if (stopAfterCurrentTrack) {
+      await get().disableSingleLooping();
+    }
+  },
 
   seekBackward: async (seconds: number) => {
     const { playbackInstance, playbackPosition } = get();
@@ -210,8 +345,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     await playbackInstance?.setPositionAsync(newPosition);
   },
 
-  toggleQueueLooping: () =>
-    set((state) => ({
-      isQueueLooping: !state.isQueueLooping,
-    })),
+  resetPlayer: async () => {
+    const { playbackInstance } = get();
+    if (playbackInstance) {
+      await playbackInstance.unloadAsync();
+    }
+    set((state) => ({ ...state, ...InitialState }));
+  },
 }));

@@ -1,7 +1,7 @@
 // components/global/LoadingModal.tsx
 
 import React, { useEffect, useState } from 'react';
-import { useAppState } from '@/hooks/useAppState';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 import ModalWrapper from '../reusables/ModalWrapper';
 import LottieView from 'lottie-react-native';
 import { PlayingMusicLA } from '@/assets/lottie';

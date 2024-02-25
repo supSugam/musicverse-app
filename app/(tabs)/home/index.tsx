@@ -5,12 +5,12 @@ import GenreScrollView from '@/components/home/GenreScrollView';
 import StyledText from '@/components/reusables/StyledText';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
-import { useAppState } from '@/hooks/useAppState';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 const HomeScreen: React.FC = () => {
   const { currentUser, currentUserProfile } = useAuthStore((state) => state);
@@ -36,18 +36,17 @@ const HomeScreen: React.FC = () => {
     },
   });
 
-  const { data } = getAllTracks;
+  const { data, isLoading, isFetching, isRefetching } = getAllTracks;
   const { api } = useAuthStore();
   const { setIsLoading } = useAppState();
   useEffect(() => {
-    setIsLoading(true);
+    setIsLoading(isGenresLoading || isLoading || isFetching || isRefetching);
     console.log(api.defaults.baseURL, 'api');
     if (data) {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
-      updateTracks(tracks);
     }
-  }, [data]);
+  }, [data, isGenresLoading, isLoading, isFetching, isRefetching]);
 
   const {
     updateTracks,
@@ -56,11 +55,25 @@ const HomeScreen: React.FC = () => {
     currentTrack,
     isPlaying,
     tracks: playerTracks,
+    enableSingleLooping,
+    enableQueueLooping,
+    resetPlayer,
   } = usePlayerStore((state) => state);
 
   return (
     <Container includeNavBar navbarTitle="Home">
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={isGenresLoading}
+            onRefresh={() => {
+              setIsLoading(true);
+              getAllTracks.refetch();
+            }}
+          />
+        }
+      >
         {/* <View>
           <StyledText size="2xl" weight="bold" tracking="tighter">
             Hi, {currentUserProfile?.name || currentUser?.username}!
@@ -82,7 +95,8 @@ const HomeScreen: React.FC = () => {
               id={track.id}
               title={track.title}
               onPlayClick={async () => {
-                console.log('play clicked');
+                updateTracks(tracksOfSelectedGenre);
+                await enableQueueLooping();
                 await playPause(track.id);
               }}
               isPlaying={currentTrack()?.id === track.id && isPlaying}

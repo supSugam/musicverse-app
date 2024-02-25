@@ -16,6 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 
 interface ITrackListItemProps {
   id: string;
@@ -64,6 +65,16 @@ const TrackListItem = ({
     favoriteButtonScale.value = withTiming(1, { duration: 250 });
   };
 
+  // API
+
+  const {
+    toggleLike: { mutate, isPending },
+  } = useTracksQuery({ id });
+
+  const onLikeClick = () => {
+    if (isPending) return;
+    mutate(id);
+  };
   return (
     <Animated.View
       style={[
@@ -143,14 +154,14 @@ const TrackListItem = ({
         </View>
         <View className="flex flex-row items-center ml-3 flex-1 justify-end">
           <Pressable
+            onPress={onLikeClick}
             onPressIn={() => {
-              setIsFavorite(!isFavorite);
-
               favoriteButtonScale.value = withSpring(1.1, {
                 stiffness: 1000,
                 damping: 10,
               });
             }}
+            disabled={isPending}
             onPressOut={leaveAnimation}
           >
             <Animated.View style={favoriteButtonStyle}>

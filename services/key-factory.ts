@@ -48,4 +48,5 @@ export const trackKeyFactory = {
   createTrack: () => [TRACK_QUERY_KEY],
   updateTrack: (id: string) => [TRACK_QUERY_KEY, id],
   deleteTrack: (id?: string) => [TRACK_QUERY_KEY, ...(id ? [id] : [])],
+  toggleLike: (id?: string) => [TRACK_QUERY_KEY, ...(id ? [id] : [])],
 };

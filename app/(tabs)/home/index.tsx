@@ -2,7 +2,6 @@
 import Container from '@/components/Container';
 import TrackListItem from '@/components/Tracks/TrackListItem';
 import GenreScrollView from '@/components/home/GenreScrollView';
-import StyledText from '@/components/reusables/StyledText';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useAppState } from '@/services/zustand/stores/useAppStore';

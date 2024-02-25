@@ -36,6 +36,12 @@ type TracksQuery<T extends string | undefined = undefined> = {
         string, // Ensure the mutation function receives a string (track id)
         unknown
       >;
+      toggleLike: UseMutationResult<
+        AxiosResponse<any, any>,
+        Error,
+        string, // Ensure the mutation function receives a string (track id)
+        unknown
+      >;
     }
   : {});
 
@@ -54,6 +60,7 @@ export const useTracksQuery = <T extends string | undefined = undefined>({
       console.log(params?.selectedGenre, 'refetch');
       return await api.get('/tracks', { params: cleanObject(params || {}) });
     },
+    enabled: !!params,
   });
 
   const deleteTrackById = useMutation({
@@ -86,9 +93,26 @@ export const useTracksQuery = <T extends string | undefined = undefined>({
     },
   });
 
+  const toggleLike = useMutation({
+    mutationFn: async (trackId: string) =>
+      await api.post(`/tracks/toggle-like/${trackId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trackKeyFactory.toggleLike(id),
+      });
+    },
+    onError: (error) => {
+      toastResponseMessage({
+        content: error,
+        type: 'error',
+      });
+    },
+  });
+
   return {
     getAllTracks,
     getTrackById,
     deleteTrackById,
+    toggleLike,
   };
 };

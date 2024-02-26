@@ -204,7 +204,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (!isNextTrackAvailable()) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
     await loadTrack(nextIndex);
-    await playPause();
+    await playPause(undefined, true);
   },
 
   prevTrack: async () => {
@@ -218,7 +218,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (!isPrevTrackAvailable()) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     await loadTrack(prevIndex);
-    await playPause();
+    await playPause(undefined, true);
   },
 
   seek: async (position: number) => {

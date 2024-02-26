@@ -56,10 +56,8 @@ export const useTracksQuery = <T extends string | undefined = undefined>({
   const queryClient = useQueryClient();
   const getAllTracks = useQuery<AxiosResponse<GetAllTracksResponse, any>>({
     queryKey: [TRACK_QUERY_KEY, params],
-    queryFn: async () => {
-      console.log('refetch');
-      return await api.get('/tracks', { params: cleanObject(params || {}) });
-    },
+    queryFn: async () =>
+      await api.get('/tracks', { params: cleanObject(params || {}) }),
     enabled: !!params,
   });
 

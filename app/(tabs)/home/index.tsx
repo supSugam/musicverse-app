@@ -86,7 +86,7 @@ const HomeScreen: React.FC = () => {
         />
 
         <View className="flex flex-col mt-8">
-          {tracksOfSelectedGenre.map((track) => (
+          {tracksOfSelectedGenre.map((track, i) => (
             <TrackListItem
               key={track.id}
               id={track.id}
@@ -102,6 +102,7 @@ const HomeScreen: React.FC = () => {
               cover={track.cover}
               duration={track.trackDuration}
               isLiked={track?.isLiked}
+              label={i + 1}
             />
           ))}
         </View>

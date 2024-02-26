@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Animated, {
   useAnimatedStyle,
@@ -8,14 +14,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GLOBAL_STYLES, TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import COLORS from '@/constants/Colors';
-import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import ImageDisplay from '../reusables/ImageDisplay';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import StyledText from '../reusables/StyledText';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
-import { ITrackDetails } from '@/utils/Interfaces/ITrack';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 const MiniPlayer = () => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -27,7 +32,9 @@ const MiniPlayer = () => {
     };
   });
 
-  const currentTrack = usePlayerStore((state) => state.currentTrack());
+  const playerStore = usePlayerStore();
+  const { isPlaying, playPause, prevTrack, nextTrack } = playerStore;
+  const currentTrack = playerStore.currentTrack();
 
   useEffect(() => {
     translateY.value = withSpring(
@@ -63,8 +70,18 @@ const MiniPlayer = () => {
   const onFavBtnLeave = () => {
     favoriteButtonScale.value = withTiming(1, { duration: 250 });
   };
+
+  const panResponder = useSwipeGesture({
+    onSwipeLeft: () => nextTrack(),
+    onSwipeRight: () => prevTrack(),
+    onSwipeUp: () => console.log('Swiped up'),
+    onSwipeDown: () => console.log('Swiped down'),
+  });
   return (
-    <Animated.View style={[styles.container, containerAnimatedStyle]}>
+    <Animated.View
+      {...panResponder}
+      style={[styles.container, containerAnimatedStyle]}
+    >
       <LinearGradient
         colors={[COLORS.gradient.primary[0], COLORS.gradient.primary[1]]}
         style={{
@@ -83,17 +100,13 @@ const MiniPlayer = () => {
         end={{ x: 1, y: 1 }}
       />
 
-      <View className="flex flex-row items-center px-2">
-        {/* <TouchableOpacity onPress={onPlayClick} activeOpacity={0.8}>
-          <MaterialIcons
-            name={isPlaying ? 'pause' : 'play-arrow'}
-            size={28}
-            color={COLORS.neutral.light}
-          />
-        </TouchableOpacity> */}
-
+      <View className="flex flex-row items-center flex-1 px-3">
         <ImageDisplay
-          source={currentTrack?.cover || TRACK_PLACEHOLDER_IMAGE}
+          source={
+            currentTrack?.cover
+              ? { uri: currentTrack?.cover }
+              : TRACK_PLACEHOLDER_IMAGE
+          }
           placeholder={''}
           width={40}
           height={40}
@@ -102,7 +115,6 @@ const MiniPlayer = () => {
             borderColor: COLORS.neutral.semidark,
             borderWidth: 1,
           }}
-          className="ml-4"
         />
 
         <View className="flex flex-1 flex-col ml-3">
@@ -128,7 +140,7 @@ const MiniPlayer = () => {
               currentTrack?.creator?.username}
           </StyledText>
         </View>
-        <View className="flex flex-row items-center ml-3 flex-1 justify-end">
+        <View className="flex flex-row items-center ml-auto justify-end">
           <Pressable
             onPress={onLikeClick}
             onPressIn={() => {
@@ -152,6 +164,14 @@ const MiniPlayer = () => {
               />
             </Animated.View>
           </Pressable>
+
+          <TouchableOpacity onPress={() => playPause()} activeOpacity={0.8}>
+            <MaterialIcons
+              name={isPlaying ? 'pause' : 'play-arrow'}
+              size={28}
+              color={COLORS.neutral.light}
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </Animated.View>

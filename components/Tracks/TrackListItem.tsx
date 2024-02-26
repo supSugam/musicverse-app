@@ -29,6 +29,7 @@ interface ITrackListItemProps {
   onPlayClick?: () => void;
   isPlaying?: boolean;
   isLiked?: boolean;
+  label?: string | number;
 }
 
 const TrackListItem = ({
@@ -38,6 +39,7 @@ const TrackListItem = ({
   artistId,
   cover,
   duration,
+  label,
   isLiked = false,
   onPlayClick,
   isPlaying,
@@ -112,6 +114,18 @@ const TrackListItem = ({
         end={{ x: 1, y: 1 }}
       />
       <View className="flex flex-row items-center flex-1 px-2">
+        {label !== undefined && (
+          <StyledText
+            size="sm"
+            weight="semibold"
+            style={{
+              color: COLORS.neutral.normal,
+            }}
+            className="mx-2"
+          >
+            {label}
+          </StyledText>
+        )}
         <ImageDisplay
           source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
           placeholder={''}
@@ -122,10 +136,10 @@ const TrackListItem = ({
             borderColor: COLORS.neutral.semidark,
             borderWidth: 1,
           }}
-          className="ml-4"
+          className="ml-2"
         />
 
-        <View className="flex flex-col mx-3 flex-1">
+        <View className="flex flex-col mx-3 mr-5 flex-1">
           <StyledText
             size="base"
             weight="semibold"
@@ -158,7 +172,7 @@ const TrackListItem = ({
           >
             <MaterialIcons
               name={isPlaying ? 'pause' : 'play-arrow'}
-              size={36}
+              size={28}
               color={COLORS.neutral.light}
             />
           </TouchableOpacity>

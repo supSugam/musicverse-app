@@ -44,3 +44,5 @@ export const ALLOWED_AUDIO_MIMETYPES = [
   'audio/x-wav',
   'audio/wave',
 ];
+
+export const TRACK_PLACEHOLDER_IMAGE = require('@/assets/images/placeholder/track.jpg');

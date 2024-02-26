@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
+import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 
 interface ITrackListItemProps {
   id: string;
@@ -28,7 +29,6 @@ interface ITrackListItemProps {
   onPlayClick?: () => void;
   isPlaying?: boolean;
 }
-const TRACK_PLACEHOLDER_IMAGE = require('@/assets/images/placeholder/track.jpg');
 
 const TrackListItem = ({
   id,

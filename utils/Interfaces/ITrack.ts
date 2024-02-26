@@ -54,4 +54,5 @@ export interface ITrackDetails {
   likedBy?: any[]; // Lets see
   tags?: ITag[];
   creator?: IUserWithProfile;
+  isLiked?: boolean;
 }

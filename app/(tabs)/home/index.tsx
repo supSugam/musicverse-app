@@ -35,17 +35,15 @@ const HomeScreen: React.FC = () => {
     },
   });
 
-  const { data, isLoading, isFetching, isRefetching } = getAllTracks;
-  const { api } = useAuthStore();
+  const { data, isLoading } = getAllTracks;
   const { setIsLoading } = useAppState();
   useEffect(() => {
-    setIsLoading(isGenresLoading || isLoading || isFetching || isRefetching);
-    console.log(api.defaults.baseURL, 'api');
+    setIsLoading(isGenresLoading || isLoading);
     if (data) {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
     }
-  }, [data, isGenresLoading, isLoading, isFetching, isRefetching]);
+  }, [data, isGenresLoading, isLoading]);
 
   const {
     updateTracks,
@@ -103,6 +101,7 @@ const HomeScreen: React.FC = () => {
               artistId={track?.creator?.id}
               cover={track.cover}
               duration={track.trackDuration}
+              isLiked={track?.isLiked}
             />
           ))}
         </View>

@@ -28,6 +28,7 @@ interface ITrackListItemProps {
   duration: number;
   onPlayClick?: () => void;
   isPlaying?: boolean;
+  isLiked?: boolean;
 }
 
 const TrackListItem = ({
@@ -37,6 +38,7 @@ const TrackListItem = ({
   artistId,
   cover,
   duration,
+  isLiked = false,
   onPlayClick,
   isPlaying,
 }: ITrackListItemProps) => {
@@ -45,7 +47,7 @@ const TrackListItem = ({
   // Favorite button animations
   const favoriteButtonScale = useSharedValue(1);
 
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(isLiked);
 
   const translateStyle = useAnimatedStyle(() => {
     return {
@@ -74,6 +76,7 @@ const TrackListItem = ({
   const onLikeClick = () => {
     if (isPending) return;
     mutate(id);
+    setIsFavorite((prev) => !prev);
   };
   return (
     <Animated.View
@@ -108,15 +111,7 @@ const TrackListItem = ({
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
       />
-      <View className="flex flex-row items-center px-2">
-        <TouchableOpacity onPress={onPlayClick} activeOpacity={0.8}>
-          <MaterialIcons
-            name={isPlaying ? 'pause' : 'play-arrow'}
-            size={28}
-            color={COLORS.neutral.light}
-          />
-        </TouchableOpacity>
-
+      <View className="flex flex-row items-center flex-1 px-2">
         <ImageDisplay
           source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
           placeholder={''}
@@ -130,14 +125,14 @@ const TrackListItem = ({
           className="ml-4"
         />
 
-        <View className="flex flex-1 flex-col ml-3">
+        <View className="flex flex-col mx-3 flex-1">
           <StyledText
             size="base"
             weight="semibold"
             numberOfLines={1}
             ellipsizeMode="tail"
           >
-            {title}
+            {title}asasasasasasasasasasasaaaa
           </StyledText>
           <StyledText
             size="sm"
@@ -152,35 +147,25 @@ const TrackListItem = ({
             {artistName}
           </StyledText>
         </View>
-        <View className="flex flex-row items-center ml-3 flex-1 justify-end">
-          <Pressable
-            onPress={onLikeClick}
-            onPressIn={() => {
-              favoriteButtonScale.value = withSpring(1.1, {
-                stiffness: 1000,
-                damping: 10,
-              });
+        <View className="flex flex-row items-center ml-auto justify-end">
+          <TouchableOpacity
+            className="mr-2"
+            onPress={onPlayClick}
+            activeOpacity={0.8}
+            style={{
+              transform: [{ scale: 1.2 }],
             }}
-            disabled={isPending}
-            onPressOut={leaveAnimation}
           >
-            <Animated.View style={favoriteButtonStyle}>
-              <FontAwesome
-                name={isFavorite ? 'heart' : 'heart-o'}
-                size={26}
-                color={isFavorite ? COLORS.neutral.white : COLORS.neutral.light}
-                className="mr-3"
-                style={{
-                  marginRight: 16,
-                }}
-              />
-            </Animated.View>
-          </Pressable>
+            <MaterialIcons
+              name={isPlaying ? 'pause' : 'play-arrow'}
+              size={36}
+              color={COLORS.neutral.light}
+            />
+          </TouchableOpacity>
           <MaterialIcons
             name="more-vert"
             size={24}
             color={COLORS.neutral.light}
-            className="ml-3"
           />
         </View>
       </View>

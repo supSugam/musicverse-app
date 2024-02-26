@@ -57,7 +57,7 @@ export const useTracksQuery = <T extends string | undefined = undefined>({
   const getAllTracks = useQuery<AxiosResponse<GetAllTracksResponse, any>>({
     queryKey: [TRACK_QUERY_KEY, params],
     queryFn: async () => {
-      console.log(params?.selectedGenre, 'refetch');
+      console.log('refetch');
       return await api.get('/tracks', { params: cleanObject(params || {}) });
     },
     enabled: !!params,
@@ -98,7 +98,7 @@ export const useTracksQuery = <T extends string | undefined = undefined>({
       await api.post(`/tracks/toggle-like/${trackId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: trackKeyFactory.toggleLike(id),
+        queryKey: [TRACK_QUERY_KEY],
       });
     },
     onError: (error) => {

@@ -45,7 +45,7 @@ interface PlayerState {
   playPause: (id?: string, play?: boolean) => Promise<void>;
   nextTrack: () => Promise<void>;
   prevTrack: () => Promise<void>;
-  currentTrack: ITrackDetails | null;
+  currentTrack: () => ITrackDetails | null;
   seek: (position: number) => Promise<void>;
   setSpeed: (speed: number) => Promise<void>;
   setVolume: (volume: number) => Promise<void>;
@@ -66,8 +66,11 @@ interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
 
-
-  currentTrack:(get().tracks[get().currentTrackIndex])||null,
+  currentTrack: () => {
+    const { tracks, currentTrackIndex } = get();
+    if (tracks.length === 0) return null;
+    return tracks[currentTrackIndex] || null;
+  },
 
   isNextTrackAvailable: () => {
     const { currentTrackIndex, tracks, isLoopingQueue } = get();
@@ -83,9 +86,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   updateTracks: (tracks: ITrackDetails[]) => {
     set({ tracks });
-    const { playbackInstance,currentTrack } = get();
+    const { playbackInstance, currentTrack } = get();
     tracks.forEach((track) => {
-      if (track.id === currentTrack?.id) {
+      if (track.id === currentTrack()?.id) {
         playbackInstance?.loadAsync({ uri: track.src }, {}, false);
       }
     });
@@ -167,12 +170,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       loadTrack,
       tracks,
       playPause,
-      currentTrack
+      currentTrack,
     } = get();
 
     if (!id && !playbackInstance) return;
 
-    if (id && id !== currentTrack?.id) {
+    if (id && id !== currentTrack()?.id) {
       await loadTrack(tracks.findIndex((track) => track.id === id));
       await playPause(undefined, true);
       return;

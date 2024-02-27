@@ -105,6 +105,7 @@ export default function TabsLayout() {
           options={{
             headerTitle: 'Home',
           }}
+          navigationKey="home"
         />
         <Tab.Screen
           name="Search"

@@ -146,7 +146,7 @@ const TrackListItem = ({
             numberOfLines={1}
             ellipsizeMode="tail"
           >
-            {title}asasasasasasasasasasasaaaa
+            {title}
           </StyledText>
           <StyledText
             size="sm"

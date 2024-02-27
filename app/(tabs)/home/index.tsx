@@ -35,7 +35,7 @@ const HomeScreen: React.FC = () => {
     },
   });
 
-  const { data, isLoading } = getAllTracks;
+  const { data, isLoading, isRefetching, isPending, isFetching } = getAllTracks;
   const { setIsLoading } = useAppState();
   useEffect(() => {
     setIsLoading(isGenresLoading || isLoading);
@@ -43,7 +43,7 @@ const HomeScreen: React.FC = () => {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
     }
-  }, [data, isGenresLoading, isLoading]);
+  }, [data, isGenresLoading, isLoading, isRefetching, isPending, isFetching]);
 
   const {
     updateTracks,

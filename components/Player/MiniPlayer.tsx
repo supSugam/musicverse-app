@@ -21,6 +21,7 @@ import StyledText from '../reusables/StyledText';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useNavigation } from 'expo-router';
 
 const MiniPlayer = () => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -31,14 +32,19 @@ const MiniPlayer = () => {
       transform: [{ translateY: translateY.value }],
     };
   });
+  const navigation = useNavigation();
 
   const playerStore = usePlayerStore();
   const { isPlaying, playPause, prevTrack, nextTrack } = playerStore;
   const currentTrack = playerStore.currentTrack();
 
   useEffect(() => {
+    console.log('nav', navigation.getId());
+
+    const showPlayerAboveTabBar =
+      currentTrack !== null && navigation?.getState()?.index === 1;
     translateY.value = withSpring(
-      currentTrack !== null ? 0 : GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2,
+      showPlayerAboveTabBar ? 0 : GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2,
       {
         damping: 20,
         stiffness: 90,

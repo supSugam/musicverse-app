@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { Modal } from 'react-native';
 
 const LoadingModal: React.FC = () => {
   const { isLoading } = useAppState((state) => state);
@@ -28,12 +29,7 @@ const LoadingModal: React.FC = () => {
   }, [isLoading]);
 
   return (
-    <ModalWrapper
-      fullWidth
-      visible={isLoading}
-      animationType="fade"
-      transparent
-    >
+    <Modal visible={isLoading} animationType="fade" transparent>
       <Animated.View
         style={[
           { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -52,7 +48,7 @@ const LoadingModal: React.FC = () => {
           }}
         />
       </Animated.View>
-    </ModalWrapper>
+    </Modal>
   );
 };
 

@@ -117,10 +117,7 @@ const useUploadAssets = ({
     for (const key in payload) {
       if (key === 'uploadKey') continue; // make constant for uploadKey
       const value = payload[key];
-      console.log('Key:', key);
-      console.log('Value:', value);
       if (Array.isArray(value)) {
-        console.log('Array', value);
         value.forEach((item: any, index: number) => {
           // Handle arrays properly by appending each item with the same key
           formData.append(`${key}[${index}]`, stringifyValue(item));
@@ -165,7 +162,6 @@ const useUploadAssets = ({
         };
         const response = await api(config);
         onUploadStart?.();
-        console.log(response.data);
         return response.data;
       } catch (error) {
         setProgressDetails((prev) => ({

@@ -35,15 +35,19 @@ const HomeScreen: React.FC = () => {
     },
   });
 
-  const { data, isLoading, isRefetching, isPending, isFetching } = getAllTracks;
+  const { data, isLoading: isTracksLoading } = getAllTracks;
   const { setIsLoading } = useAppState();
   useEffect(() => {
-    setIsLoading(isGenresLoading || isLoading);
     if (data) {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
+      updateTracks(tracks);
     }
-  }, [data, isGenresLoading, isLoading, isRefetching, isPending, isFetching]);
+  }, [data]);
+
+  useEffect(() => {
+    setIsLoading(isGenresLoading || isTracksLoading);
+  }, [isGenresLoading, isTracksLoading]);
 
   const {
     updateTracks,
@@ -65,7 +69,6 @@ const HomeScreen: React.FC = () => {
           <RefreshControl
             refreshing={isGenresLoading}
             onRefresh={() => {
-              setIsLoading(true);
               getAllTracks.refetch();
             }}
           />

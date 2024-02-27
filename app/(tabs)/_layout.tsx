@@ -7,6 +7,8 @@ import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
 import { GLOBAL_STYLES } from '@/utils/constants';
 import MiniPlayer from '@/components/Player/MiniPlayer';
+import { useEffect, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
@@ -53,51 +55,61 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 };
 
 export default function TabsLayout() {
+  const [activeTab, setActiveTab] = useState<string>('Home');
   return (
     <>
-      <MiniPlayer />
+      <MiniPlayer activeTab={activeTab} />
       <Tab.Navigator
         initialRouteName="Home"
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} route={route} />
-          ),
-
-          tabBarLabel: ({ focused, color }) => {
-            const routeName = route.name as string;
-            return (
-              <StyledText
-                size="xs"
-                tracking="tight"
-                weight={focused ? 'bold' : 'normal'}
-                dimness={focused ? 'none' : 'extra'}
-                style={{
-                  color: focused ? COLORS.neutral.light : COLORS.neutral.normal,
-                }}
-              >
-                {routeName}
-              </StyledText>
-            );
+        screenListeners={({ navigation, route }) => ({
+          tabPress: (e) => {
+            setActiveTab(route.name);
           },
-          headerShown: Platform.OS === 'ios' ? true : false,
-          headerStyle: {
-            backgroundColor: 'transparent',
-          },
-          tabBarStyle: {
-            paddingBottom: 10,
-            paddingTop: 10,
-            height: GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT,
-            backgroundColor: 'transparent',
-            borderTopWidth: 0,
-            elevation: 0,
-          },
-          tabBarOptions: {
-            tabBarPosition: 'bottom',
-            swipeEnabled: true,
-            animationEnabled: true,
-          },
-          tabBarHideOnKeyboard: true,
         })}
+        screenOptions={({ route }) => {
+          return {
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon focused={focused} route={route} />
+            ),
+
+            tabBarLabel: ({ focused, color }) => {
+              const routeName = route.name as string;
+              return (
+                <StyledText
+                  size="xs"
+                  tracking="tight"
+                  weight={focused ? 'bold' : 'normal'}
+                  dimness={focused ? 'none' : 'extra'}
+                  style={{
+                    color: focused
+                      ? COLORS.neutral.light
+                      : COLORS.neutral.normal,
+                  }}
+                >
+                  {routeName}
+                </StyledText>
+              );
+            },
+            headerShown: Platform.OS === 'ios' ? true : false,
+            headerStyle: {
+              backgroundColor: 'transparent',
+            },
+            tabBarStyle: {
+              paddingBottom: 10,
+              paddingTop: 10,
+              height: GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT,
+              backgroundColor: 'transparent',
+              borderTopWidth: 0,
+              elevation: 0,
+            },
+            tabBarOptions: {
+              tabBarPosition: 'bottom',
+              swipeEnabled: true,
+              animationEnabled: true,
+            },
+            tabBarHideOnKeyboard: true,
+          };
+        }}
       >
         <Tab.Screen
           name="Home"
@@ -105,7 +117,6 @@ export default function TabsLayout() {
           options={{
             headerTitle: 'Home',
           }}
-          navigationKey="home"
         />
         <Tab.Screen
           name="Search"

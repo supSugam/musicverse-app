@@ -21,39 +21,39 @@ import StyledText from '../reusables/StyledText';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
-import { useNavigation } from 'expo-router';
 
-const MiniPlayer = () => {
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2);
+const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
+  const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateY: translateY.value }],
     };
   });
-  const navigation = useNavigation();
 
   const playerStore = usePlayerStore();
   const { isPlaying, playPause, prevTrack, nextTrack } = playerStore;
   const currentTrack = playerStore.currentTrack();
 
   useEffect(() => {
-    console.log('nav', navigation.getId());
+    const showPlayerAboveTabBar = currentTrack !== null && activeTab === 'Home';
 
-    const showPlayerAboveTabBar =
-      currentTrack !== null && navigation?.getState()?.index === 1;
-    translateY.value = withSpring(
-      showPlayerAboveTabBar ? 0 : GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2,
-      {
-        damping: 20,
-        stiffness: 90,
-        overshootClamping: false,
-        restDisplacementThreshold: 0.1,
-        restSpeedThreshold: 0.1,
-      }
-    );
-  }, [currentTrack]);
+    if (showPlayerAboveTabBar) {
+      translateY.value = withSpring(
+        0,
+        // showPlayerAboveTabBar ? 0 : GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2,
+        {
+          damping: 20,
+          stiffness: 90,
+          overshootClamping: false,
+          restDisplacementThreshold: 0.1,
+          restSpeedThreshold: 0.1,
+        }
+      );
+    } else {
+      translateY.value = withSpring(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
+    }
+  }, [currentTrack, activeTab]);
 
   // API
 
@@ -65,7 +65,6 @@ const MiniPlayer = () => {
     if (isPending) return;
     if (!currentTrack) return;
     mutate(currentTrack.id);
-    setIsFavorite((prev) => !prev);
   };
 
   // Favorite button animations
@@ -160,9 +159,13 @@ const MiniPlayer = () => {
           >
             <Animated.View style={favoriteButtonStyle}>
               <FontAwesome
-                name={isFavorite ? 'heart' : 'heart-o'}
+                name={currentTrack?.isLiked ? 'heart' : 'heart-o'}
                 size={26}
-                color={isFavorite ? COLORS.neutral.white : COLORS.neutral.light}
+                color={
+                  currentTrack?.isLiked
+                    ? COLORS.neutral.white
+                    : COLORS.neutral.light
+                }
                 className="mr-3"
                 style={{
                   marginRight: 16,

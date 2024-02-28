@@ -85,10 +85,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   updateTracks: (tracks: ITrackDetails[]) => {
-    set((state) => ({
-      ...state,
-      tracks,
-    }));
+    set({ tracks });
     const { playbackInstance, currentTrack } = get();
     tracks.forEach((track) => {
       if (track.id === currentTrack()?.id) {
@@ -118,7 +115,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       if (!src) return;
 
-      await newPlaybackInstance.loadAsync({ uri: src }, {}, false);
+      await newPlaybackInstance.loadAsync(
+        { uri: src },
+        {
+          progressUpdateIntervalMillis: 1000,
+        },
+        false
+      );
 
       newPlaybackInstance.setOnPlaybackStatusUpdate(async (status) => {
         if (status.isLoaded) {
@@ -135,6 +138,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
           });
 
           if (status.didJustFinish) {
+            console.log('didJustFinish');
+            console.log('isLoopingSingle', isLoopingSingle);
+            console.log('stopAfterCurrentTrack', stopAfterCurrentTrack);
+            console.log('playUntilLastTrack', playUntilLastTrack);
+            console.log('isLoopingQueue', isLoopingQueue);
+
             if (isLoopingSingle || stopAfterCurrentTrack) {
               return;
             }
@@ -159,103 +168,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       set({ playbackError: error as string });
     }
   },
-
-  // currentTrack: () => {
-  //   const { tracks, currentTrackIndex } = get();
-  //   if (tracks.length === 0) return null;
-  //   return tracks[currentTrackIndex] || null;
-  // },
-
-  // isNextTrackAvailable: () => {
-  //   const { currentTrackIndex, tracks, isLoopingQueue } = get();
-
-  //   return currentTrackIndex < tracks.length - 1 || isLoopingQueue;
-  // },
-
-  // isPrevTrackAvailable: () => {
-  //   const { currentTrackIndex, isLoopingQueue } = get();
-
-  //   return currentTrackIndex > 0 || isLoopingQueue;
-  // },
-
-  // updateTracks: (tracks: ITrackDetails[]) => {
-  //   set({ tracks });
-  //   const { playbackInstance, currentTrack } = get();
-  //   tracks.forEach((track) => {
-  //     if (track.id === currentTrack()?.id) {
-  //       playbackInstance?.loadAsync({ uri: track.src }, {}, false);
-  //     }
-  //   });
-  // },
-
-  // loadTrack: async (index: number) => {
-  //   try {
-  //     const {
-  //       tracks,
-  //       playbackInstance,
-  //       isLoopingSingle,
-  //       isLoopingQueue,
-  //       playUntilLastTrack,
-  //       stopAfterCurrentTrack,
-  //       nextTrack,
-  //     } = get();
-
-  //     if (playbackInstance) {
-  //       await playbackInstance.unloadAsync();
-  //     }
-  //     const newPlaybackInstance = new Audio.Sound();
-
-  //     const { src } = tracks[index];
-
-  //     if (!src) return;
-
-  //     await newPlaybackInstance.loadAsync({ uri: src }, {}, false);
-
-  //     newPlaybackInstance.setOnPlaybackStatusUpdate(async (status) => {
-  //       if (status.isLoaded) {
-  //         set({
-  //           playbackPosition: status.positionMillis,
-  //           playbackDuration: status.durationMillis ?? 0,
-  //           isPlaying: status.isPlaying,
-  //           isBuffering: status.isBuffering,
-  //           playbackSpeed: status.rate,
-  //           isLoopingSingle: status.isLooping,
-  //           isMuted: status.isMuted,
-  //           isLoaded: status.isLoaded,
-  //           volume: status.volume,
-  //         });
-
-  //         if (status.didJustFinish) {
-  //           console.log('didJustFinish');
-  //           console.log('isLoopingSingle', isLoopingSingle);
-  //           console.log('stopAfterCurrentTrack', stopAfterCurrentTrack);
-  //           console.log('playUntilLastTrack', playUntilLastTrack);
-  //           console.log('isLoopingQueue', isLoopingQueue);
-
-  //           if (isLoopingSingle || stopAfterCurrentTrack) {
-  //             return;
-  //           }
-  //           if (isLoopingQueue) {
-  //             await nextTrack();
-  //             return;
-  //           }
-  //           if (playUntilLastTrack && index === tracks.length - 1) {
-  //             await nextTrack();
-  //             return;
-  //           }
-  //         }
-  //       }
-  //     });
-
-  //     set({
-  //       playbackInstance: newPlaybackInstance,
-  //       currentTrackIndex: index,
-  //       playbackError: null,
-  //     });
-  //   } catch (error) {
-  //     set({ playbackError: error as string });
-  //   }
-  // },
 
   playPause: async (id?: string, play = false) => {
     const {

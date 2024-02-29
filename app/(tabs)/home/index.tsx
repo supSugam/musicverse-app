@@ -73,6 +73,7 @@ const HomeScreen: React.FC = () => {
     enableQueueLooping,
     playATrackById,
     resetPlayer,
+    isBuffering,
   } = usePlayerStore((state) => state);
 
   return (
@@ -121,6 +122,7 @@ const HomeScreen: React.FC = () => {
               cover={track.cover}
               duration={track.trackDuration}
               isLiked={track?.isLiked}
+              isBuffering={isBuffering && currentTrack()?.id === track.id}
               label={i + 1}
             />
           ))}

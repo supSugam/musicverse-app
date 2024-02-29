@@ -146,12 +146,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
           });
 
           if (status.didJustFinish) {
-            console.log('didJustFinish');
-            console.log('isLoopingSingle', isLoopingSingle);
-            console.log('stopAfterCurrentTrack', stopAfterCurrentTrack);
-            console.log('playUntilLastTrack', playUntilLastTrack);
-            console.log('isLoopingQueue', isLoopingQueue);
-
             if (isLoopingSingle || stopAfterCurrentTrack) {
               return;
             }
@@ -178,14 +172,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   playPause: async (play = false) => {
-    const {
-      isPlaying,
-      playbackInstance,
-      loadTrack,
-      tracks,
-      playPause,
-      currentTrack,
-    } = get();
+    const { isPlaying, playbackInstance } = get();
 
     if (!playbackInstance) return;
 

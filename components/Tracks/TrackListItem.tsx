@@ -1,18 +1,12 @@
-import {
-  View,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  Pressable,
-} from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { View, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
 import StyledText from '../reusables/StyledText';
 import ImageDisplay from '../reusables/ImageDisplay';
 import COLORS from '@/constants/Colors';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,6 +24,7 @@ interface ITrackListItemProps {
   isPlaying?: boolean;
   isLiked?: boolean;
   label?: string | number;
+  isBuffering?: boolean;
 }
 
 const TrackListItem = ({
@@ -43,13 +38,13 @@ const TrackListItem = ({
   isLiked = false,
   onPlayClick,
   isPlaying,
+  isBuffering = false,
 }: ITrackListItemProps) => {
   const translateX = useSharedValue(400); // Start position outside the screen
 
   // Favorite button animations
   const favoriteButtonScale = useSharedValue(1);
-
-  const [isFavorite, setIsFavorite] = useState<boolean>(isLiked);
+  const playButtonOpacity = useSharedValue(0);
 
   const translateStyle = useAnimatedStyle(() => {
     return {
@@ -69,17 +64,28 @@ const TrackListItem = ({
     favoriteButtonScale.value = withTiming(1, { duration: 250 });
   };
 
+  const playButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: playButtonOpacity.value,
+    };
+  });
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      playButtonOpacity.value = withTiming(isBuffering ? 0 : 1, {
+        duration: 200,
+      });
+    }, 200);
+
+    return () => clearInterval(id);
+  }, [isBuffering]);
+
   // API
 
   const {
     toggleLike: { mutate, isPending },
   } = useTracksQuery({ id });
 
-  const onLikeClick = () => {
-    if (isPending) return;
-    mutate(id);
-    setIsFavorite((prev) => !prev);
-  };
   return (
     <Animated.View
       style={[
@@ -162,20 +168,19 @@ const TrackListItem = ({
           </StyledText>
         </View>
         <View className="flex flex-row items-center ml-auto justify-end">
-          <TouchableOpacity
-            className="mr-2"
-            onPress={onPlayClick}
-            activeOpacity={0.8}
-            style={{
-              transform: [{ scale: 1.2 }],
-            }}
-          >
-            <MaterialIcons
-              name={isPlaying ? 'pause' : 'play-arrow'}
-              size={28}
-              color={COLORS.neutral.light}
-            />
-          </TouchableOpacity>
+          <Animated.View style={favoriteButtonStyle}>
+            <TouchableOpacity
+              className="mr-2"
+              onPress={onPlayClick}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons
+                name={isPlaying ? 'pause' : 'play-arrow'}
+                size={28}
+                color={COLORS.neutral.light}
+              />
+            </TouchableOpacity>
+          </Animated.View>
           <MaterialIcons
             name="more-vert"
             size={24}
@@ -189,17 +194,17 @@ const TrackListItem = ({
 
 export default TrackListItem;
 
-{
-  /* <LottieView
-source={PlayingMusicLA}
-autoPlay
-loop
-speed={0.8}
-style={{
-  alignSelf: 'center',
-  transform: [{ scaleX: 5 }, { scaleY: 5 }],
-  width: 42,
-  height: 42,
-}}
-/> */
-}
+// {
+//    <LottieView
+// source={PlayingMusicLA}
+// autoPlay
+// loop
+// speed={0.8}
+// style={{
+//   alignSelf: 'center',
+//   transform: [{ scaleX: 5 }, { scaleY: 5 }],
+//   width: 42,
+//   height: 42,
+// }}
+// />
+// }

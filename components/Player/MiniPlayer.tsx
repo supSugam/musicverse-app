@@ -89,6 +89,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
     <Animated.View
       {...panResponder}
       style={[styles.container, containerAnimatedStyle]}
+      className="overflow-hidden"
     >
       <LinearGradient
         colors={[COLORS.gradient.primary[0], COLORS.gradient.primary[1]]}
@@ -108,7 +109,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
         end={{ x: 1, y: 1 }}
       />
 
-      {/* <View className="flex flex-row items-center flex-1 px-3">
+      <View className="flex flex-row items-center flex-1 px-3">
         <ImageDisplay
           source={
             currentTrack?.cover
@@ -185,12 +186,13 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
             />
           </TouchableOpacity>
         </View>
-      </View> */}
+      </View>
+
       <SliderInput
         currentValue={msToSeconds(playbackPosition)}
-        width={200}
         minimumValue={0}
         maximumValue={msToSeconds(currentTrack?.trackDuration || 0)}
+        roundedTrack
       />
     </Animated.View>
   );
@@ -203,7 +205,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '96%',
-    height: 60,
+    height: 65,
     backgroundColor: COLORS.neutral.dark,
     borderRadius: 4,
     alignSelf: 'center',

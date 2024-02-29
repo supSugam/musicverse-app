@@ -7,7 +7,7 @@ const InitialState = {
   isBuffering: false,
   isMuted: false,
   isLoaded: false,
-  currentTrackIndex: 0,
+  currentTrackIndex: null,
   tracks: [],
   playbackInstance: null,
   playbackPosition: 0,
@@ -25,7 +25,7 @@ interface PlayerState {
   isBuffering: boolean;
   isMuted: boolean;
   isLoaded: boolean;
-  currentTrackIndex: number;
+  currentTrackIndex: number | null;
   tracks: ITrackDetails[];
   volume?: number;
   playbackInstance: Audio.Sound | null;
@@ -68,20 +68,24 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   currentTrack: () => {
     const { tracks, currentTrackIndex } = get();
-    if (tracks.length === 0) return null;
+    if (tracks.length === 0 || currentTrackIndex === null) return null;
     return tracks[currentTrackIndex] || null;
   },
 
   isNextTrackAvailable: () => {
     const { currentTrackIndex, tracks, isLoopingQueue } = get();
-
-    return currentTrackIndex < tracks.length - 1 || isLoopingQueue;
+    return (
+      (currentTrackIndex !== null && currentTrackIndex > tracks.length - 1) ||
+      isLoopingQueue
+    );
   },
 
   isPrevTrackAvailable: () => {
     const { currentTrackIndex, isLoopingQueue } = get();
 
-    return currentTrackIndex > 0 || isLoopingQueue;
+    return (
+      (currentTrackIndex !== null && currentTrackIndex > 0) || isLoopingQueue
+    );
   },
 
   updateTracks: (tracks: ITrackDetails[]) => {
@@ -135,6 +139,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             isMuted: status.isMuted,
             isLoaded: status.isLoaded,
             volume: status.volume,
+            currentTrackIndex: index,
           });
 
           if (status.didJustFinish) {
@@ -207,7 +212,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isNextTrackAvailable,
       playPause,
     } = get();
-    if (!isNextTrackAvailable()) return;
+    if (!isNextTrackAvailable() || currentTrackIndex === null) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
     await loadTrack(nextIndex);
     await playPause(undefined, true);
@@ -221,7 +226,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isPrevTrackAvailable,
       playPause,
     } = get();
-    if (!isPrevTrackAvailable()) return;
+    if (!isPrevTrackAvailable() || currentTrackIndex === null) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     await loadTrack(prevIndex);
     await playPause(undefined, true);

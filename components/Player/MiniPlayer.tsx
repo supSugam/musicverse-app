@@ -21,6 +21,8 @@ import StyledText from '../reusables/StyledText';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import SliderInput from '../reusables/SliderInput';
+import { msToSeconds } from '@/utils/helpers/string';
 
 const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
@@ -32,7 +34,8 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
   });
 
   const playerStore = usePlayerStore();
-  const { isPlaying, playPause, prevTrack, nextTrack } = playerStore;
+  const { isPlaying, playPause, prevTrack, nextTrack, playbackPosition } =
+    playerStore;
   const currentTrack = playerStore.currentTrack();
 
   useEffect(() => {
@@ -105,7 +108,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
         end={{ x: 1, y: 1 }}
       />
 
-      <View className="flex flex-row items-center flex-1 px-3">
+      {/* <View className="flex flex-row items-center flex-1 px-3">
         <ImageDisplay
           source={
             currentTrack?.cover
@@ -182,7 +185,13 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
             />
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
+      <SliderInput
+        currentValue={msToSeconds(playbackPosition)}
+        width={200}
+        minimumValue={0}
+        maximumValue={msToSeconds(currentTrack?.trackDuration || 0)}
+      />
     </Animated.View>
   );
 };

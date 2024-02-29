@@ -37,13 +37,14 @@ const HomeScreen: React.FC = () => {
 
   const { data, isLoading: isTracksLoading } = getAllTracks;
   const { setIsLoading } = useAppState();
+
   useEffect(() => {
-    if (data) {
+    if (data && !isTracksLoading) {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
       updateTracks(tracks);
     }
-  }, [data]);
+  }, [data, isTracksLoading]);
 
   useEffect(() => {
     setIsLoading(isGenresLoading || isTracksLoading);

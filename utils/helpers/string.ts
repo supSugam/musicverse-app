@@ -64,3 +64,8 @@ export const formatDuration = (seconds?: number, ms = false): string => {
     sec < 10 ? '0' : ''
   }${sec}`;
 };
+
+// Transform ms to seconds
+export const msToSeconds = (ms: number): number => {
+  return ms / 1000;
+};

@@ -27,16 +27,23 @@ import { msToSeconds } from '@/utils/helpers/string';
 const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
 
+  // Animation when
+
   const containerAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateY: translateY.value }],
     };
   });
 
-  const playerStore = usePlayerStore();
-  const { isPlaying, playPause, prevTrack, nextTrack, playbackPosition } =
-    playerStore;
-  const currentTrack = playerStore.currentTrack();
+  const {
+    isPlaying,
+    playPause,
+    prevTrack,
+    nextTrack,
+    playbackPosition,
+    currentTrack: currTrack,
+  } = usePlayerStore();
+  const currentTrack = currTrack();
 
   useEffect(() => {
     const showPlayerAboveTabBar = currentTrack !== null && activeTab === 'Home';
@@ -188,12 +195,18 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
         </View>
       </View>
 
-      <SliderInput
-        currentValue={msToSeconds(playbackPosition)}
-        minimumValue={0}
-        maximumValue={msToSeconds(currentTrack?.trackDuration || 0)}
-        roundedTrack
-      />
+      <View className="w-full my-1">
+        <SliderInput
+          currentValue={msToSeconds(playbackPosition)}
+          minimumValue={0}
+          maximumValue={
+            currentTrack?.trackDuration
+              ? msToSeconds(currentTrack.trackDuration)
+              : 0
+          }
+          roundedTrack
+        />
+      </View>
     </Animated.View>
   );
 };

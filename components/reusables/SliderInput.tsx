@@ -29,54 +29,54 @@ const SliderInput = ({
   maximumValue,
   currentValue,
   onValueChange,
-  allowChange = false,
+  allowChange = true,
   roundedTrack = false,
   trackHeight = 2,
 }: ISliderInputProps) => {
-  const translateX = useSharedValue(0);
+  const sliderDotPositionValue = useSharedValue(0);
   const progressValue = useSharedValue(0);
 
-  const onGestureEvent = useAnimatedGestureHandler({
-    onStart: (_, context) => {
-      context.startX = translateX.value;
-    },
-    onActive: (event, context) => {
-      let newValue = (context.startX as number) + event.translationX;
-      //   newValue = Math.max(0, Math.min(newValue, width - 40)); // Adjust the maximum translationX value here
-      translateX.value = newValue;
-    },
-    onEnd: () => {
-      //   const percentage = translateX.value / (width - 40); // Adjust the maximum translationX value here
-      //   const newValue =
-      //     minimumValue + percentage * (maximumValue - minimumValue);
-      //   translateX.value = withSpring(percentage * (width - 40)); // Adjust the maximum translationX value here
-      //   onValueChange?.(newValue);
-    },
-  });
+  //   const onGestureEvent = useAnimatedGestureHandler({
+  //     onStart: (_, context) => {
+  //       context.startX = sliderDotTranslateX.value;
+  //     },
+  //     onActive: (event, context) => {
+  //       let newValue = (context.startX as number) + event.translationX;
+  //       //   newValue = Math.max(0, Math.min(newValue, width - 40)); // Adjust the maximum translationX value here
+  //       sliderDotTranslateX.value = newValue;
+  //     },
+  //     onEnd: () => {
+  //       //   const percentage = translateX.value / (width - 40); // Adjust the maximum translationX value here
+  //       //   const newValue =
+  //       //     minimumValue + percentage * (maximumValue - minimumValue);
+  //       //   translateX.value = withSpring(percentage * (width - 40)); // Adjust the maximum translationX value here
+  //       //   onValueChange?.(newValue);
+  //     },
+  //   });
 
   const sliderStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: translateX.value }],
+      left: `${sliderDotPositionValue.value}%`,
     };
   });
 
-  const dotStyle = useAnimatedStyle(() => {
+  const sliderDotAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: allowChange ? 1 : 0,
-      transform: [{ translateX: translateX.value - 10 }], // Adjust the dot position
+      left: `${sliderDotPositionValue.value}%`,
     };
   });
   useEffect(() => {
-    progressValue.value = withSpring(
-      calculatePercentage(currentValue, maximumValue),
-      {
-        duration: 1000, // Duration of the animation in milliseconds
-        stiffness: 100, // Controls the stiffness of the spring animation
-        overshootClamping: false, // Determines if the spring animation should overshoot and then settle
-        restDisplacementThreshold: 0.01, // Threshold for considering the animation at rest
-        restSpeedThreshold: 0.01, // Threshold for considering the animation at rest
-      }
-    );
+    const percentage = calculatePercentage(currentValue, maximumValue);
+    progressValue.value = withSpring(percentage, {
+      duration: 1000, // Duration of the animation in milliseconds
+      stiffness: 100, // Controls the stiffness of the spring animation
+      overshootClamping: false, // Determines if the spring animation should overshoot and then settle
+      restDisplacementThreshold: 0.01, // Threshold for considering the animation at rest
+      restSpeedThreshold: 0.01, // Threshold for considering the animation at rest
+    });
+    sliderDotPositionValue.value = withSpring(percentage);
+    console.log('sliderDotTranslateX.value', sliderDotPositionValue.value);
   }, [currentValue, maximumValue]);
 
   // Animated styles for the progress bar
@@ -89,7 +89,9 @@ const SliderInput = ({
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <PanGestureHandler onGestureEvent={onGestureEvent}>
+      <Animated.View style={[styles.sliderDot, sliderDotAnimatedStyle]} />
+
+      <PanGestureHandler>
         <View
           style={[
             styles.trackContainer,
@@ -134,6 +136,17 @@ const styles = StyleSheet.create({
   },
   roundedTrack: {
     borderRadius: 4,
+  },
+
+  sliderDot: {
+    backgroundColor: COLORS.neutral.white,
+    width: 6,
+    height: 6,
+    borderRadius: 10,
+    position: 'absolute',
+    left: 0,
+    top: -2,
+    zIndex: 1,
   },
 });
 

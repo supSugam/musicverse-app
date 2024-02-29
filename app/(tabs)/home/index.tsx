@@ -21,9 +21,6 @@ const HomeScreen: React.FC = () => {
 
   // Tracks
 
-  const [playerTracksUpdated, setPlayerTracksUpdated] =
-    useState<boolean>(false);
-
   const [tracksOfSelectedGenre, setTracksOfSelectedGenre] = useState<
     ITrackDetails[]
   >([]);
@@ -110,9 +107,8 @@ const HomeScreen: React.FC = () => {
               id={track.id}
               title={track.title}
               onPlayClick={async () => {
-                if (!playerTracksUpdated) {
+                if (playerTracks.length === 0) {
                   updateTracks(tracksOfSelectedGenre);
-                  setPlayerTracksUpdated(true);
                 }
                 await playATrackById(track.id);
               }}

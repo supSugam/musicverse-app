@@ -37,6 +37,7 @@ interface PlayerState {
   playUntilLastTrack: boolean;
   stopAfterCurrentTrack: boolean;
   playbackError: string | null;
+  didJustFinish: boolean;
 
   loadTrack: (index: number) => Promise<void>;
   updateTracks: (tracks: ITrackDetails[]) => void;
@@ -67,6 +68,8 @@ interface PlayerState {
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
+
+  didJustFinish: false,
 
   currentTrack: () => {
     const { tracks, currentTrackIndex } = get();
@@ -143,6 +146,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             isLoaded: status.isLoaded,
             volume: status.volume,
             currentTrackIndex: index,
+            didJustFinish: status.didJustFinish,
           });
 
           if (status.didJustFinish) {
@@ -172,13 +176,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   playPause: async (play = false) => {
-    const { isPlaying, playbackInstance } = get();
+    const { isPlaying, playbackInstance, didJustFinish, isBuffering } = get();
 
     if (!playbackInstance) return;
+    if (isBuffering) return;
 
     if (isPlaying && !play) {
       await playbackInstance.pauseAsync();
     } else {
+      if (didJustFinish) {
+        await playbackInstance.replayAsync();
+        return;
+      }
       await playbackInstance.playAsync();
     }
   },
@@ -197,27 +206,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   nextTrack: async () => {
-    const {
-      currentTrackIndex,
-      tracks,
-      loadTrack,
-      isNextTrackAvailable,
-      playPause,
-    } = get();
-    if (!isNextTrackAvailable() || currentTrackIndex === null) return;
+    const { currentTrackIndex, tracks, loadTrack, isBuffering } = get();
+    if (currentTrackIndex === null || isBuffering) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
     await loadTrack(nextIndex);
   },
 
   prevTrack: async () => {
-    const {
-      currentTrackIndex,
-      tracks,
-      loadTrack,
-      isPrevTrackAvailable,
-      playPause,
-    } = get();
-    if (!isPrevTrackAvailable() || currentTrackIndex === null) return;
+    const { currentTrackIndex, tracks, loadTrack, isBuffering } = get();
+    if (currentTrackIndex === null || isBuffering) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     await loadTrack(prevIndex);
   },

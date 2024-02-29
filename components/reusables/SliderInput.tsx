@@ -4,15 +4,19 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  useAnimatedGestureHandler,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
-import {
-  GestureHandlerRootView,
-  PanGestureHandler,
-} from 'react-native-gesture-handler';
+
 import COLORS from '@/constants/Colors';
 import { calculatePercentage } from '@/utils/helpers/number';
 import { LinearGradient } from 'expo-linear-gradient';
+
+import {
+  GestureDetector,
+  Gesture,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 
 interface ISliderInputProps {
   minimumValue: number;
@@ -33,32 +37,34 @@ const SliderInput = ({
   roundedTrack = false,
   trackHeight = 2,
 }: ISliderInputProps) => {
+  // Pan for progress seeking
+  const pan = Gesture.Pan()
+    .onTouchesDown((event) => {
+      console.log('onTouchesDown', event);
+    })
+    .onTouchesMove((event) => {
+      console.log('onTouchesMove', event);
+    })
+    .onTouchesUp((event) => {
+      console.log('onTouchesUp', event);
+    })
+    .onTouchesCancelled((event) => {
+      console.log('onTouchesCancelled', event);
+    })
+    .runOnJS(true);
+
+  pan.config = {
+    minPointers: 1,
+    maxPointers: 1,
+    minDist: 0,
+    minVelocity: 0,
+    activeOffsetXStart: 0,
+    activeOffsetXEnd: 0,
+    shouldCancelWhenOutside: false,
+  };
+
   const sliderDotPositionValue = useSharedValue(0);
   const progressValue = useSharedValue(0);
-
-  //   const onGestureEvent = useAnimatedGestureHandler({
-  //     onStart: (_, context) => {
-  //       context.startX = sliderDotTranslateX.value;
-  //     },
-  //     onActive: (event, context) => {
-  //       let newValue = (context.startX as number) + event.translationX;
-  //       //   newValue = Math.max(0, Math.min(newValue, width - 40)); // Adjust the maximum translationX value here
-  //       sliderDotTranslateX.value = newValue;
-  //     },
-  //     onEnd: () => {
-  //       //   const percentage = translateX.value / (width - 40); // Adjust the maximum translationX value here
-  //       //   const newValue =
-  //       //     minimumValue + percentage * (maximumValue - minimumValue);
-  //       //   translateX.value = withSpring(percentage * (width - 40)); // Adjust the maximum translationX value here
-  //       //   onValueChange?.(newValue);
-  //     },
-  //   });
-
-  const sliderStyle = useAnimatedStyle(() => {
-    return {
-      left: `${sliderDotPositionValue.value}%`,
-    };
-  });
 
   const sliderDotAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -68,15 +74,12 @@ const SliderInput = ({
   });
   useEffect(() => {
     const percentage = calculatePercentage(currentValue, maximumValue);
-    progressValue.value = withSpring(percentage, {
-      duration: 1000, // Duration of the animation in milliseconds
-      stiffness: 100, // Controls the stiffness of the spring animation
-      overshootClamping: false, // Determines if the spring animation should overshoot and then settle
-      restDisplacementThreshold: 0.01, // Threshold for considering the animation at rest
-      restSpeedThreshold: 0.01, // Threshold for considering the animation at rest
+    progressValue.value = withTiming(percentage, {
+      easing: Easing.linear,
     });
-    sliderDotPositionValue.value = withSpring(percentage);
-    console.log('sliderDotTranslateX.value', sliderDotPositionValue.value);
+    sliderDotPositionValue.value = withTiming(percentage, {
+      easing: Easing.linear,
+    });
   }, [currentValue, maximumValue]);
 
   // Animated styles for the progress bar
@@ -88,33 +91,34 @@ const SliderInput = ({
   };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <Animated.View style={[styles.sliderDot, sliderDotAnimatedStyle]} />
-
-      <PanGestureHandler>
-        <View
-          style={[
-            styles.trackContainer,
-            trackHeightStyle,
-            roundedTrack && styles.roundedTrack,
-          ]}
-        >
-          <Animated.View
+    <GestureHandlerRootView>
+      <GestureDetector gesture={pan}>
+        <View style={styles.container} collapsable={false}>
+          <Animated.View style={[styles.sliderDot, sliderDotAnimatedStyle]} />
+          <View
             style={[
-              styles.progressBar,
-              progressBarAnimatedStyle,
+              styles.trackContainer,
               trackHeightStyle,
+              roundedTrack && styles.roundedTrack,
             ]}
           >
-            <LinearGradient
-              colors={COLORS.gradient.primary} // Using primary gradient colors for the progress bar
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ flex: 1 }}
-            />
-          </Animated.View>
+            <Animated.View
+              style={[
+                styles.progressBar,
+                progressBarAnimatedStyle,
+                trackHeightStyle,
+              ]}
+            >
+              <LinearGradient
+                colors={COLORS.gradient.primary} // Using primary gradient colors for the progress bar
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ flex: 1 }}
+              />
+            </Animated.View>
+          </View>
         </View>
-      </PanGestureHandler>
+      </GestureDetector>
     </GestureHandlerRootView>
   );
 };

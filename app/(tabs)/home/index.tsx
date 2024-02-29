@@ -52,6 +52,7 @@ const HomeScreen: React.FC = () => {
     if (data) {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
+      updateTracks(tracks);
     }
   }, [data]);
 
@@ -107,9 +108,6 @@ const HomeScreen: React.FC = () => {
               id={track.id}
               title={track.title}
               onPlayClick={async () => {
-                if (playerTracks.length === 0) {
-                  updateTracks(tracksOfSelectedGenre);
-                }
                 await playATrackById(track.id);
               }}
               isPlaying={currentTrack()?.id === track.id && isPlaying}

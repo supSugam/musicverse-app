@@ -176,10 +176,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   playPause: async (play = false) => {
-    const { isPlaying, playbackInstance, didJustFinish, isBuffering } = get();
+    const { isPlaying, playbackInstance, didJustFinish } = get();
 
     if (!playbackInstance) return;
-    if (isBuffering) return;
 
     if (isPlaying && !play) {
       await playbackInstance.pauseAsync();
@@ -206,15 +205,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   nextTrack: async () => {
-    const { currentTrackIndex, tracks, loadTrack, isBuffering } = get();
-    if (currentTrackIndex === null || isBuffering) return;
+    const {
+      currentTrackIndex,
+      tracks,
+      loadTrack,
+      isNextTrackAvailable,
+      playPause,
+    } = get();
+    if (!isNextTrackAvailable() || currentTrackIndex === null) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
     await loadTrack(nextIndex);
   },
 
   prevTrack: async () => {
-    const { currentTrackIndex, tracks, loadTrack, isBuffering } = get();
-    if (currentTrackIndex === null || isBuffering) return;
+    const {
+      currentTrackIndex,
+      tracks,
+      loadTrack,
+      isPrevTrackAvailable,
+      playPause,
+    } = get();
+    if (!isPrevTrackAvailable() || currentTrackIndex === null) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     await loadTrack(prevIndex);
   },

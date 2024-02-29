@@ -94,7 +94,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
   });
   return (
     <Animated.View
-      {...panResponder}
+      // {...panResponder}
       style={[styles.container, containerAnimatedStyle]}
       className="overflow-hidden"
     >

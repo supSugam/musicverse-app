@@ -1,5 +1,6 @@
 import {
   UseMutationResult,
+  UseQueryOptions,
   UseQueryResult,
   useMutation,
   useQuery,
@@ -26,20 +27,19 @@ export interface ITracksPaginationQueryParams extends IBasePaginationParams {
 
 type TracksQuery<T extends string | undefined = undefined> = {
   getAllTracks: UseQueryResult<AxiosResponse<GetAllTracksResponse, any>, Error>;
-  params?: ITracksPaginationQueryParams;
 } & (T extends string
   ? {
       getTrackById: UseQueryResult<AxiosResponse<any, any>, Error>;
       deleteTrackById: UseMutationResult<
         AxiosResponse<any, any>,
         Error,
-        string, // Ensure the mutation function receives a string (track id)
+        string,
         unknown
       >;
       toggleLike: UseMutationResult<
         AxiosResponse<any, any>,
         Error,
-        string, // Ensure the mutation function receives a string (track id)
+        string,
         unknown
       >;
     }
@@ -47,18 +47,25 @@ type TracksQuery<T extends string | undefined = undefined> = {
 
 export const useTracksQuery = <T extends string | undefined = undefined>({
   id,
-  params,
+  getAllTracksConfig,
 }: {
   id?: T;
-  params?: ITracksPaginationQueryParams;
+  getAllTracksConfig?: {
+    params?: ITracksPaginationQueryParams;
+    queryOptions?: Partial<
+      UseQueryOptions<AxiosResponse<GetAllTracksResponse, any>, Error>
+    >;
+  };
 }): TracksQuery<T> => {
   const { api } = useAuthStore();
   const queryClient = useQueryClient();
   const getAllTracks = useQuery<AxiosResponse<GetAllTracksResponse, any>>({
-    queryKey: [TRACK_QUERY_KEY, params],
+    queryKey: [TRACK_QUERY_KEY, getAllTracksConfig?.params],
     queryFn: async () =>
-      await api.get('/tracks', { params: cleanObject(params || {}) }),
-    enabled: !!params,
+      await api.get('/tracks', {
+        params: cleanObject(getAllTracksConfig?.params || {}),
+      }),
+    ...getAllTracksConfig?.queryOptions,
   });
 
   const deleteTrackById = useMutation({

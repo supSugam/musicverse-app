@@ -42,7 +42,8 @@ interface PlayerState {
   updateTracks: (tracks: ITrackDetails[]) => void;
   isNextTrackAvailable: () => boolean;
   isPrevTrackAvailable: () => boolean;
-  playPause: (id?: string, play?: boolean) => Promise<void>;
+  playPause: (play?: boolean) => Promise<void>;
+  playATrackById: (id: string) => Promise<void>;
   nextTrack: () => Promise<void>;
   prevTrack: () => Promise<void>;
   currentTrack: () => ITrackDetails | null;
@@ -61,6 +62,7 @@ interface PlayerState {
 
   resetPlayer: () => void;
 }
+
 // TODO : Sleep Timer
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -123,6 +125,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         { uri: src },
         {
           progressUpdateIntervalMillis: 1000,
+          shouldPlay: true,
         },
         false
       );
@@ -174,7 +177,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  playPause: async (id?: string, play = false) => {
+  playPause: async (play = false) => {
     const {
       isPlaying,
       playbackInstance,
@@ -184,24 +187,26 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       currentTrack,
     } = get();
 
-    if (!id && !playbackInstance) return;
+    if (!playbackInstance) return;
 
-    if (id && id !== currentTrack()?.id) {
-      await loadTrack(tracks.findIndex((track) => track.id === id));
-      await playPause(undefined, true);
+    if (isPlaying && !play) {
+      await playbackInstance.pauseAsync();
+    } else {
+      await playbackInstance.playAsync();
+    }
+  },
+
+  playATrackById: async (id: string) => {
+    const { tracks, loadTrack, playPause, currentTrack, isPlaying } = get();
+    if (tracks.length === 0) return;
+    const shouldPause = isPlaying && currentTrack()?.id === id;
+    if (shouldPause) {
+      await playPause(false);
       return;
     }
-
-    if (playbackInstance) {
-      if (isPlaying && !play) {
-        await playbackInstance.pauseAsync();
-      } else {
-        await playbackInstance.playAsync();
-      }
-    } else if (id) {
-      await loadTrack(tracks.findIndex((track) => track.id === id));
-      await playPause(undefined, true);
-    }
+    const index = tracks.findIndex((track) => track.id === id);
+    if (index === -1) return;
+    await loadTrack(index);
   },
 
   nextTrack: async () => {
@@ -215,7 +220,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (!isNextTrackAvailable() || currentTrackIndex === null) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
     await loadTrack(nextIndex);
-    await playPause(undefined, true);
   },
 
   prevTrack: async () => {
@@ -229,7 +233,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (!isPrevTrackAvailable() || currentTrackIndex === null) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     await loadTrack(prevIndex);
-    await playPause(undefined, true);
   },
 
   seek: async (position: number) => {

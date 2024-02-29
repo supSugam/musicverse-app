@@ -90,7 +90,7 @@ const TrackListItem = ({
           // backgroundColor: 'red',
         },
       ]}
-      className="flex flex-row items-center my-2 flex-1"
+      className="flex flex-row items-center my-1 flex-1"
     >
       <LinearGradient
         colors={[

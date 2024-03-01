@@ -20,6 +20,7 @@ interface IUploadStore {
   setAlbum: (album: Partial<IAlbum>) => boolean;
   addTrackToAlbum: (track: ITrack) => ISimpleResponse;
   removeTrackFromAlbum: (trackId: string) => void;
+  updateTrackById: (track: ITrack, type: 'single' | 'album') => ISimpleResponse;
 }
 
 export const useUploadStore = create<IUploadStore>(
@@ -113,6 +114,38 @@ export const useUploadStore = create<IUploadStore>(
         }
         return state;
       });
+    },
+
+    updateTrackById: (track: ITrack, type: 'single' | 'album') => {
+      let response = {
+        content: 'Track updated successfully',
+        type: 'success',
+      } as ISimpleResponse;
+
+      set((state) => {
+        if (type === 'single') {
+          return { track };
+        } else {
+          if (!state.album) {
+            return state;
+          }
+
+          const { album } = state;
+          const { tracks } = album;
+          if (tracks) {
+            const newTracks = tracks.map((t) => {
+              if (t.title.toLowerCase() === track.title.toLowerCase()) {
+                return track;
+              }
+              return t;
+            });
+            return { album: { ...album, tracks: newTracks } };
+          }
+          return state;
+        }
+      });
+
+      return response;
     },
   })
 );

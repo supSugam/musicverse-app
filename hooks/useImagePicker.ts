@@ -9,6 +9,7 @@ interface IImagePickerProps {
   quality?: number;
   aspect?: [number, number];
   mediaTypes?: ImagePicker.MediaTypeOptions;
+  onImageSelected?: (image: ImageWithRotation[]) => void;
 }
 
 export type ImageWithRotation = ImagePicker.ImagePickerAsset & {
@@ -21,6 +22,7 @@ export const useImagePicker = ({
   quality = 1,
   aspect = [1, 1],
   mediaTypes = ImagePicker.MediaTypeOptions.Images,
+  onImageSelected,
 }: IImagePickerProps) => {
   const [image, setImage] = useState<ImageWithRotation[] | null>(null);
 
@@ -57,6 +59,7 @@ export const useImagePicker = ({
         return;
       }
       setImage(result.assets);
+      onImageSelected?.(result.assets);
     }
   };
 

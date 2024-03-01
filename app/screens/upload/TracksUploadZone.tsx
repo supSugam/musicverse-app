@@ -30,6 +30,7 @@ import Animated from 'react-native-reanimated';
 import AddTrackButton from './components/AddTrackButton';
 import { cleanObject } from '@/utils/helpers/Object';
 import { ITrack } from '@/utils/Interfaces/ITrack';
+import { ActionsEnum } from '@/utils/enums/Action';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -212,11 +213,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
       </View>
 
       {trackModalVisible && (
-        <TrackDetailsModal
-          // action={ActionsEnum.CREATE}
-          visible={trackModalVisible}
-          onClose={onModalClose}
-        />
+        <TrackDetailsModal visible={trackModalVisible} onClose={onModalClose} />
       )}
 
       <AddTrackButton
@@ -278,12 +275,13 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             ] || { progress: 0, uploadStatus: UploadStatus.QUEUED };
             return (
               <AudioDetailsCard
+                trackDetails={track}
                 key={track.uploadKey}
                 title={track.title}
                 size={formatBytes(track.src.size)}
                 duration={formatDuration(track.src.duration, true)}
                 extension={extractExtension(track.src.name)}
-                onEdit={() => {}}
+                editable
                 onRemove={() => {
                   toastResponseMessage({
                     content: 'Track removed successfully.',
@@ -299,12 +297,13 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           })}
         {isUploadTypeSingle && track && (
           <AudioDetailsCard
+            trackDetails={track}
             key={track.uploadKey}
             title={track.title}
             size={formatBytes(track.src.size)}
             duration={formatDuration(track.src.duration, true)}
             extension={extractExtension(track.src.name)}
-            onEdit={() => {}}
+            editable
             alwaysShowProgressBar
             onRemove={() => {
               toastResponseMessage({

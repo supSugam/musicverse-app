@@ -16,7 +16,7 @@ import { toastResponseMessage } from '@/utils/toast';
 import { MaterialIcons } from '@expo/vector-icons';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MediaType } from 'expo-media-library';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Modal, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { View, Text } from 'react-native';
@@ -33,7 +33,7 @@ import { DocumentPickerAsset } from 'expo-document-picker';
 import RadioButton from '@/components/reusables/RadioButton';
 import FilePicker from '@/components/reusables/FilePicker';
 import * as FileSystem from 'expo-file-system';
-import { useImagePicker } from '@/hooks/useImagePicker';
+import { ImageWithRotation, useImagePicker } from '@/hooks/useImagePicker';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
 import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 import { ITrack } from '@/utils/Interfaces/ITrack';
@@ -42,6 +42,7 @@ import { USER_LIMITS, USER_PERMISSIONS, uuid } from '@/utils/constants';
 import Switch from '@/components/reusables/StyledSwitch';
 import { ReviewStatus } from '@/utils/enums/ReviewStatus';
 import { cleanObject } from '@/utils/helpers/Object';
+import { IAlbum } from '@/utils/Interfaces/IAlbum';
 
 const schema = yup.object().shape({
   title: yup
@@ -56,17 +57,23 @@ const schema = yup.object().shape({
   lyrics: yup.string().nullable(),
 });
 
-interface TrackDetailsModalProps {
-  // action?: ActionsEnum;
+type TrackDetailsModalProps<T extends ActionsEnum = ActionsEnum.CREATE> = {
+  action?: T;
   visible: boolean;
   onClose: () => void;
-}
+} & (T extends ActionsEnum.UPDATE
+  ? { trackToUpdate: ITrack }
+  : { trackToUpdate?: never });
 
 const TrackDetailsModal = ({
-  // action = ActionsEnum.CREATE,
   visible,
   onClose,
-}: TrackDetailsModalProps) => {
+  action = ActionsEnum.CREATE,
+  trackToUpdate,
+}: TrackDetailsModalProps<ActionsEnum>) => {
+  if (action === ActionsEnum.UPDATE && !trackToUpdate) {
+    throw new Error('trackToUpdate is required for update action');
+  }
   const {
     uploadType,
     album,
@@ -74,7 +81,8 @@ const TrackDetailsModal = ({
     setTrack,
     track,
     removeTrackFromAlbum,
-  } = useUploadStore((state) => state);
+    updateTrackById,
+  } = useUploadStore();
   const { currentUser } = useAuthStore((state) => state);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedGenre, setSelectedGenre] = useState<string[]>([]);
@@ -103,10 +111,14 @@ const TrackDetailsModal = ({
   const [requestPublicUpload, setRequestPublicUpload] =
     useState<boolean>(false);
 
-  const { pickImage, image: cover } = useImagePicker({
+  const { pickImage, image } = useImagePicker({
     selectionLimit: 1,
     allowsEditing: true,
+    onImageSelected: (image) => {
+      setCover(image);
+    },
   });
+  const [cover, setCover] = useState<ImageWithRotation[] | null>(image);
 
   const {
     handleSubmit,
@@ -196,7 +208,11 @@ const TrackDetailsModal = ({
           setLoading(false);
           return;
         }
-        if (album?.tracks && album?.tracks?.length === 10) {
+        if (
+          album?.tracks &&
+          album?.tracks?.length === 10 &&
+          action === ActionsEnum.CREATE
+        ) {
           toastResponseMessage({
             type: 'error',
             content: 'Album can only have 10 tracks',
@@ -204,13 +220,16 @@ const TrackDetailsModal = ({
           setLoading(false);
           return;
         }
-        const response = addTrackToAlbum(trackDetails);
+        const response =
+          action === ActionsEnum.CREATE
+            ? addTrackToAlbum(trackDetails)
+            : updateTrackById(trackDetails, 'album');
         toastResponseMessage(response);
         if (response.type === 'success') {
           onClose();
         }
       } else {
-        if (track) {
+        if (track && action === ActionsEnum.CREATE) {
           toastResponseMessage({
             type: 'error',
             content: 'One Track already exists',
@@ -218,7 +237,10 @@ const TrackDetailsModal = ({
           setLoading(false);
           return;
         }
-        const response = setTrack(trackDetails);
+        const response =
+          action === ActionsEnum.CREATE
+            ? setTrack(trackDetails)
+            : updateTrackById(trackDetails, 'single');
         toastResponseMessage(response);
         if (response.type === 'success') {
           onClose();
@@ -231,6 +253,51 @@ const TrackDetailsModal = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (action === ActionsEnum.UPDATE && trackToUpdate) {
+      setValue('title', trackToUpdate.title);
+      setValue('description', trackToUpdate.description);
+      setLyricsInputType('textfield');
+      setValue('lyrics', trackToUpdate.lyrics);
+
+      const genreName = genres.find(
+        (g) => g.id === trackToUpdate.genreId
+      )?.name;
+      if (genreName) {
+        setSelectedGenre([genreName]);
+      }
+
+      const selectedTags = tags
+        .filter((tag) => trackToUpdate?.tags?.includes(tag.id))
+        .map((tag) => tag.name);
+      if (selectedTags) {
+        setSelectedTags(selectedTags);
+      }
+
+      if (trackToUpdate.src) {
+        setTrackSource({
+          ...trackToUpdate.src,
+          duration: trackToUpdate.trackDuration,
+          size: trackToUpdate.trackSize,
+        });
+      }
+      if (trackToUpdate.preview) {
+        setTrackPreview({
+          ...trackToUpdate.preview,
+          duration: trackToUpdate.previewDuration,
+        });
+      }
+
+      if (trackToUpdate.cover) {
+        setCover([trackToUpdate.cover]);
+      }
+
+      setRequestPublicUpload(
+        trackToUpdate.publicStatus === ReviewStatus.REQUESTED
+      );
+    }
+  }, [trackToUpdate, action, genres, tags]);
   return (
     <ModalWrapper
       transparent

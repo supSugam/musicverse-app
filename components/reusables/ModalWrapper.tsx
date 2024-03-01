@@ -39,8 +39,12 @@ const ModalWrapper = ({
   fullWidth = false,
   transparentWrapper = false,
 }: IModalWrapperProps) => {
-  const positionStyle: FlexAlignType =
+  const alignItems: FlexAlignType =
     position === 'center' ? position : `flex-${position}`;
+
+  const justifyContent: FlexAlignType =
+    position === 'center' ? position : `flex-${position}`;
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -52,8 +56,8 @@ const ModalWrapper = ({
         },
         blurView: {
           flex: 1,
-          justifyContent: 'center',
-          alignItems: positionStyle,
+          justifyContent: justifyContent,
+          alignItems: alignItems,
         },
         modalContainer: {
           width: fullWidth ? '100%' : '90%',
@@ -68,7 +72,7 @@ const ModalWrapper = ({
           width: '100%',
         },
       }),
-    []
+    [fullWidth, alignItems, justifyContent]
   );
 
   const blurIntensity = useMemo(() => (blur ? 90 : 0), [blur]);
@@ -98,41 +102,45 @@ const ModalWrapper = ({
           <ToastInstance />
           <Animated.View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
-              <LinearGradient
-                colors={[
-                  ...(transparentWrapper
-                    ? [COLORS.transparent, COLORS.transparent]
-                    : [
-                        COLORS.neutral.black,
-                        COLORS.neutral.dark,
-                        COLORS.neutral.dense,
-                        COLORS.neutral.dense,
-                      ]),
-                ]}
-                style={{
-                  borderWidth: transparentWrapper ? 0 : 1,
-                  borderColor: `${COLORS.neutral.light}20`,
-                  padding: 16,
-                  width: '100%',
-                  borderRadius: 10,
-                }}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                {header && (
-                  <View style={styles.headerContainer}>
-                    {typeof header === 'string' ? (
-                      <StyledText size="lg" weight="bold" className="text-left">
-                        {header}
-                      </StyledText>
-                    ) : (
-                      header
-                    )}
-                  </View>
-                )}
+              {transparentWrapper ? (
+                children
+              ) : (
+                <LinearGradient
+                  colors={[
+                    COLORS.neutral.black,
+                    COLORS.neutral.dark,
+                    COLORS.neutral.dense,
+                    COLORS.neutral.dense,
+                  ]}
+                  style={{
+                    borderWidth: transparentWrapper ? 0 : 1,
+                    borderColor: `${COLORS.neutral.light}20`,
+                    padding: 16,
+                    width: '100%',
+                    borderRadius: 10,
+                  }}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  {header && (
+                    <View style={styles.headerContainer}>
+                      {typeof header === 'string' ? (
+                        <StyledText
+                          size="lg"
+                          weight="bold"
+                          className="text-left"
+                        >
+                          {header}
+                        </StyledText>
+                      ) : (
+                        header
+                      )}
+                    </View>
+                  )}
 
-                {children}
-              </LinearGradient>
+                  {children}
+                </LinearGradient>
+              )}
             </TouchableWithoutFeedback>
           </Animated.View>
         </BlurView>

@@ -46,3 +46,52 @@ export const useSwipeGesture = ({
 
   return panResponder.panHandlers;
 };
+
+import { useState } from 'react';
+import { Gesture } from 'react-native-gesture-handler';
+
+interface SwipeGestureProps {
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  onSwipeUp?: () => void;
+  onSwipeDown?: () => void;
+  horizontalThreshold?: number;
+  verticalThreshold?: number;
+}
+
+// export const useSwipeGesture = ({
+//   onSwipeLeft,
+//   onSwipeRight,
+//   onSwipeUp,
+//   onSwipeDown,
+//   horizontalThreshold = 50, // Default threshold values
+//   verticalThreshold = 50,
+// }: SwipeGestureProps) => {
+//   const [initialX, setInitialX] = useState<number>(0);
+//   const [initialY, setInitialY] = useState<number>(0);
+//   const [finalX, setFinalX] = useState<number>(0);
+//   const [finalY, setFinalY] = useState<number>(0);
+//   const panGesure = Gesture.Pan()
+//     .runOnJS(true)
+//     .onTouchesDown((event) => {
+//       setInitialX(event.allTouches[0].absoluteX);
+//       setInitialY(event.allTouches[0].absoluteY);
+//     })
+//     .onTouchesMove((event) => {
+//       setFinalX(event.allTouches[0].absoluteX);
+//       setFinalY(event.allTouches[0].absoluteY);
+//     })
+//     .onTouchesUp((event) => {
+//       if (initialX - finalX > horizontalThreshold) {
+//         onSwipeLeft && onSwipeLeft();
+//       } else if (finalX - initialX > horizontalThreshold) {
+//         onSwipeRight && onSwipeRight();
+//       } else if (initialY - finalY > verticalThreshold) {
+//         onSwipeUp && onSwipeUp();
+//       } else if (finalY - initialY > verticalThreshold) {
+//         onSwipeDown && onSwipeDown();
+//       }
+//     });
+
+//   return panGesure;
+// };

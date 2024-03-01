@@ -41,8 +41,8 @@ interface PlayerState {
 
   loadTrack: (index: number) => Promise<void>;
   updateTracks: (tracks: ITrackDetails[]) => void;
-  isNextTrackAvailable: () => boolean;
-  isPrevTrackAvailable: () => boolean;
+  isNextTrackAvailable: (ignoreLoopState?: boolean) => boolean;
+  isPrevTrackAvailable: (ignoreLoopState?: boolean) => boolean;
   playPause: (play?: boolean) => Promise<void>;
   playATrackById: (id: string) => Promise<void>;
   nextTrack: () => Promise<void>;
@@ -77,19 +77,22 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     return tracks[currentTrackIndex] || null;
   },
 
-  isNextTrackAvailable: () => {
+  isNextTrackAvailable: (ignoreLoopState = false) => {
     const { currentTrackIndex, tracks, isLoopingQueue } = get();
     return (
       (currentTrackIndex !== null && currentTrackIndex > tracks.length - 1) ||
-      isLoopingQueue
+      isLoopingQueue ||
+      ignoreLoopState
     );
   },
 
-  isPrevTrackAvailable: () => {
+  isPrevTrackAvailable: (ignoreLoopState = false) => {
     const { currentTrackIndex, isLoopingQueue } = get();
 
     return (
-      (currentTrackIndex !== null && currentTrackIndex > 0) || isLoopingQueue
+      (currentTrackIndex !== null && currentTrackIndex > 0) ||
+      isLoopingQueue ||
+      ignoreLoopState
     );
   },
 
@@ -212,8 +215,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isNextTrackAvailable,
       playPause,
     } = get();
-    if (!isNextTrackAvailable() || currentTrackIndex === null) return;
+
+    if (!isNextTrackAvailable(true) || currentTrackIndex === null) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
+    console.log('nextTrack', nextIndex);
     await loadTrack(nextIndex);
   },
 
@@ -225,7 +230,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isPrevTrackAvailable,
       playPause,
     } = get();
-    if (!isPrevTrackAvailable() || currentTrackIndex === null) return;
+    if (!isPrevTrackAvailable(true) || currentTrackIndex === null) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     await loadTrack(prevIndex);
   },

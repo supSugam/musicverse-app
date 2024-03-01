@@ -23,6 +23,7 @@ import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import SliderInput from '../reusables/SliderInput';
 import { msToSeconds } from '@/utils/helpers/string';
+import { GestureDetector } from 'react-native-gesture-handler';
 
 const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
@@ -87,15 +88,17 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
     favoriteButtonScale.value = withTiming(1, { duration: 250 });
   };
 
-  const panResponder = useSwipeGesture({
-    onSwipeLeft: () => nextTrack(),
+  const changeTrackGesture = useSwipeGesture({
+    onSwipeLeft: () => {
+      console.log('swiped left');
+      nextTrack();
+    },
     onSwipeRight: () => prevTrack(),
     onSwipeUp: () => console.log('Swiped up'),
     onSwipeDown: () => console.log('Swiped down'),
   });
   return (
     <Animated.View
-      // {...panResponder}
       style={[styles.container, containerAnimatedStyle]}
       className="overflow-visible"
     >
@@ -117,7 +120,10 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
         end={{ x: 1, y: 1 }}
       />
 
-      <View className="flex flex-row items-center flex-1 px-3">
+      <View
+        {...changeTrackGesture}
+        className="flex flex-row items-center flex-1 px-3"
+      >
         <ImageDisplay
           source={
             currentTrack?.cover

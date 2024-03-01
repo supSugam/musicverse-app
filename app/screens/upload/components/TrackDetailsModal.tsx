@@ -297,7 +297,7 @@ const TrackDetailsModal = ({
         trackToUpdate.publicStatus === ReviewStatus.REQUESTED
       );
     }
-  }, [trackToUpdate, action, genres, tags]);
+  }, [trackToUpdate, action]);
   return (
     <ModalWrapper
       transparent

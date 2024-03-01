@@ -36,12 +36,18 @@ const HomeScreen: React.FC = () => {
   }, [selectedGenre, genres]);
 
   const {
-    getAllTracks: { data, isLoading: isTracksLoading },
+    getAllTracks: {
+      data,
+      isLoading: isTracksLoading,
+      refetch: refetchAllTracks,
+    },
   } = useTracksQuery({
     getAllTracksConfig: {
       params: InitialTracksParams,
       queryOptions: {
         enabled: !isGenresLoading,
+        refetchOnWindowFocus: false,
+        staleTime: 0,
       },
     },
   });
@@ -50,6 +56,7 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     if (data) {
+      console.log('GetAllTracksResponse', Date.now());
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
       updateTracks(tracks);
@@ -82,7 +89,7 @@ const HomeScreen: React.FC = () => {
           <RefreshControl
             refreshing={isGenresLoading}
             onRefresh={() => {
-              // getAllTracks.refetch();
+              refetchAllTracks();
             }}
           />
         }

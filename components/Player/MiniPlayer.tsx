@@ -41,6 +41,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
     prevTrack,
     nextTrack,
     playbackPosition,
+    seek,
     currentTrack: currTrack,
   } = usePlayerStore();
   const currentTrack = currTrack();
@@ -96,7 +97,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
     <Animated.View
       // {...panResponder}
       style={[styles.container, containerAnimatedStyle]}
-      className="overflow-hidden"
+      className="overflow-visible"
     >
       <LinearGradient
         colors={[COLORS.gradient.primary[0], COLORS.gradient.primary[1]]}
@@ -195,18 +196,15 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
         </View>
       </View>
 
-      <View className="w-full my-1">
-        <SliderInput
-          currentValue={msToSeconds(playbackPosition)}
-          minimumValue={0}
-          maximumValue={
-            currentTrack?.trackDuration
-              ? msToSeconds(currentTrack.trackDuration)
-              : 0
-          }
-          roundedTrack
-        />
-      </View>
+      <SliderInput
+        currentValue={playbackPosition}
+        minimumValue={0}
+        maximumValue={currentTrack?.trackDuration || 0}
+        onValueChange={(value) => seek(value)}
+        roundedTrack
+        showDot
+        allowChange
+      />
     </Animated.View>
   );
 };

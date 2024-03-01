@@ -54,11 +54,7 @@ export default function RootLayout() {
     return <></>;
   }
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <RootLayoutNav />
-    </GestureHandlerRootView>
-  );
+  return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
@@ -66,12 +62,15 @@ function RootLayoutNav() {
     <ThemeProvider value={DarkTheme}>
       <LoadingModal />
       <QueryClientProvider client={queryClient}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            gestureEnabled: true,
-          }}
-        />
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              gestureEnabled: true,
+            }}
+          />
+        </GestureHandlerRootView>
+
         <StatusBar style="light" />
       </QueryClientProvider>
       <ToastInstance />

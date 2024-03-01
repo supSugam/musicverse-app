@@ -19,7 +19,7 @@ export const useGenreQuery = (): IProfileQuery => {
   const { data, isLoading, isRefetching, isFetching } = useQuery({
     queryKey: [GENRES_QUERY_KEY],
     queryFn: async () => await api.get('/genre'),
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

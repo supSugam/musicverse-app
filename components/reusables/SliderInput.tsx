@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -9,13 +9,16 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import COLORS from '@/constants/Colors';
-import { calculatePercentage } from '@/utils/helpers/number';
+import {
+  calculatePercentage,
+  getValueFromPercentage,
+} from '@/utils/helpers/number';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import {
   GestureDetector,
   Gesture,
-  GestureHandlerRootView,
+  PanGestureHandler,
 } from 'react-native-gesture-handler';
 
 interface ISliderInputProps {
@@ -24,6 +27,7 @@ interface ISliderInputProps {
   currentValue: number;
   onValueChange?: (value: number) => void;
   allowChange?: boolean;
+  showDot?: boolean;
   roundedTrack?: boolean;
   trackHeight?: number;
 }
@@ -33,35 +37,36 @@ const SliderInput = ({
   maximumValue,
   currentValue,
   onValueChange,
-  allowChange = true,
+  allowChange = false,
+  showDot = false,
   roundedTrack = false,
   trackHeight = 2,
 }: ISliderInputProps) => {
-  // Pan for progress seeking
-  const pan = Gesture.Pan()
+  // Pan Gesture Handler for progress seeking
+  const [isSeeking, setIsSeeking] = useState<boolean>(false);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  const panGestureHandler = Gesture.Pan()
+    .onBegin((event) => {
+      if (!allowChange) return;
+    })
     .onTouchesDown((event) => {
-      console.log('onTouchesDown', event);
+      setIsSeeking(true);
     })
     .onTouchesMove((event) => {
-      console.log('onTouchesMove', event);
+      const percentage = Math.min(
+        100,
+        Math.max(calculatePercentage(event.allTouches[0].x, containerWidth), 0)
+      );
+      progressValue.value = percentage;
+      sliderDotPositionValue.value = percentage;
     })
     .onTouchesUp((event) => {
-      console.log('onTouchesUp', event);
-    })
-    .onTouchesCancelled((event) => {
-      console.log('onTouchesCancelled', event);
+      onValueChange?.(
+        getValueFromPercentage(progressValue.value, maximumValue)
+      );
     })
     .runOnJS(true);
-
-  pan.config = {
-    minPointers: 1,
-    maxPointers: 1,
-    minDist: 0,
-    minVelocity: 0,
-    activeOffsetXStart: 0,
-    activeOffsetXEnd: 0,
-    shouldCancelWhenOutside: false,
-  };
 
   const sliderDotPositionValue = useSharedValue(0);
   const progressValue = useSharedValue(0);
@@ -91,35 +96,51 @@ const SliderInput = ({
   };
 
   return (
-    <GestureHandlerRootView>
-      <GestureDetector gesture={pan}>
-        <View style={styles.container} collapsable={false}>
-          <Animated.View style={[styles.sliderDot, sliderDotAnimatedStyle]} />
-          <View
+    <GestureDetector gesture={panGestureHandler}>
+      <View
+        onLayout={(event) => {
+          const { width } = event.nativeEvent.layout;
+          setContainerWidth(width);
+        }}
+        style={styles.container}
+      >
+        {showDot && (
+          <Animated.View
+            style={[styles.sliderDotContainer, sliderDotAnimatedStyle]}
+          >
+            <LinearGradient
+              colors={COLORS.gradient.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.sliderDot}
+            />
+          </Animated.View>
+        )}
+
+        <View
+          style={[
+            styles.trackContainer,
+            trackHeightStyle,
+            roundedTrack && styles.roundedTrack,
+          ]}
+        >
+          <Animated.View
             style={[
-              styles.trackContainer,
+              styles.progressBar,
+              progressBarAnimatedStyle,
               trackHeightStyle,
-              roundedTrack && styles.roundedTrack,
             ]}
           >
-            <Animated.View
-              style={[
-                styles.progressBar,
-                progressBarAnimatedStyle,
-                trackHeightStyle,
-              ]}
-            >
-              <LinearGradient
-                colors={COLORS.gradient.primary} // Using primary gradient colors for the progress bar
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{ flex: 1 }}
-              />
-            </Animated.View>
-          </View>
+            <LinearGradient
+              colors={COLORS.gradient.primary} // Using primary gradient colors for the progress bar
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ flex: 1 }}
+            />
+          </Animated.View>
         </View>
-      </GestureDetector>
-    </GestureHandlerRootView>
+      </View>
+    </GestureDetector>
   );
 };
 
@@ -136,21 +157,26 @@ const styles = StyleSheet.create({
   trackContainer: {
     width: '100%',
     overflow: 'hidden',
-    backgroundColor: COLORS.neutral.semidark,
+    backgroundColor: COLORS.neutral.dark,
   },
   roundedTrack: {
     borderRadius: 4,
   },
-
-  sliderDot: {
-    backgroundColor: COLORS.neutral.white,
+  sliderDotContainer: {
+    ...StyleSheet.absoluteFillObject,
     width: 6,
     height: 6,
-    borderRadius: 10,
-    position: 'absolute',
-    left: 0,
-    top: -2,
+    alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 1,
+    overflow: 'hidden',
+    top: -2,
+  },
+  sliderDot: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+    overflow: 'hidden',
   },
 });
 

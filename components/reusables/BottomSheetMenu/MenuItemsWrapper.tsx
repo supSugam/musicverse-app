@@ -1,13 +1,20 @@
 import COLORS from '@/constants/Colors';
-import React, { useEffect, useMemo } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
-import { Text, Touchable, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { View } from 'react-native';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+  TouchableOpacity,
+} from 'react-native-gesture-handler';
 import StyledText from '../StyledText';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface IMenuItemsWrapperProps {
   children: React.ReactNode;
@@ -20,6 +27,7 @@ const MenuItemsWrapper = ({
   header,
   draggable,
 }: IMenuItemsWrapperProps) => {
+  const [containerHeight, setContainerHeight] = useState<number>(0);
   const wrapperTranslateY = useSharedValue(400);
 
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
@@ -42,38 +50,84 @@ const MenuItemsWrapper = ({
     }
   }, [header]);
 
+  const { height } = useWindowDimensions();
+
+  // Handle Dragging
+
+  const [initialAbsoluteY, setInitialAbsoluteY] = useState<number>(0);
+
+  const panGesture = Gesture.Pan()
+    .onTouchesDown((event) => {})
+    .onTouchesMove((event) => {
+      const absoluteY = event.allTouches[0].absoluteY;
+      setInitialAbsoluteY(absoluteY);
+      wrapperTranslateY.value = absoluteY - containerHeight;
+    })
+    .onTouchesUp((event) => {
+      if (containerHeight === 0) return;
+      if (containerHeight <= height / 2) {
+        wrapperTranslateY.value = withTiming(0);
+        return;
+      }
+      if (event.allTouches[0].absoluteY - initialAbsoluteY > 10) {
+        wrapperTranslateY.value = withTiming(200);
+        return;
+      }
+    })
+    .runOnJS(true);
+
   useEffect(() => {
-    wrapperTranslateY.value = 0;
-  }, []);
+    // positive -> down
+    // negative -> up
+
+    if (containerHeight === 0) return;
+    if (containerHeight <= height / 2) {
+      wrapperTranslateY.value = withTiming(0);
+    } else {
+      wrapperTranslateY.value = withTiming(200);
+    }
+  }, [containerHeight]);
   return (
-    <Animated.View style={[styles.mainWrapper, wrapperAnimatedStyle]}>
-      <TouchableOpacity activeOpacity={0.7} containerStyle={{ width: '100%' }}>
-        <View
-          style={{
-            height: 4,
-            width: 40,
-            backgroundColor: 'white',
-            marginVertical: 10,
-            borderRadius: 5,
-            alignSelf: 'center',
+    <GestureHandlerRootView style={{ width: '100%' }}>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[styles.mainWrapper, wrapperAnimatedStyle]}
+          onLayout={(event) => {
+            setContainerHeight(event.nativeEvent.layout.height);
           }}
-        />
-      </TouchableOpacity>
-      {conditionalHeader && (
-        <View style={styles.headerWrapper}>{conditionalHeader}</View>
-      )}
-      <ScrollView style={styles.scrollViewWrapper}>{children}</ScrollView>
-    </Animated.View>
+        >
+          <TouchableOpacity
+            activeOpacity={0.7}
+            containerStyle={{ width: '100%' }}
+          >
+            <View
+              style={{
+                height: 4,
+                width: 40,
+                backgroundColor: 'white',
+                marginVertical: 10,
+                borderRadius: 5,
+                alignSelf: 'center',
+              }}
+            />
+          </TouchableOpacity>
+          {conditionalHeader && (
+            <View style={styles.headerWrapper}>{conditionalHeader}</View>
+          )}
+          <View style={styles.scrollViewWrapper}>{children}</View>
+        </Animated.View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
   mainWrapper: {
     width: '100%',
-    backgroundColor: COLORS.neutral.semidark,
+    // backgroundColor: COLORS.neutral.semidark,
+    backgroundColor: 'red',
     paddingHorizontal: 4,
     paddingVertical: 12,
-    maxHeight: 500,
   },
   scrollViewWrapper: {
     width: '100%',

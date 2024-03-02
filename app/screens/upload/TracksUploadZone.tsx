@@ -43,7 +43,11 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
     removeTrack,
     removeTrackFromAlbum,
   } = useUploadStore((state) => state);
-  const [trackModalVisible, setTrackModalVisible] = useState<boolean>(false);
+  const [createTrackModalVisible, setCreateTrackModalVisible] =
+    useState<boolean>(false);
+  const [editTrackModalVisible, setEditTrackModalVisible] =
+    useState<boolean>(false);
+  const [trackToEdit, setTrackToEdit] = useState<ITrack | null>(null);
 
   const isUploadTypeSingle = uploadType === 'single';
 
@@ -168,16 +172,26 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
       });
       return;
     }
-    setTrackModalVisible(true);
+    setCreateTrackModalVisible(true);
   };
 
-  const onModalClose = () => {
-    setTrackModalVisible(false);
+  const onCreateModalClose = () => {
+    setCreateTrackModalVisible(false);
+  };
+
+  const onEditModalClose = () => {
+    setEditTrackModalVisible(false);
+    setTrackToEdit(null);
   };
 
   useEffect(() => {
     setLoading(false);
   }, []);
+
+  const onEditTrackClick = (track: ITrack) => {
+    setEditTrackModalVisible(true);
+    setTrackToEdit(track);
+  };
 
   return (
     <Container includeNavBar navbarTitle="Upload">
@@ -212,8 +226,19 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         </StyledText>
       </View>
 
-      {trackModalVisible && (
-        <TrackDetailsModal visible={trackModalVisible} onClose={onModalClose} />
+      {createTrackModalVisible && (
+        <TrackDetailsModal
+          visible={createTrackModalVisible}
+          onClose={onCreateModalClose}
+          action={ActionsEnum.CREATE}
+        />
+      )}
+      {editTrackModalVisible && (
+        <TrackDetailsModal
+          visible={editTrackModalVisible}
+          onClose={onEditModalClose}
+          action={ActionsEnum.UPDATE}
+        />
       )}
 
       <AddTrackButton
@@ -275,13 +300,11 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
             ] || { progress: 0, uploadStatus: UploadStatus.QUEUED };
             return (
               <AudioDetailsCard
-                trackDetails={track}
                 key={track.uploadKey}
                 title={track.title}
                 size={formatBytes(track.src.size)}
                 duration={formatDuration(track.src.duration, true)}
                 extension={extractExtension(track.src.name)}
-                editable
                 onRemove={() => {
                   toastResponseMessage({
                     content: 'Track removed successfully.',
@@ -297,13 +320,11 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           })}
         {isUploadTypeSingle && track && (
           <AudioDetailsCard
-            trackDetails={track}
             key={track.uploadKey}
             title={track.title}
             size={formatBytes(track.src.size)}
             duration={formatDuration(track.src.duration, true)}
             extension={extractExtension(track.src.name)}
-            editable
             alwaysShowProgressBar
             onRemove={() => {
               toastResponseMessage({

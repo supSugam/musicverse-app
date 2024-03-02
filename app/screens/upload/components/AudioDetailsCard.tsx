@@ -9,7 +9,6 @@ import { GLOBAL_STYLES } from '@/utils/constants';
 import { UploadStatus } from '@/utils/enums/IUploadStatus';
 import TrackDetailsModal from './TrackDetailsModal';
 import { ActionsEnum } from '@/utils/enums/Action';
-import { useUploadStore } from '@/services/zustand/stores/useUploadStore';
 import { ITrack } from '@/utils/Interfaces/ITrack';
 
 export interface IAudioDetailsCardProps {
@@ -18,12 +17,11 @@ export interface IAudioDetailsCardProps {
   duration?: string;
   extension: string;
   onRemove?: () => void;
-  editable?: boolean;
   icon?: keyof typeof MaterialIcons.glyphMap;
   uploadProgress?: number;
   uploadStatus?: UploadStatus;
   alwaysShowProgressBar?: boolean;
-  trackDetails?: ITrack;
+  onEdit?: () => void;
 }
 const AudioDetailsCard = ({
   title,
@@ -31,29 +29,16 @@ const AudioDetailsCard = ({
   duration = '',
   extension,
   onRemove,
-  editable = false,
   icon = 'audio-file',
   uploadProgress,
   uploadStatus,
   alwaysShowProgressBar = false,
-  trackDetails,
+  onEdit,
 }: IAudioDetailsCardProps) => {
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
-  const [trackModalVisible, setTrackModalVisible] = useState<boolean>(false);
-  const {} = useUploadStore();
 
   return (
     <>
-      {trackModalVisible && (
-        <TrackDetailsModal
-          visible={trackModalVisible}
-          onClose={() => {
-            setTrackModalVisible(false);
-          }}
-          action={ActionsEnum.UPDATE}
-          trackToUpdate={trackDetails}
-        />
-      )}
       {onRemove && (
         <ReusableAlert
           cancelText="Cancel"
@@ -115,15 +100,13 @@ const AudioDetailsCard = ({
             >{`${size} | ${duration} | ${extension}`}</StyledText>
           </View>
           <View className="flex flex-row ml-2 items-center">
-            {editable && (
+            {onEdit && (
               <>
                 <MaterialIcons
                   name="edit"
                   size={28}
                   color={COLORS.neutral.normal}
-                  onPress={() => {
-                    setTrackModalVisible(true);
-                  }}
+                  onPress={onEdit}
                 />
                 <View className="w-2" />
               </>

@@ -62,7 +62,6 @@ export const useTracksQuery = <T extends string | undefined = undefined>({
   const getAllTracks = useQuery<AxiosResponse<GetAllTracksResponse, any>>({
     queryKey: [TRACK_QUERY_KEY, getAllTracksConfig?.params],
     queryFn: async () => {
-      console.log(Date.now(), 'GetAllTracks Call');
       return await api.get('/tracks', {
         params: cleanObject(getAllTracksConfig?.params || {}),
       });

@@ -56,7 +56,6 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      console.log('GetAllTracksResponse', Date.now());
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
       updateTracks(tracks);

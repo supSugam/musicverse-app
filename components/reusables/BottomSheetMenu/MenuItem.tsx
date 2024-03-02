@@ -26,7 +26,7 @@ const MenuItem = ({
   duration,
   ...rest
 }: IMenuItemProps) => {
-  const translateX = useSharedValue(400); // Start position outside the screen
+  const translateX = useSharedValue(50); // Start position outside the screen
   const translateStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: translateX.value }],

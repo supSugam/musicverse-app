@@ -23,7 +23,7 @@ interface IModalWrapperProps extends ModalProps {
   closeOnOutsideClick?: boolean;
   position?: 'start' | 'center' | 'end';
   fullWidth?: boolean;
-  transparentWrapper?: boolean;
+  doNotUseWrapper?: boolean;
 }
 
 const ModalWrapper = ({
@@ -37,7 +37,7 @@ const ModalWrapper = ({
   closeOnOutsideClick,
   position = 'center',
   fullWidth = false,
-  transparentWrapper = false,
+  doNotUseWrapper = false,
 }: IModalWrapperProps) => {
   const alignItems: FlexAlignType =
     position === 'center' ? position : `flex-${position}`;
@@ -102,8 +102,8 @@ const ModalWrapper = ({
           <ToastInstance />
           <Animated.View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
-              {transparentWrapper ? (
-                children
+              {doNotUseWrapper ? (
+                <View className="w-full">{children}</View>
               ) : (
                 <LinearGradient
                   colors={[
@@ -113,7 +113,7 @@ const ModalWrapper = ({
                     COLORS.neutral.dense,
                   ]}
                   style={{
-                    borderWidth: transparentWrapper ? 0 : 1,
+                    borderWidth: doNotUseWrapper ? 0 : 1,
                     borderColor: `${COLORS.neutral.light}20`,
                     padding: 16,
                     width: '100%',

@@ -32,7 +32,7 @@ const ReusableAlert = ({
       blur
       animationType="fade"
       visible={visible}
-      closeOnOutsideClick={false}
+      closeOnOutsideClick
       onClose={onClose}
       header={header}
     >

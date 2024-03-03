@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
+import TrackPreview from './TrackPreview';
 
 interface ITrackListItemProps {
   id: string;
@@ -96,7 +97,15 @@ const TrackListItem = ({
       <MenuModal
         visible={optionsMenuVisible}
         onClose={() => setOptionsMenuVisible(false)}
-        header="Options"
+        header={
+          <TrackPreview
+            id={id}
+            title={title}
+            artistName={artistName}
+            cover={cover}
+            duration={duration}
+          />
+        }
         items={[
           {
             label: 'Add to Playlist',

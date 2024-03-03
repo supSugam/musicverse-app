@@ -26,12 +26,14 @@ interface IMenuItemsWrapperProps {
   children: React.ReactNode;
   draggable?: boolean;
   header?: string | React.ReactNode;
+  closeMenu?: () => void;
 }
 
 const MenuItemsWrapper = ({
   children,
   header,
   draggable,
+  closeMenu,
 }: IMenuItemsWrapperProps) => {
   const [containerHeight, setContainerHeight] = useState<number>(0);
   const wrapperTranslateY = useSharedValue(400);
@@ -76,39 +78,38 @@ const MenuItemsWrapper = ({
     .onTouchesMove((event) => {
       const { absoluteY } = event.allTouches[0];
 
-      // Calculate the difference between the current and initial touch positions
       const diff = absoluteY - previousAbsoluteY;
 
-      // Update the wrapperTranslateY value by accumulating the changes
       wrapperTranslateY.value += diff;
     })
     .onTouchesUp((event) => {
-      if (containerHeight <= height / 2) {
-        wrapperTranslateY.value = withTiming(0);
-        return;
-      }
       const { absoluteY: finalAbsoluteY } = event.allTouches[0];
-      console.log('diff', initialAbsoluteY - finalAbsoluteY, height / 2);
 
       if (initialAbsoluteY - finalAbsoluteY > 0) {
-        wrapperTranslateY.value = withTiming(0);
-      } else {
-        if (containerHeight <= height / 2) {
-          wrapperTranslateY.value = withTiming(height - containerHeight - 60);
+        if (wrapperTranslateY.value < -200) {
+          wrapperTranslateY.value = withTiming(-height);
+          closeMenu?.();
         } else {
-          wrapperTranslateY.value = withTiming(height / 2);
+          wrapperTranslateY.value = withTiming(0);
+        }
+      } else {
+        if (wrapperTranslateY.value > height / 2) {
+          wrapperTranslateY.value = withTiming(height + containerHeight);
+          closeMenu?.();
+        } else {
+          if (containerHeight <= height / 2) {
+            wrapperTranslateY.value = withTiming(height - containerHeight);
+          } else {
+            wrapperTranslateY.value = withTiming(height / 2);
+          }
         }
       }
     })
     .runOnJS(true);
 
   useEffect(() => {
-    // positive -> down
-    // negative -> up
-    console.log('containerHeight', containerHeight, height / 2);
-
     if (containerHeight <= height / 2) {
-      wrapperTranslateY.value = withTiming(height - containerHeight - 60);
+      wrapperTranslateY.value = withTiming(height - containerHeight);
     } else {
       wrapperTranslateY.value = withTiming(height / 2);
     }
@@ -131,10 +132,17 @@ const MenuItemsWrapper = ({
               >
                 <View style={styles.draggableIndicator} />
               </TouchableOpacity>
-              {conditionalHeader && (
-                <View style={styles.headerWrapper}>{conditionalHeader}</View>
-              )}
-              <View style={styles.childrenWrapper}>{children}</View>
+              {conditionalHeader &&
+                (typeof conditionalHeader === 'string' ? (
+                  <View style={styles.textHeaderWrapper}>
+                    <StyledText size="xl" weight="bold">
+                      {conditionalHeader}
+                    </StyledText>
+                  </View>
+                ) : (
+                  conditionalHeader
+                ))}
+              <ScrollView style={styles.childrenWrapper}>{children}</ScrollView>
             </View>
           </Animated.View>
         </GestureDetector>
@@ -145,7 +153,6 @@ const MenuItemsWrapper = ({
 
 const styles = StyleSheet.create({
   rootWrapper: {
-    backgroundColor: 'green',
     height: '100%',
     position: 'relative',
   },
@@ -153,7 +160,7 @@ const styles = StyleSheet.create({
   childrenWrapper: {
     width: '100%',
   },
-  headerWrapper: {
+  textHeaderWrapper: {
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
@@ -161,7 +168,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 12,
     width: '100%',
-    backgroundColor: COLORS.neutral.semidark,
+    backgroundColor: COLORS.neutral.dark,
+    height: '100%',
   },
   draggableIndicator: {
     height: 4,
@@ -171,6 +179,7 @@ const styles = StyleSheet.create({
   },
   draggableIndicatorWrapper: {
     ...StyleSheet.absoluteFillObject,
+    top: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },

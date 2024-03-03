@@ -29,9 +29,21 @@ const MenuModal = ({
       position="end"
       fullWidth
     >
-      <MenuItemsWrapper header={header} draggable={draggable}>
+      <MenuItemsWrapper
+        closeMenu={onClose}
+        header={header}
+        draggable={draggable}
+      >
         {items.map((item, index) => {
-          return <MenuItem key={index} {...item} duration={(index + 1) * 50} />;
+          return (
+            <MenuItem
+              key={index}
+              {...item}
+              duration={(index + 1) * 150}
+              borderTop={index === 0}
+              borderBottom
+            />
+          );
         })}
       </MenuItemsWrapper>
     </ModalWrapper>

@@ -16,6 +16,8 @@ export interface IMenuItemProps extends React.ComponentProps<typeof View> {
   label?: string;
   rightComponent?: React.ReactNode;
   duration?: number;
+  borderTop?: boolean;
+  borderBottom?: boolean;
 }
 
 const MenuItem = ({
@@ -24,6 +26,8 @@ const MenuItem = ({
   label,
   rightComponent,
   duration,
+  borderBottom = false,
+  borderTop = false,
   ...rest
 }: IMenuItemProps) => {
   const translateX = useSharedValue(50); // Start position outside the screen
@@ -51,7 +55,14 @@ const MenuItem = ({
       onPressOut={leaveAnimation}
     >
       <Animated.View
-        style={[styles.wrapper, rest.style, scaleStyle, translateStyle]}
+        style={[
+          styles.wrapper,
+          rest.style,
+          scaleStyle,
+          translateStyle,
+          borderTop && styles.borderTop,
+          borderBottom && styles.borderBottom,
+        ]}
       >
         <View className="flex-row items-center flex-1">
           {icon && (
@@ -59,10 +70,15 @@ const MenuItem = ({
               name={icon}
               size={28}
               color={COLORS.neutral.normal}
-              style={{ marginRight: 8 }}
+              style={{ marginRight: 10 }}
             />
           )}
-          <StyledText weight="normal" size="lg">
+          <StyledText
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            weight="normal"
+            size="lg"
+          >
             {label}
           </StyledText>
         </View>
@@ -78,8 +94,13 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     padding: 16,
-    borderBottomColor: COLORS.neutral.semidark,
-    borderBottomWidth: 1,
+    borderColor: COLORS.neutral.gray,
+  },
+  borderTop: {
+    borderTopWidth: 0.5,
+  },
+  borderBottom: {
+    borderBottomWidth: 0.5,
   },
 });
 

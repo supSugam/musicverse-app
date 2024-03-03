@@ -51,7 +51,6 @@ const MenuItem = ({
       onPressOut={leaveAnimation}
     >
       <Animated.View
-        {...rest}
         style={[styles.wrapper, rest.style, scaleStyle, translateStyle]}
       >
         <View className="flex-row items-center flex-1">
@@ -75,7 +74,6 @@ const MenuItem = ({
 
 const styles = StyleSheet.create({
   wrapper: {
-    justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
     flexDirection: 'row',

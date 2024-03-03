@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import ModalWrapper from '../ModalWrapper';
 import MenuItem, { IMenuItemProps } from './MenuItem';
 import MenuItemsWrapper from './MenuItemsWrapper';
@@ -27,12 +28,11 @@ const MenuModal = ({
       onClose={onClose}
       position="end"
       fullWidth
-      closeOnOutsideClick
     >
       <MenuItemsWrapper header={header} draggable={draggable}>
-        {items.map((item, index) => (
-          <MenuItem key={index} {...item} duration={(index + 1) * 50} />
-        ))}
+        {items.map((item, index) => {
+          return <MenuItem key={index} {...item} duration={(index + 1) * 50} />;
+        })}
       </MenuItemsWrapper>
     </ModalWrapper>
   );

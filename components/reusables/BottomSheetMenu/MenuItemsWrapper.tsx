@@ -118,13 +118,13 @@ const MenuItemsWrapper = ({
   return (
     <GestureHandlerRootView style={{ width: '100%' }}>
       <TouchableWithoutFeedback style={styles.rootWrapper}>
-        <GestureDetector gesture={panGesture}>
-          <Animated.View
-            style={[wrapperAnimatedStyle]}
-            onLayout={(event) => {
-              setContainerHeight(event.nativeEvent.layout.height);
-            }}
-          >
+        <Animated.View
+          style={[wrapperAnimatedStyle]}
+          onLayout={(event) => {
+            setContainerHeight(event.nativeEvent.layout.height);
+          }}
+        >
+          <GestureDetector gesture={panGesture}>
             <View style={styles.contentWrapper}>
               <TouchableOpacity
                 activeOpacity={0.7}
@@ -144,8 +144,8 @@ const MenuItemsWrapper = ({
                 ))}
               <ScrollView style={styles.childrenWrapper}>{children}</ScrollView>
             </View>
-          </Animated.View>
-        </GestureDetector>
+          </GestureDetector>
+        </Animated.View>
       </TouchableWithoutFeedback>
     </GestureHandlerRootView>
   );

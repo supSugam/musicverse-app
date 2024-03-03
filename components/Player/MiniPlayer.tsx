@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     bottom: GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT + 5,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '96%',
+    width: '100%',
     height: 65,
     backgroundColor: COLORS.neutral.dark,
     borderRadius: 4,

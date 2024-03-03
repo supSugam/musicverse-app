@@ -114,53 +114,18 @@ const TrackListItem = ({
             },
             icon: 'playlist-add',
           },
+
           {
-            label: isLiked ? 'Remove from Liked' : 'Add to Liked',
+            label: isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs',
             onPress: () => {
               toggleLikeMutate(id);
-              setOptionsMenuVisible(false);
             },
             icon: isLiked ? 'favorite' : 'favorite-border',
           },
           {
-            label: isLiked ? 'Remove from Liked' : 'Add to Liked',
-            onPress: () => {
-              toggleLikeMutate(id);
-              setOptionsMenuVisible(false);
-            },
-            icon: isLiked ? 'favorite' : 'favorite-border',
-          },
-          {
-            label: isLiked ? 'Remove from Liked' : 'Add to Liked',
-            onPress: () => {
-              toggleLikeMutate(id);
-              setOptionsMenuVisible(false);
-            },
-            icon: isLiked ? 'favorite' : 'favorite-border',
-          },
-          {
-            label: isLiked ? 'Remove from Liked' : 'Add to Liked',
-            onPress: () => {
-              toggleLikeMutate(id);
-              setOptionsMenuVisible(false);
-            },
-            icon: isLiked ? 'favorite' : 'favorite-border',
-          },
-          {
-            label: isLiked ? 'Remove from Liked' : 'Add to Liked',
-            onPress: () => {
-              toggleLikeMutate(id);
-              setOptionsMenuVisible(false);
-            },
-            icon: isLiked ? 'favorite' : 'favorite-border',
-          },
-          {
-            label: isLiked ? 'Remove from Liked' : 'Add to Liked',
-            onPress: () => {
-              toggleLikeMutate(id);
-              setOptionsMenuVisible(false);
-            },
-            icon: isLiked ? 'favorite' : 'favorite-border',
+            label: 'See Artist Profile',
+            onPress: () => {},
+            icon: 'person',
           },
         ]}
       />

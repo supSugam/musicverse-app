@@ -125,7 +125,15 @@ const MenuItemsWrapper = ({
           }}
         >
           <GestureDetector gesture={panGesture}>
-            <View style={styles.contentWrapper}>
+            <View
+              style={[
+                styles.contentWrapper,
+                {
+                  height:
+                    wrapperTranslateY.value <= height / 3 ? '100%' : 'auto',
+                },
+              ]}
+            >
               <TouchableOpacity
                 activeOpacity={0.7}
                 style={styles.draggableIndicatorWrapper}
@@ -157,9 +165,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
 
-  childrenWrapper: {
-    width: '100%',
-  },
+  childrenWrapper: {},
   textHeaderWrapper: {
     paddingHorizontal: 20,
     paddingVertical: 16,
@@ -169,7 +175,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     width: '100%',
     backgroundColor: COLORS.neutral.dark,
-    height: '100%',
   },
   draggableIndicator: {
     height: 4,

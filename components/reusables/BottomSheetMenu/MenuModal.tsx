@@ -28,6 +28,7 @@ const MenuModal = ({
       onClose={onClose}
       position="end"
       fullWidth
+      closeOnOutsideClick
     >
       <MenuItemsWrapper
         closeMenu={onClose}

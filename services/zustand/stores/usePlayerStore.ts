@@ -18,6 +18,7 @@ const InitialState = {
   playUntilLastTrack: true,
   stopAfterCurrentTrack: false,
   playbackError: null,
+  isPlayerExpanded: false,
 };
 
 interface PlayerState {
@@ -38,6 +39,9 @@ interface PlayerState {
   stopAfterCurrentTrack: boolean;
   playbackError: string | null;
   didJustFinish: boolean;
+  isPlayerExpanded: boolean;
+  setPlayerExpanded: (isPlayerExpanded: boolean) => void;
+  togglePlayerExpanded: () => void;
 
   loadTrack: (index: number) => Promise<void>;
   updateTracks: (tracks: ITrackDetails[]) => void;
@@ -70,6 +74,16 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
 
   didJustFinish: false,
+
+  isPlayerExpanded: false,
+
+  setPlayerExpanded: (isPlayerExpanded: boolean) => {
+    set({ isPlayerExpanded });
+  },
+
+  togglePlayerExpanded: () => {
+    set((state) => ({ isPlayerExpanded: !state.isPlayerExpanded }));
+  },
 
   currentTrack: () => {
     const { tracks, currentTrackIndex } = get();

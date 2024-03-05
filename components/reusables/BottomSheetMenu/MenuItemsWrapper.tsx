@@ -129,8 +129,8 @@ const MenuItemsWrapper = ({
               style={[
                 styles.contentWrapper,
                 {
-                  height:
-                    wrapperTranslateY.value <= height / 3 ? '100%' : 'auto',
+                  height: '100%',
+                  // wrapperTranslateY.value <= height / 3 ? '100%' : 'auto',
                 },
               ]}
             >
@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
   rootWrapper: {
     height: '100%',
     position: 'relative',
+    zIndex: 100,
   },
 
   childrenWrapper: {},

@@ -9,6 +9,8 @@ import { GLOBAL_STYLES } from '@/utils/constants';
 import MiniPlayer from '@/components/Player/MiniPlayer';
 import { useEffect, useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
+import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
+import TrackPlayer from '@/components/Player/TrackPlayer';
 
 const Tab = createBottomTabNavigator();
 
@@ -59,6 +61,7 @@ export default function TabsLayout() {
   return (
     <>
       <MiniPlayer activeTab={activeTab} />
+      <TrackPlayer />
       <Tab.Navigator
         initialRouteName="Home"
         screenListeners={({ navigation, route }) => ({

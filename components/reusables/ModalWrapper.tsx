@@ -14,7 +14,6 @@ import COLORS from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import StyledText from './StyledText';
 import ToastInstance from '../ToastInstance';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 interface IModalWrapperProps extends ModalProps {
   blur?: boolean;

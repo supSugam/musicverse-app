@@ -30,6 +30,7 @@ interface ISliderInputProps {
   showDot?: boolean;
   roundedTrack?: boolean;
   trackHeight?: number;
+  color?: 'gradient' | 'white';
 }
 
 const SliderInput = ({
@@ -41,6 +42,7 @@ const SliderInput = ({
   showDot = false,
   roundedTrack = false,
   trackHeight = 2,
+  color = 'gradient',
 }: ISliderInputProps) => {
   // Pan Gesture Handler for progress seeking
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
@@ -75,6 +77,8 @@ const SliderInput = ({
     return {
       opacity: allowChange ? 1 : 0,
       left: `${sliderDotPositionValue.value}%`,
+      width: trackHeight * 2,
+      height: trackHeight * 2,
     };
   });
   useEffect(() => {
@@ -109,7 +113,11 @@ const SliderInput = ({
             style={[styles.sliderDotContainer, sliderDotAnimatedStyle]}
           >
             <LinearGradient
-              colors={COLORS.gradient.primary}
+              colors={
+                color === 'gradient'
+                  ? COLORS.gradient.primary
+                  : [COLORS.neutral.white, COLORS.neutral.white]
+              }
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               style={styles.sliderDot}
@@ -132,7 +140,11 @@ const SliderInput = ({
             ]}
           >
             <LinearGradient
-              colors={COLORS.gradient.primary} // Using primary gradient colors for the progress bar
+              colors={
+                color === 'gradient'
+                  ? COLORS.gradient.primary
+                  : [COLORS.neutral.white, COLORS.neutral.white]
+              }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ flex: 1 }}

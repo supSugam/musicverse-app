@@ -14,13 +14,14 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Dimension } from '@/utils/helpers/types';
 
 interface IImageDisplayProps
   extends React.ComponentProps<typeof TouchableOpacity> {
   source?: ImageSourcePropType | null;
   placeholder: string | React.ReactNode;
-  width?: number;
-  height?: number;
+  width?: Dimension;
+  height?: Dimension;
   borderRadius?: 'full' | number;
   onPress?: () => void;
   onEdit?: () => void;
@@ -44,7 +45,7 @@ const ImageDisplay = ({
 }: IImageDisplayProps) => {
   const borderRadiusStyle =
     borderRadius === 'full'
-      ? { borderRadius: Math.min(width, height) / 2 }
+      ? { borderRadius: Math.min(typeof width === 'number' ? width : 100, 100) }
       : { borderRadius };
 
   //For the edit icon
@@ -95,7 +96,11 @@ const ImageDisplay = ({
         end={{ x: 1, y: 1 }}
       >
         {source ? (
-          <Image source={source} style={styles.image} resizeMode="cover" />
+          <Image
+            source={source}
+            style={[styles.image, borderRadiusStyle]}
+            resizeMode="cover"
+          />
         ) : typeof placeholder === 'string' ? (
           <StyledText size="2xl" weight="bold" className="text-center">
             {placeholder}

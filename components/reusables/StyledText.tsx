@@ -120,7 +120,7 @@ const StyledText = (props: ITextProps) => {
   const fontDimnessClassName = (() => {
     switch (dimness) {
       case 'extra':
-        return 'text-opacity-25';
+        return 'text-opacity-10';
       case 'high':
         return 'text-opacity-50';
       case 'medium':

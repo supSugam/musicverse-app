@@ -15,13 +15,21 @@ import Animated, {
 } from 'react-native-reanimated';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import { Link } from 'expo-router';
+import SliderInput from '../reusables/SliderInput';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const TrackPlayer = () => {
   // Player Store
-  const { currentTrack, setPlayerExpanded, isPlayerExpanded } =
-    usePlayerStore();
+  const {
+    currentTrack,
+    setPlayerExpanded,
+    isPlayerExpanded,
+    playbackPosition,
 
-  const [track, setTrack] = useState<ITrackDetails | null>(currentTrack);
+    seek,
+  } = usePlayerStore();
+
+  const track = currentTrack();
 
   const onPlayerClose = () => {
     setPlayerExpanded(false);
@@ -40,10 +48,6 @@ const TrackPlayer = () => {
   });
 
   useEffect(() => {
-    setTrack(currentTrack);
-  }, [currentTrack]);
-
-  useEffect(() => {
     playerRootTranslateY.value = isPlayerExpanded
       ? withTiming(0, { duration: 500 })
       : withTiming(SCREEN_HEIGHT + 50, { duration: 300 });
@@ -60,7 +64,7 @@ const TrackPlayer = () => {
     >
       <Animated.View style={[styles.container, playerRootAnimatedStyle]}>
         <View className="flex flex-row justify-between items-center mt-4">
-          <TouchableOpacity activeOpacity={0.7} className="p-2">
+          <TouchableOpacity activeOpacity={0.7} onPress={onPlayerClose}>
             <Ionicons
               name="chevron-down"
               size={28}
@@ -68,7 +72,7 @@ const TrackPlayer = () => {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.7} className="p-2">
+          <TouchableOpacity activeOpacity={0.7}>
             <MaterialIcons
               name="more-vert"
               size={28}
@@ -77,19 +81,19 @@ const TrackPlayer = () => {
           </TouchableOpacity>
         </View>
         <View className="flex flex-col">
-          <TouchableOpacity activeOpacity={0.7} className="mt-4">
+          <TouchableOpacity activeOpacity={0.7} className="mt-8 mx-2">
             <ImageDisplay
               source={
                 track?.cover ? { uri: track?.cover } : TRACK_PLACEHOLDER_IMAGE
               }
               placeholder=""
-              width={300}
-              height={300}
-              className="mt-4"
+              width={'100%'}
+              height={328}
+              borderRadius={8}
             />
           </TouchableOpacity>
 
-          <View className="flex flex-col mt-6">
+          <View className="flex flex-col mt-6 mx-3">
             <Link
               href={`//(tabs)/profile/${track?.creator?.username}` as never}
             >
@@ -97,14 +101,31 @@ const TrackPlayer = () => {
                 size="sm"
                 weight="light"
                 dimness="extra"
-                className="text-center"
+                className="leading-6"
               >
-                {track?.creator?.username}
+                {track?.creator?.profile.name}
               </StyledText>
             </Link>
-            <StyledText size="2xl" weight="bold" className="text-center">
+            <StyledText size="2xl" weight="bold" dimness="low">
               {track?.title}
             </StyledText>
+          </View>
+
+          <View className="m-3">
+            <GestureHandlerRootView style={{ width: '100%' }}>
+              <SliderInput
+                currentValue={playbackPosition}
+                minimumValue={0}
+                maximumValue={track?.trackDuration || 0}
+                allowChange
+                onValueChange={seek}
+                roundedTrack
+                showDot
+                trackHeight={4}
+                color="white"
+                key={`${track?.id}-SliderInPlayer`}
+              />
+            </GestureHandlerRootView>
           </View>
         </View>
       </Animated.View>
@@ -115,9 +136,8 @@ const TrackPlayer = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     backgroundColor: COLORS.neutral.dense,
-    padding: 20,
+    padding: 16,
     width: '100%',
     minHeight: '100%',
   },

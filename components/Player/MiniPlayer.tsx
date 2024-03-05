@@ -207,7 +207,6 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
           maximumValue={currentTrack?.trackDuration || 0}
           onValueChange={(value) => seek(value)}
           roundedTrack
-          showDot
           allowChange
         />
       </Pressable>

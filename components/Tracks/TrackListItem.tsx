@@ -199,7 +199,6 @@ const TrackListItem = ({
             <StyledText
               size="sm"
               weight="light"
-              opacity="low"
               style={{
                 color: COLORS.neutral.light,
               }}

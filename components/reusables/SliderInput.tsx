@@ -109,7 +109,7 @@ const SliderInput = ({
           const { width } = event.nativeEvent.layout;
           setContainerWidth(width);
         }}
-        style={styles.container}
+        style={[styles.container, { paddingVertical }]}
       >
         {showDot && (
           <Animated.View

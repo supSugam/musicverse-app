@@ -1,4 +1,5 @@
 import { joinClassNames } from '@/utils/helpers/string';
+import { fontWeights } from '@/utils/helpers/types';
 import { Text as DefaultText, TextProps } from 'react-native';
 
 export type TextSizeOptions =
@@ -49,6 +50,7 @@ const StyledText = (props: ITextProps) => {
     tracking,
     opacity,
     uppercase = false,
+    style,
     ...otherProps
   } = props;
 
@@ -77,24 +79,24 @@ const StyledText = (props: ITextProps) => {
     }
   })();
 
-  const fontWeightClassName = (() => {
+  const fontWeightStyle = (() => {
     switch (weight) {
       case 'extralight':
-        return 'font-extralight';
+        return { fontWeight: '200' };
       case 'light':
-        return 'font-light';
+        return { fontWeight: '300' };
       case 'normal':
-        return 'font-normal';
+        return { fontWeight: '400' };
       case 'medium':
-        return 'font-medium';
+        return { fontWeight: '500' };
       case 'semibold':
-        return 'font-semibold';
+        return { fontWeight: '600' };
       case 'bold':
-        return 'font-bold';
+        return { fontWeight: '700' };
       case 'extrabold':
-        return 'font-extrabold';
+        return { fontWeight: '800' };
       default:
-        return 'font-normal';
+        return { fontWeight: '400' };
     }
   })();
 
@@ -135,7 +137,6 @@ const StyledText = (props: ITextProps) => {
   const classNames = joinClassNames([
     'text-white',
     fontClassName,
-    fontWeightClassName,
     fontTrackingClassName,
     uppercase ? 'uppercase' : '',
     className,
@@ -144,7 +145,14 @@ const StyledText = (props: ITextProps) => {
   return (
     <DefaultText
       className={classNames}
-      style={[fontOpacityStyle, otherProps.style]}
+      style={[
+        fontOpacityStyle,
+        {
+          fontWeight: fontWeightStyle.fontWeight as fontWeights,
+        },
+        style,
+      ]}
+      {...otherProps}
     >
       {props.children}
     </DefaultText>

@@ -82,7 +82,7 @@ export default function TabsLayout() {
                   size="xs"
                   tracking="tight"
                   weight={focused ? 'bold' : 'normal'}
-                  opacity={focused ? 'none' : 'low'}
+                  opacity={focused ? 'none' : 'high'}
                   style={{
                     color: focused
                       ? COLORS.neutral.light

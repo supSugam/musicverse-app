@@ -167,6 +167,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             isBuffering: status.isBuffering,
             playbackSpeed: status.rate,
             isLoopingSingle: status.isLooping,
+            ...(status.isLooping && {
+              isLoopingQueue: false,
+              playUntilLastTrack: false,
+              stopAfterCurrentTrack: false,
+            }),
             isMuted: status.isMuted,
             isLoaded: status.isLoaded,
             volume: status.volume,
@@ -182,7 +187,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
               await nextTrack();
               return;
             }
-            if (playUntilLastTrack && index === tracks.length - 1) {
+            if (playUntilLastTrack && index !== tracks.length - 1) {
               await nextTrack();
               return;
             }
@@ -360,15 +365,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isLoopingQueue,
       playUntilLastTrack,
       stopAfterCurrentTrack,
+      enableQueueLooping,
+      enablePlayUntilLastTrack,
+      enableStopAfterCurrentTrack,
+      enableSingleLooping,
     } = get();
     if (isLoopingSingle) {
-      await get().enableQueueLooping();
+      console.log('isLoopingSingle');
+
+      await enableQueueLooping();
     } else if (isLoopingQueue) {
-      await get().enablePlayUntilLastTrack();
+      console.log('isLoopingQueue');
+      await enablePlayUntilLastTrack();
     } else if (playUntilLastTrack) {
-      await get().enableStopAfterCurrentTrack();
+      console.log('playUntilLastTrack');
+      await enableStopAfterCurrentTrack();
     } else if (stopAfterCurrentTrack) {
-      await get().disableSingleLooping();
+      console.log('stopAfterCurrentTrack');
+      await enableSingleLooping();
+    } else {
+      console.log('enableSingleLooping');
+      await enableSingleLooping();
     }
   },
 

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Dimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withTiming,
   Easing,
 } from 'react-native-reanimated';
@@ -20,8 +19,9 @@ import {
   Gesture,
   PanGestureHandler,
 } from 'react-native-gesture-handler';
+import { throttle } from '@/utils/helpers/throttle';
 
-interface ISliderInputProps {
+interface ISliderInputProps extends React.ComponentProps<typeof View> {
   minimumValue: number;
   maximumValue: number;
   currentValue: number;
@@ -43,19 +43,15 @@ const SliderInput = ({
   roundedTrack = false,
   trackHeight = 2,
   color = 'gradient',
+  ...rest
 }: ISliderInputProps) => {
   // Pan Gesture Handler for progress seeking
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   const panGestureHandler = Gesture.Pan()
-    .onBegin((event) => {
-      if (!allowChange) return;
-    })
-    .onTouchesDown((event) => {
-      setIsSeeking(true);
-    })
     .onTouchesMove((event) => {
+      // if (!allowChange) return;
       const percentage = Math.min(
         100,
         Math.max(calculatePercentage(event.allTouches[0].x, containerWidth), 0)
@@ -64,8 +60,14 @@ const SliderInput = ({
       sliderDotPositionValue.value = percentage;
     })
     .onTouchesUp((event) => {
-      onValueChange?.(
-        getValueFromPercentage(progressValue.value, maximumValue)
+      // if (!allowChange) return;
+
+      throttle(
+        () =>
+          onValueChange?.(
+            getValueFromPercentage(progressValue.value, maximumValue)
+          ),
+        1000
       );
     })
     .runOnJS(true);
@@ -106,7 +108,7 @@ const SliderInput = ({
           const { width } = event.nativeEvent.layout;
           setContainerWidth(width);
         }}
-        style={styles.container}
+        style={[styles.container, rest.style]}
       >
         {showDot && (
           <Animated.View

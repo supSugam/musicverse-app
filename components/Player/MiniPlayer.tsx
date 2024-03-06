@@ -38,6 +38,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
     playbackPosition,
     seek,
     setPlayerExpanded,
+    isAsyncOperationPending,
     currentTrack: currTrack,
   } = usePlayerStore();
   const currentTrack = currTrack();
@@ -207,8 +208,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
           maximumValue={currentTrack?.trackDuration || 0}
           onValueChange={(value) => seek(value)}
           roundedTrack
-          allowChange
-          trackHeight={10}
+          allowChange={!isAsyncOperationPending}
         />
       </Pressable>
     </Animated.View>

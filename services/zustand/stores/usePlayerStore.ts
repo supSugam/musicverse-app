@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import { Audio } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 
 const InitialState = {
@@ -23,6 +23,7 @@ const InitialState = {
 
 interface PlayerState {
   isPlaying: boolean;
+  isAsyncOperationPending: boolean;
   isBuffering: boolean;
   isMuted: boolean;
   isLoaded: boolean;
@@ -42,6 +43,7 @@ interface PlayerState {
   isPlayerExpanded: boolean;
   setPlayerExpanded: (isPlayerExpanded: boolean) => void;
   togglePlayerExpanded: () => void;
+  setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => void;
 
   loadTrack: (index: number) => Promise<void>;
   updateTracks: (tracks: ITrackDetails[]) => void;
@@ -76,6 +78,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   didJustFinish: false,
 
   isPlayerExpanded: false,
+  isAsyncOperationPending: false,
+
+  setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => {
+    set({ isAsyncOperationPending });
+  },
 
   setPlayerExpanded: (isPlayerExpanded: boolean) => {
     set({ isPlayerExpanded });
@@ -250,10 +257,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   seek: async (position: number) => {
-    const { playbackInstance } = get();
+    const { playbackInstance, setIsAsyncOperationPending } = get();
 
     if (playbackInstance) {
-      await playbackInstance.setPositionAsync(position);
+      setIsAsyncOperationPending(true);
+      const start = Date.now();
+      await playbackInstance.setPositionAsync(position).finally(() => {
+        setIsAsyncOperationPending(false);
+        console.log('Seeking took', Date.now() - start, 'ms');
+      });
     }
   },
 

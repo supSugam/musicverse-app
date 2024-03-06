@@ -208,6 +208,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
           onValueChange={(value) => seek(value)}
           roundedTrack
           allowChange
+          trackHeight={10}
         />
       </Pressable>
     </Animated.View>

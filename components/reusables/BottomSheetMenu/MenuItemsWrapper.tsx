@@ -21,6 +21,7 @@ import {
 } from 'react-native-gesture-handler';
 import StyledText from '../StyledText';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { Dimension } from '@/utils/helpers/types';
 
 interface IMenuItemsWrapperProps {
   children: React.ReactNode;
@@ -71,6 +72,7 @@ const MenuItemsWrapper = ({
       const absoluteY = event.allTouches[0].absoluteY;
       setInitialAbsoluteY(absoluteY);
       setPreviousAbsoluteY(absoluteY);
+      setContentWrapperHeight('100%');
     })
     .onUpdate((event) => {
       setPreviousAbsoluteY(event.absoluteY);
@@ -81,6 +83,7 @@ const MenuItemsWrapper = ({
       const diff = absoluteY - previousAbsoluteY;
 
       wrapperTranslateY.value += diff;
+      //calculate percentage cotent wrapper height
     })
     .onTouchesUp((event) => {
       const { absoluteY: finalAbsoluteY } = event.allTouches[0];
@@ -99,8 +102,10 @@ const MenuItemsWrapper = ({
         } else {
           if (containerHeight <= height / 2) {
             wrapperTranslateY.value = withTiming(height - containerHeight);
+            setContentWrapperHeight('auto');
           } else {
             wrapperTranslateY.value = withTiming(height / 2);
+            setContentWrapperHeight('100%');
           }
         }
       }
@@ -112,8 +117,12 @@ const MenuItemsWrapper = ({
       wrapperTranslateY.value = withTiming(height - containerHeight);
     } else {
       wrapperTranslateY.value = withTiming(height / 2);
+      setContentWrapperHeight('100%');
     }
   }, [containerHeight, height]);
+
+  const [contentWrapperHeight, setContentWrapperHeight] =
+    useState<Dimension>('auto');
 
   return (
     <GestureHandlerRootView style={{ width: '100%' }}>
@@ -129,7 +138,7 @@ const MenuItemsWrapper = ({
               style={[
                 styles.contentWrapper,
                 {
-                  height: '100%',
+                  height: contentWrapperHeight,
                   // wrapperTranslateY.value <= height / 3 ? '100%' : 'auto',
                 },
               ]}

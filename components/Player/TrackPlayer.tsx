@@ -16,7 +16,10 @@ import Animated, {
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import { Link } from 'expo-router';
 import SliderInput from '../reusables/SliderInput';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  GestureHandlerRootView,
+  gestureHandlerRootHOC,
+} from 'react-native-gesture-handler';
 
 const TrackPlayer = () => {
   // Player Store
@@ -46,6 +49,21 @@ const TrackPlayer = () => {
       transform: [{ translateY: playerRootTranslateY.value }],
     };
   });
+
+  const Slider = gestureHandlerRootHOC(() => (
+    <SliderInput
+      currentValue={playbackPosition}
+      minimumValue={0}
+      maximumValue={track?.trackDuration || 0}
+      allowChange
+      onValueChange={seek}
+      roundedTrack
+      showDot
+      trackHeight={4}
+      color="white"
+      key={`${track?.id}-SliderInPlayer`}
+    />
+  ));
 
   useEffect(() => {
     playerRootTranslateY.value = isPlayerExpanded
@@ -111,8 +129,8 @@ const TrackPlayer = () => {
             </StyledText>
           </View>
 
-          <View className="m-3">
-            <GestureHandlerRootView style={{ width: '100%' }}>
+          <GestureHandlerRootView>
+            <View className="m-3">
               <SliderInput
                 currentValue={playbackPosition}
                 minimumValue={0}
@@ -125,8 +143,8 @@ const TrackPlayer = () => {
                 color="white"
                 key={`${track?.id}-SliderInPlayer`}
               />
-            </GestureHandlerRootView>
-          </View>
+            </View>
+          </GestureHandlerRootView>
         </View>
       </Animated.View>
     </ModalWrapper>

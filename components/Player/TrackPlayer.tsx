@@ -1,10 +1,9 @@
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import COLORS from '@/constants/Colors';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import ImageDisplay from '../reusables/ImageDisplay';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
-import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import ModalWrapper from '../reusables/ModalWrapper';
@@ -16,10 +15,8 @@ import Animated, {
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import { Link } from 'expo-router';
 import SliderInput from '../reusables/SliderInput';
-import {
-  GestureHandlerRootView,
-  gestureHandlerRootHOC,
-} from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { formatDuration } from '@/utils/helpers/string';
 
 const TrackPlayer = () => {
   // Player Store
@@ -50,21 +47,6 @@ const TrackPlayer = () => {
       transform: [{ translateY: playerRootTranslateY.value }],
     };
   });
-
-  const Slider = gestureHandlerRootHOC(() => (
-    <SliderInput
-      currentValue={playbackPosition}
-      minimumValue={0}
-      maximumValue={track?.trackDuration || 0}
-      allowChange
-      onValueChange={seek}
-      roundedTrack
-      showDot
-      trackHeight={4}
-      color="white"
-      key={`${track?.id}-SliderInPlayer`}
-    />
-  ));
 
   useEffect(() => {
     playerRootTranslateY.value = isPlayerExpanded
@@ -113,25 +95,30 @@ const TrackPlayer = () => {
               />
             </TouchableOpacity>
 
-            <View className="flex flex-col mt-6 mx-3">
-              <Link
-                href={`//(tabs)/profile/${track?.creator?.username}` as never}
-              >
+            <View className="flex flex-row justify-between items-center mt-6 mx-3">
+              <View className="flex flex-col">
+                {/* <Link
+                  href={`//(tabs)/profile/${track?.creator?.username}` as never}
+                > */}
                 <StyledText
                   size="sm"
                   weight="light"
-                  dimness="extra"
-                  className="leading-6"
+                  opacity="high"
+                  className="leading-7"
                 >
                   {track?.creator?.profile.name}
                 </StyledText>
-              </Link>
-              <StyledText size="2xl" weight="bold" dimness="low">
-                {track?.title}
-              </StyledText>
+                {/* </Link> */}
+                <StyledText size="2xl" weight="bold">
+                  {track?.title}
+                </StyledText>
+              </View>
+              <TouchableOpacity activeOpacity={0.7}>
+                <Ionicons name="heart" size={28} color={COLORS.primary.light} />
+              </TouchableOpacity>
             </View>
 
-            <View className="m-3">
+            <View className="m-3 mt-6">
               <SliderInput
                 currentValue={playbackPosition}
                 minimumValue={0}
@@ -145,6 +132,34 @@ const TrackPlayer = () => {
                 key={`${track?.id}-SliderInPlayer`}
                 style={{ paddingVertical: 10 }}
               />
+              <View className="flex flex-row justify-between items-center mt-3">
+                <StyledText
+                  size="sm"
+                  weight="light"
+                  opacity="medium"
+                  tracking="tighter"
+                >
+                  {formatDuration(playbackPosition, true)}
+                </StyledText>
+                <StyledText
+                  size="sm"
+                  weight="light"
+                  opacity="medium"
+                  tracking="tighter"
+                >
+                  {formatDuration(track?.trackDuration, true)}
+                </StyledText>
+              </View>
+            </View>
+
+            <View className="flex flex-row justify-center items-center mt-6">
+              <TouchableOpacity activeOpacity={0.7}>
+                <Ionicons
+                  name="play-forward-circle"
+                  size={40}
+                  color={COLORS.primary.light}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         </Animated.View>

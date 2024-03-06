@@ -131,7 +131,7 @@ const TrackPreview = ({
           <StyledText
             size="sm"
             weight="light"
-            dimness="extra"
+            opacity="low"
             style={{
               color: COLORS.neutral.light,
             }}

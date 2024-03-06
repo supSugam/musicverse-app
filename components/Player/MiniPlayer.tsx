@@ -152,7 +152,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
             <StyledText
               size="sm"
               weight="light"
-              dimness="extra"
+              opacity="low"
               style={{
                 color: COLORS.neutral.light,
               }}

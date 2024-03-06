@@ -262,10 +262,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (playbackInstance) {
       setIsAsyncOperationPending(true);
       const start = Date.now();
-      await playbackInstance.setPositionAsync(position).finally(() => {
-        setIsAsyncOperationPending(false);
-        console.log('Seeking took', Date.now() - start, 'ms');
-      });
+      await playbackInstance
+        .setPositionAsync(position, {
+          toleranceMillisAfter: 0,
+          toleranceMillisBefore: 0,
+        })
+        .finally(() => {
+          setIsAsyncOperationPending(false);
+          console.log('Seeking took', Date.now() - start, 'ms');
+        });
     }
   },
 

@@ -31,6 +31,7 @@ interface ISliderInputProps extends React.ComponentProps<typeof View> {
   roundedTrack?: boolean;
   trackHeight?: number;
   color?: 'gradient' | 'white';
+  paddingVertical?: number;
 }
 
 const SliderInput = ({
@@ -43,7 +44,7 @@ const SliderInput = ({
   roundedTrack = false,
   trackHeight = 2,
   color = 'gradient',
-  ...rest
+  paddingVertical = 0,
 }: ISliderInputProps) => {
   // Pan Gesture Handler for progress seeking
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
@@ -61,15 +62,14 @@ const SliderInput = ({
     })
     .onTouchesUp((event) => {
       // if (!allowChange) return;
-
-      throttle(
-        () =>
-          onValueChange?.(
-            getValueFromPercentage(progressValue.value, maximumValue)
-          ),
-        1000
-      );
+      const throttledFunction = throttle(() => {
+        onValueChange?.(
+          getValueFromPercentage(progressValue.value, maximumValue)
+        );
+      }, 200);
+      throttledFunction(); // Call the throttled function to execute
     })
+
     .runOnJS(true);
 
   const sliderDotPositionValue = useSharedValue(0);
@@ -77,12 +77,13 @@ const SliderInput = ({
 
   const sliderDotAnimatedStyle = useAnimatedStyle(() => {
     return {
-      opacity: allowChange ? 1 : 0,
-      left: `${sliderDotPositionValue.value}%`,
+      left: `${sliderDotPositionValue.value - 0.1}%`,
       width: trackHeight * 2,
       height: trackHeight * 2,
+      top: paddingVertical - trackHeight / 2,
     };
   });
+
   useEffect(() => {
     const percentage = calculatePercentage(currentValue, maximumValue);
     progressValue.value = withTiming(percentage, {
@@ -108,7 +109,7 @@ const SliderInput = ({
           const { width } = event.nativeEvent.layout;
           setContainerWidth(width);
         }}
-        style={[styles.container, rest.style]}
+        style={styles.container}
       >
         {showDot && (
           <Animated.View
@@ -184,7 +185,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1,
     overflow: 'hidden',
-    top: -2,
   },
   sliderDot: {
     width: '100%',

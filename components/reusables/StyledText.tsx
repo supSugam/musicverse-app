@@ -29,14 +29,14 @@ type TextTrackingOptions =
   | 'wider'
   | 'widest';
 
-type TextDimnessOptions = 'extra' | 'high' | 'medium' | 'low' | 'none';
+type TextOpacityOptions = 'none' | 'low' | 'medium' | 'high';
 
 interface ITextProps extends TextProps {
   className?: string;
   size?: TextSizeOptions;
   weight?: TextWeightOptions;
   tracking?: TextTrackingOptions;
-  dimness?: TextDimnessOptions;
+  opacity?: TextOpacityOptions;
   uppercase?: boolean;
   children: React.ReactNode;
 }
@@ -47,7 +47,7 @@ const StyledText = (props: ITextProps) => {
     size,
     weight,
     tracking,
-    dimness,
+    opacity,
     uppercase = false,
     ...otherProps
   } = props;
@@ -117,20 +117,18 @@ const StyledText = (props: ITextProps) => {
     }
   })();
 
-  const fontDimnessClassName = (() => {
-    switch (dimness) {
-      case 'extra':
-        return 'text-opacity-10';
-      case 'high':
-        return 'text-opacity-50';
-      case 'medium':
-        return 'text-opacity-75';
-      case 'low':
-        return 'text-opacity-90';
+  const fontOpacityStyle = (() => {
+    switch (opacity) {
       case 'none':
-        return 'text-opacity-100';
+        return { opacity: 1 };
+      case 'low':
+        return { opacity: 0.3 };
+      case 'medium':
+        return { opacity: 0.5 };
+      case 'high':
+        return { opacity: 0.8 };
       default:
-        return 'text-opacity-100';
+        return { opacity: 1 };
     }
   })();
 
@@ -139,13 +137,15 @@ const StyledText = (props: ITextProps) => {
     fontClassName,
     fontWeightClassName,
     fontTrackingClassName,
-    fontDimnessClassName,
     uppercase ? 'uppercase' : '',
     className,
   ]);
 
   return (
-    <DefaultText className={classNames} {...otherProps}>
+    <DefaultText
+      className={classNames}
+      style={[fontOpacityStyle, otherProps.style]}
+    >
       {props.children}
     </DefaultText>
   );

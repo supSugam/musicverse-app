@@ -29,7 +29,7 @@ interface PlayerState {
   isLoaded: boolean;
   currentTrackIndex: number | null;
   tracks: ITrackDetails[];
-  volume?: number;
+  volume: number;
   playbackInstance: Audio.Sound | null;
   playbackPosition: number;
   playbackDuration: number;
@@ -74,6 +74,7 @@ interface PlayerState {
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
+  volume: 1,
 
   didJustFinish: false,
 

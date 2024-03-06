@@ -4,7 +4,7 @@ import COLORS from '@/constants/Colors';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import ImageDisplay from '../reusables/ImageDisplay';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
-import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
+import { GLOBAL_STYLES, TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import ModalWrapper from '../reusables/ModalWrapper';
 import Animated, {
@@ -17,6 +17,7 @@ import { Link } from 'expo-router';
 import SliderInput from '../reusables/SliderInput';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { formatDuration } from '@/utils/helpers/string';
+import SkipIcon from '@/lib/svgs/SkipIcon';
 
 const TrackPlayer = () => {
   // Player Store
@@ -26,8 +27,17 @@ const TrackPlayer = () => {
     isPlayerExpanded,
     playbackPosition,
     isAsyncOperationPending,
-
+    playPause,
+    isPlaying,
     seek,
+    seekForward,
+    seekBackward,
+    isNextTrackAvailable,
+    isPrevTrackAvailable,
+    nextTrack,
+    prevTrack,
+    volume,
+    setVolume,
   } = usePlayerStore();
 
   const track = currentTrack();
@@ -53,6 +63,11 @@ const TrackPlayer = () => {
       ? withTiming(0, { duration: 500 })
       : withTiming(SCREEN_HEIGHT + 50, { duration: 300 });
   }, [isPlayerExpanded]);
+
+  const onPlayPause = () => {
+    playPause();
+  };
+
   return (
     <ModalWrapper
       visible={isPlayerExpanded}
@@ -83,14 +98,14 @@ const TrackPlayer = () => {
             </TouchableOpacity>
           </View>
           <View className="flex flex-col">
-            <TouchableOpacity activeOpacity={0.7} className="mt-8 mx-2">
+            <TouchableOpacity activeOpacity={0.7} className="mt-8 mx-4">
               <ImageDisplay
                 source={
                   track?.cover ? { uri: track?.cover } : TRACK_PLACEHOLDER_IMAGE
                 }
                 placeholder=""
                 width={'100%'}
-                height={328}
+                height={320}
                 borderRadius={8}
               />
             </TouchableOpacity>
@@ -150,16 +165,85 @@ const TrackPlayer = () => {
                   {formatDuration(track?.trackDuration, true)}
                 </StyledText>
               </View>
-            </View>
+              <View className="flex flex-row justify-between items-center mt-4 px-2">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => seekBackward(10)}
+                >
+                  <SkipIcon skipSeconds="10s" skipType="backward" />
+                </TouchableOpacity>
 
-            <View className="flex flex-row justify-center items-center mt-6">
-              <TouchableOpacity activeOpacity={0.7}>
-                <Ionicons
-                  name="play-forward-circle"
-                  size={40}
-                  color={COLORS.primary.light}
-                />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={prevTrack}
+                  style={GLOBAL_STYLES.getDisabledStyles(
+                    isPrevTrackAvailable()
+                  )}
+                >
+                  <MaterialIcons
+                    name="skip-previous"
+                    color={COLORS.neutral.white}
+                    size={36}
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity activeOpacity={0.7} onPress={onPlayPause}>
+                  <MaterialIcons
+                    name={
+                      isPlaying ? 'pause-circle-filled' : 'play-circle-filled'
+                    }
+                    size={60}
+                    color={COLORS.neutral.white}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={nextTrack}
+                  style={GLOBAL_STYLES.getDisabledStyles(
+                    isNextTrackAvailable()
+                  )}
+                >
+                  <MaterialIcons
+                    name="skip-next"
+                    color={COLORS.neutral.white}
+                    size={36}
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => seekForward(10)}
+                >
+                  <SkipIcon skipSeconds="10s" skipType="forward" />
+                </TouchableOpacity>
+              </View>
+              <View className="flex flex-row mt-4 items-center">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setVolume(volume > 0 ? 0 : 1)}
+                  className="pr-2"
+                >
+                  <MaterialIcons
+                    name={volume > 0 ? 'volume-up' : 'volume-off'}
+                    size={28}
+                    color={COLORS.neutral.light}
+                  />
+                </TouchableOpacity>
+                <View className="flex-1">
+                  <SliderInput
+                    currentValue={volume}
+                    minimumValue={0}
+                    maximumValue={1}
+                    allowChange
+                    onValueChange={(newVolume) => {
+                      setVolume(newVolume);
+                    }}
+                    roundedTrack
+                    trackHeight={6}
+                    color="gradient"
+                  />
+                </View>
+              </View>
             </View>
           </View>
         </Animated.View>

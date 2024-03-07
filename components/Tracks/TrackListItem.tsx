@@ -14,6 +14,7 @@ import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import TrackPreview from './TrackPreview';
+import { toastResponseMessage } from '@/utils/toast';
 
 interface ITrackListItemProps {
   id: string;
@@ -111,6 +112,10 @@ const TrackListItem = ({
             label: 'Add to Playlist',
             onPress: () => {
               console.log('Add to Playlist');
+              toastResponseMessage({
+                content: 'Feature not available yet',
+                type: 'error',
+              });
             },
             icon: 'playlist-add',
           },

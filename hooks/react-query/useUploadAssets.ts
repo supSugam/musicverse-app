@@ -49,7 +49,7 @@ const useUploadAssets = ({
   onUploadProgress,
   onUploadStart,
 }: UploadOptions) => {
-  const { api } = useAuthStore((state) => state);
+  const { api } = useAuthStore();
 
   const resetUploadStatus = (uploadStatus: UploadStatus) => {
     setProgressDetails((prev) => {
@@ -61,7 +61,7 @@ const useUploadAssets = ({
     });
   };
 
-  const InitialProgressDetails = useMemo(() => {
+  const initialProgressDetails = useMemo(() => {
     const progressDetails: ProgressDetails = {};
     if (!payload) return progressDetails;
     payload?.forEach((item: Payload, index: number) => {
@@ -74,7 +74,7 @@ const useUploadAssets = ({
   }, [multiple, payload]);
 
   const [progressDetails, setProgressDetails] = useState<ProgressDetails>(
-    InitialProgressDetails
+    initialProgressDetails
   );
   const [cancelTokenSource, setCancelTokenSource] = useState<CancelTokenSource>(
     axios.CancelToken.source()
@@ -101,9 +101,6 @@ const useUploadAssets = ({
         }
 
         // Else
-        if (typeof value.toJSON === 'function') {
-          return value.toJSON();
-        }
         return JSON.stringify(value);
       case 'number':
         return value.toString();
@@ -119,7 +116,7 @@ const useUploadAssets = ({
       const value = payload[key];
       if (Array.isArray(value)) {
         value.forEach((item: any, index: number) => {
-          // Handle arrays properly by appending each item with the same key
+          // Handling arrays
           formData.append(`${key}[${index}]`, stringifyValue(item));
         });
       } else {
@@ -189,9 +186,8 @@ const useUploadAssets = ({
   });
 
   const uploadAssets = async (payloadData?: Payload[]) => {
-    // payload example [{file: 'file'}, {file: 'file'}]
-
-    if (!payload && !payloadData) {
+    const payloadToUpload = payloadData || payload || [];
+    if (payloadToUpload.length === 0) {
       toastResponseMessage({
         content: 'No files to upload',
         type: 'error',
@@ -199,20 +195,18 @@ const useUploadAssets = ({
       return;
     }
 
-    // This made me look for albumIds for 5 hours, just because the payload was priorized over the payloadData
-    // (payload || payloadData || []).forEach(async (item: Payload) => {
-    (payloadData || payload || []).forEach(async (item: Payload) => {
+    for (const item of payloadToUpload) {
       const payloadFormData = getFormData(item);
       await mutation.mutateAsync({
         payload: payloadFormData,
         uploadKey: item.uploadKey,
       });
-    });
+    }
   };
 
   // mutation.mutate(payloadFormData);
   const cancelUpload = () => {
-    setProgressDetails(InitialProgressDetails);
+    setProgressDetails(initialProgressDetails);
     cancelTokenSource.cancel('Upload Cancelled');
     setCancelTokenSource(axios.CancelToken.source());
     mutation.reset();

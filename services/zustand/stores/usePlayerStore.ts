@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Audio } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
+import { toastResponseMessage } from '@/utils/toast';
 
 const InitialState = {
   isPlaying: false,
@@ -370,9 +371,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       enableStopAfterCurrentTrack,
       enableSingleLooping,
     } = get();
+    toastResponseMessage({
+      content: 'Looping Mode Changed',
+      type: 'success',
+    });
     if (isLoopingSingle) {
-      console.log('isLoopingSingle');
-
       await enableQueueLooping();
     } else if (isLoopingQueue) {
       console.log('isLoopingQueue');

@@ -1,4 +1,6 @@
-export type Dimension = number | `${number}%` | 'auto';
+import { DimensionValue } from 'react-native';
+
+export type Dimension = DimensionValue;
 
 export type fontWeights =
   | 'normal'

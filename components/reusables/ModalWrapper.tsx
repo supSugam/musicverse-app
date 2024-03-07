@@ -103,8 +103,11 @@ const ModalWrapper = ({
           <Animated.View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
               {doNotUseWrapper ? (
-                // <View className="w-full">{children}</View>
-                children
+                <View className="w-full">
+                  <ToastInstance />
+
+                  {children}
+                </View>
               ) : (
                 <LinearGradient
                   colors={[

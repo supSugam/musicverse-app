@@ -307,7 +307,7 @@ const TrackPlayer = () => {
                           color: COLORS.neutral.light,
                           padding: 2,
                         }}
-                        className="leading-none ml-2 underline"
+                        className="leading-none p-2 underline"
                       >
                         1
                       </StyledText>

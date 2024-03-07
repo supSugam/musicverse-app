@@ -72,7 +72,6 @@ const MenuItemsWrapper = ({
       const absoluteY = event.allTouches[0].absoluteY;
       setInitialAbsoluteY(absoluteY);
       setPreviousAbsoluteY(absoluteY);
-      setContentWrapperHeight('100%');
     })
     .onUpdate((event) => {
       setPreviousAbsoluteY(event.absoluteY);
@@ -102,10 +101,8 @@ const MenuItemsWrapper = ({
         } else {
           if (containerHeight <= height / 2) {
             wrapperTranslateY.value = withTiming(height - containerHeight);
-            setContentWrapperHeight('auto');
           } else {
             wrapperTranslateY.value = withTiming(height / 2);
-            setContentWrapperHeight('100%');
           }
         }
       }
@@ -117,12 +114,8 @@ const MenuItemsWrapper = ({
       wrapperTranslateY.value = withTiming(height - containerHeight);
     } else {
       wrapperTranslateY.value = withTiming(height / 2);
-      setContentWrapperHeight('100%');
     }
   }, [containerHeight, height]);
-
-  const [contentWrapperHeight, setContentWrapperHeight] =
-    useState<Dimension>('auto');
 
   return (
     <GestureHandlerRootView style={{ width: '100%' }}>
@@ -138,7 +131,7 @@ const MenuItemsWrapper = ({
               style={[
                 styles.contentWrapper,
                 {
-                  height: contentWrapperHeight,
+                  height: '100%',
                   // wrapperTranslateY.value <= height / 3 ? '100%' : 'auto',
                 },
               ]}

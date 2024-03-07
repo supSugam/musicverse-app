@@ -139,6 +139,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         playUntilLastTrack,
         stopAfterCurrentTrack,
         nextTrack,
+        resetPlayer,
       } = get();
 
       if (playbackInstance) {
@@ -370,7 +371,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       enablePlayUntilLastTrack,
       enableStopAfterCurrentTrack,
       enableSingleLooping,
-      disableSingleLooping,
     } = get();
     let content: string = '';
 
@@ -387,8 +387,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       await enableSingleLooping();
       content = 'Repeat Current Song';
     } else {
-      await disableSingleLooping();
-      content = 'Repeat Off';
+      await enableSingleLooping();
+      content = 'Repeat Current Song';
     }
     toastResponseMessage({
       content,

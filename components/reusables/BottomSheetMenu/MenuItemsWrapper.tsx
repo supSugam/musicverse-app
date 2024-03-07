@@ -46,20 +46,6 @@ const MenuItemsWrapper = ({
     };
   });
 
-  const conditionalHeader = useMemo(() => {
-    if (!header) return null;
-    if (typeof header === 'string') {
-      return (
-        <StyledText size="xl" weight="bold">
-          {header}
-        </StyledText>
-      );
-    }
-    if (React.isValidElement(header)) {
-      return header;
-    }
-  }, [header]);
-
   const { height } = useWindowDimensions();
 
   // Handle Dragging
@@ -142,15 +128,15 @@ const MenuItemsWrapper = ({
               >
                 <View style={styles.draggableIndicator} />
               </TouchableOpacity>
-              {conditionalHeader &&
-                (typeof conditionalHeader === 'string' ? (
+              {header &&
+                (typeof header === 'string' ? (
                   <View style={styles.textHeaderWrapper}>
                     <StyledText size="xl" weight="bold">
-                      {conditionalHeader}
+                      {header}
                     </StyledText>
                   </View>
                 ) : (
-                  conditionalHeader
+                  header
                 ))}
               <View style={styles.childrenWrapper}>{children}</View>
             </View>

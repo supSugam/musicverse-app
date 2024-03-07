@@ -15,6 +15,7 @@ import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import TrackPreview from './TrackPreview';
 import { toastResponseMessage } from '@/utils/toast';
+import HorizontalMarquee from '../reusables/HorizontalMarquee';
 
 interface ITrackListItemProps {
   id: string;
@@ -193,14 +194,16 @@ const TrackListItem = ({
           />
 
           <View className="flex flex-col mx-3 mr-5 flex-1">
-            <StyledText
-              size="base"
-              weight="semibold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {title}
-            </StyledText>
+            <HorizontalMarquee speed={5000} pauseDuration={2000}>
+              <StyledText
+                size="lg"
+                weight="semibold"
+                numberOfLines={1}
+                ellipsizeMode="clip"
+              >
+                {title}
+              </StyledText>
+            </HorizontalMarquee>
             <StyledText
               size="sm"
               weight="light"

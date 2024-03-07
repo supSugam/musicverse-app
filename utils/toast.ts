@@ -1,12 +1,14 @@
 import Toast, { ToastType } from 'react-native-toast-message';
 
+type ToastPosition = 'bottom' | 'top';
 type ToastContentProps<T extends ToastType> = T extends 'error'
-  ? { type: T; content: any }
-  : { type: T; content: string };
+  ? { type: T; content: any; position?: ToastPosition }
+  : { type: T; content: string; position?: ToastPosition };
 
 export const toastResponseMessage = ({
   content,
   type = 'error',
+  position = 'top',
 }: ToastContentProps<ToastType>): void => {
   if (type === 'error') {
     const errorMessage =
@@ -41,6 +43,7 @@ export const toastResponseMessage = ({
       type,
       swipeable: true,
       text1: content as string, // Assuming content is always a string for non-error types
+      position,
     });
   }
 };

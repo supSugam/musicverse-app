@@ -99,13 +99,13 @@ const ModalWrapper = ({
           style={[StyleSheet.absoluteFill, styles.blurView]}
           tint="dark"
         >
-          <ToastInstance />
           <Animated.View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
               {doNotUseWrapper ? (
-                <View className="w-full">
-                  <ToastInstance />
-
+                <View className="w-full relative">
+                  <View className="absolute top-0 left-0 z-50 w-full">
+                    <ToastInstance />
+                  </View>
                   {children}
                 </View>
               ) : (
@@ -126,6 +126,9 @@ const ModalWrapper = ({
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
+                  <View className="absolute top-0 left-0 z-50 w-full">
+                    <ToastInstance />
+                  </View>
                   {header && (
                     <View style={styles.headerContainer}>
                       {typeof header === 'string' ? (

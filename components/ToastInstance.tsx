@@ -39,7 +39,7 @@ const ToastInstance = () => {
               { maxWidth: SCREEN_WIDTH - 32 },
             ]}
           >
-            <View style={styles.circle}>
+            <View style={[styles.circle, styles.circleGreen]}>
               <FontAwesome name="check" size={20} color="#fff" solid />
             </View>
             <StyledText
@@ -64,6 +64,29 @@ const ToastInstance = () => {
           >
             <View style={[styles.circle, styles.circleRed]}>
               <FontAwesome name="times" size={20} color="#fff" solid />
+            </View>
+            <StyledText
+              size="lg"
+              tracking="tighter"
+              weight="semibold"
+              numberOfLines={3}
+              ellipsizeMode="tail"
+              className="text-ellipsis leading-tighter"
+            >
+              {text1 || text2 || 'No Message was passed.'}
+            </StyledText>
+          </Animated.View>
+        ),
+        info: ({ text1, text2, ...rest }) => (
+          <Animated.View
+            style={[
+              styles.container,
+              animatedStyle,
+              { maxWidth: SCREEN_WIDTH - 32 },
+            ]}
+          >
+            <View style={styles.circle}>
+              <FontAwesome name="info" size={20} color="#fff" solid />
             </View>
             <StyledText
               size="lg"
@@ -103,12 +126,14 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 20,
-    backgroundColor: '#61d345', // Green circle background color
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
     marginBottom: 'auto',
     marginTop: 4,
+  },
+  circleGreen: {
+    backgroundColor: '#61d345', // Green circle background color
   },
   circleRed: {
     backgroundColor: '#d34545', // Green circle background color

@@ -152,7 +152,7 @@ const MenuItemsWrapper = ({
                 ) : (
                   conditionalHeader
                 ))}
-              <ScrollView style={styles.childrenWrapper}>{children}</ScrollView>
+              <View style={styles.childrenWrapper}>{children}</View>
             </View>
           </GestureDetector>
         </Animated.View>
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
   rootWrapper: {
     height: '100%',
     position: 'relative',
-    zIndex: 100,
   },
 
   childrenWrapper: {},

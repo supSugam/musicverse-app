@@ -370,26 +370,30 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       enablePlayUntilLastTrack,
       enableStopAfterCurrentTrack,
       enableSingleLooping,
+      disableSingleLooping,
     } = get();
-    toastResponseMessage({
-      content: 'Looping Mode Changed',
-      type: 'success',
-    });
+    let content: string = '';
+
     if (isLoopingSingle) {
       await enableQueueLooping();
+      content = 'Looping Queue';
     } else if (isLoopingQueue) {
-      console.log('isLoopingQueue');
       await enablePlayUntilLastTrack();
+      content = 'Play Until Last Song';
     } else if (playUntilLastTrack) {
-      console.log('playUntilLastTrack');
       await enableStopAfterCurrentTrack();
+      content = 'Stop After Current Song';
     } else if (stopAfterCurrentTrack) {
-      console.log('stopAfterCurrentTrack');
       await enableSingleLooping();
+      content = 'Repeat Current Song';
     } else {
-      console.log('enableSingleLooping');
-      await enableSingleLooping();
+      await disableSingleLooping();
+      content = 'Repeat Off';
     }
+    toastResponseMessage({
+      content,
+      type: 'info',
+    });
   },
 
   seekBackward: async (seconds: number) => {

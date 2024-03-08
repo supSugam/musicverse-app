@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import { calculatePercentage } from '@/utils/helpers/number';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Dimensions, Text } from 'react-native';
 import Animated, {
   Easing,
@@ -22,12 +23,25 @@ const HorizontalMarquee: React.FC<IHorizontalMarqueeProps> = ({
 }) => {
   const translateXContent = useSharedValue(0);
   const followTranslateXContent = useSharedValue(0);
-  const width = useRef(0);
+  const contentWidth = useRef<number>(0);
+  const containerWidth = useRef<number>(0);
+
+  const [shouldAnimate, setShouldAnimate] = useState<boolean>(false);
+  const [widthDiff, setWidthDiff] = useState<number>(0);
 
   useEffect(() => {
+    const shouldAnimate =
+      calculatePercentage(contentWidth.current, containerWidth.current) > 80;
+    setShouldAnimate(shouldAnimate);
+    setWidthDiff(contentWidth.current - containerWidth.current);
+  }, [containerWidth.current, contentWidth.current]);
+
+  useEffect(() => {
+    if (!shouldAnimate) return;
+
     translateXContent.value = withRepeat(
       withSequence(
-        withTiming(-width.current, {
+        withTiming(-contentWidth.current + widthDiff, {
           duration: speed,
           easing: Easing.linear,
         }),
@@ -44,7 +58,7 @@ const HorizontalMarquee: React.FC<IHorizontalMarqueeProps> = ({
 
     followTranslateXContent.value = withRepeat(
       withSequence(
-        withTiming(-width.current, {
+        withTiming(-contentWidth.current + widthDiff, {
           duration: speed,
           easing: Easing.linear,
         }),
@@ -58,7 +72,7 @@ const HorizontalMarquee: React.FC<IHorizontalMarqueeProps> = ({
       -1,
       true
     );
-  }, [width.current, pauseDuration, speed]);
+  }, [speed, pauseDuration, shouldAnimate, widthDiff]);
 
   const contentAnimatedStyles = useAnimatedStyle(() => {
     return {
@@ -68,31 +82,33 @@ const HorizontalMarquee: React.FC<IHorizontalMarqueeProps> = ({
 
   const followContentAnimatedStyles = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: followTranslateXContent.value }],
+      transform: [{ translateX: followTranslateXContent.value - widthDiff }],
     };
   });
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onLayout={(event) => {
+        const { width: layoutWidth } = event.nativeEvent.layout;
+        containerWidth.current = layoutWidth;
+      }}
+    >
       <Animated.View
         style={[styles.content, contentAnimatedStyles]}
         onLayout={(event) => {
           const { width: layoutWidth } = event.nativeEvent.layout;
-          width.current = layoutWidth;
+          contentWidth.current = layoutWidth;
         }}
       >
         {children}
       </Animated.View>
 
-      <Animated.View
-        style={[styles.content, followContentAnimatedStyles]}
-        onLayout={(event) => {
-          const { width: layoutWidth } = event.nativeEvent.layout;
-          width.current = layoutWidth;
-        }}
-      >
-        {children}
-      </Animated.View>
+      {shouldAnimate && (
+        <Animated.View style={[styles.content, followContentAnimatedStyles]}>
+          {children}
+        </Animated.View>
+      )}
     </View>
   );
 };
@@ -103,11 +119,12 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     flexDirection: 'row',
     flexWrap: 'nowrap',
+    width: '100%',
   },
   content: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
-    width: '100%',
+    maxWidth: '100%',
   },
 });
 

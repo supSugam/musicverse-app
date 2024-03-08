@@ -51,6 +51,12 @@ const SliderInput = ({
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   const panGestureHandler = Gesture.Pan()
+    .onTouchesDown((event) => {
+      const positionX = event.allTouches[0].x;
+      const percentage = calculatePercentage(positionX, containerWidth);
+      progressValue.value = percentage;
+      sliderDotPositionValue.value = percentage;
+    })
     .onChange((event) => {
       setIsSeeking(true);
       const change = event.changeX;
@@ -59,7 +65,7 @@ const SliderInput = ({
       progressValue.value += percentage;
       sliderDotPositionValue.value += percentage;
     })
-    .onEnd(() => {
+    .onFinalize(() => {
       setIsSeeking(false);
 
       const throttledFunction = throttle(() => {

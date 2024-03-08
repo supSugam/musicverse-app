@@ -1,13 +1,7 @@
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import COLORS from '@/constants/Colors';
-import {
-  FontAwesome,
-  FontAwesome5,
-  FontAwesome6,
-  Ionicons,
-  MaterialIcons,
-} from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import ImageDisplay from '../reusables/ImageDisplay';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { GLOBAL_STYLES, TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
@@ -20,13 +14,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import SliderInput from '../reusables/SliderInput';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from 'react-native-gesture-handler';
 import { formatDuration } from '@/utils/helpers/string';
 import SkipIcon from '@/lib/svgs/SkipIcon';
-import { LinearGradient } from 'expo-linear-gradient';
 import LoopIcon from '@/lib/svgs/LoopIcon';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import HorizontalMarquee from '../reusables/HorizontalMarquee';
+import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
+import { useNavigation } from 'expo-router';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 const TrackPlayer = () => {
   // Player Store
@@ -67,8 +66,15 @@ const TrackPlayer = () => {
   const [speedOptionsModalVisible, setSpeedOptionsModalVisible] =
     useState<boolean>(false);
 
+  const [addToPlayListModal, setAddToPlayListModal] = useState<boolean>(false);
+
+  const onPlaylistModalClose = () => {
+    setAddToPlayListModal(false);
+  };
+
   // Stuffs
   const { SCREEN_HEIGHT } = useScreenDimensions();
+  const { rootNavigation } = useAppState();
 
   // Animations
   const playerRootTranslateY = useSharedValue(SCREEN_HEIGHT + 50);
@@ -81,7 +87,7 @@ const TrackPlayer = () => {
 
   useEffect(() => {
     playerRootTranslateY.value = isPlayerExpanded
-      ? withTiming(0, { duration: 500 })
+      ? withTiming(0, { duration: 300 })
       : withTiming(SCREEN_HEIGHT + 50, { duration: 300 });
   }, [isPlayerExpanded]);
 
@@ -101,26 +107,8 @@ const TrackPlayer = () => {
     >
       <GestureHandlerRootView style={{ width: '100%' }}>
         <Animated.View style={[styles.rootContainer, playerRootAnimatedStyle]}>
-          <LinearGradient
-            colors={[
-              COLORS.primary.light,
-              ...COLORS.gradient.primary,
-              COLORS.primary.dark,
-            ]}
-            style={{
-              width: '100%',
-              height: '100%',
-              position: 'absolute',
-              zIndex: -1,
-              opacity: 0.15,
-              flex: 1,
-              top: 0,
-              left: 0,
-            }}
-            start={{ x: 0, y: 1 }}
-            end={{ x: 1, y: 1 }}
-          />
-          <View style={styles.rootWrapper}>
+          <PrimaryGradient />
+          <ScrollView style={styles.rootWrapper}>
             <View className="flex flex-row justify-between items-center mt-4">
               {/* NavBar */}
               <TouchableOpacity activeOpacity={0.7} onPress={onPlayerClose}>
@@ -358,7 +346,9 @@ const TrackPlayer = () => {
 
                     <TouchableOpacity
                       activeOpacity={0.7}
-                      onPress={() => {}}
+                      onPress={() =>
+                        rootNavigation?.navigate('AddToPlaylistTabs' as never)
+                      }
                       className="mr-2"
                     >
                       <MaterialIcons
@@ -368,19 +358,23 @@ const TrackPlayer = () => {
                       />
                     </TouchableOpacity>
 
-                    {/* Speed */}
+                    {/* Playback Speed */}
                     <TouchableOpacity
                       activeOpacity={0.7}
                       onPress={() => setSpeedOptionsModalVisible(true)}
-                      className="mr-2 flex flex-row items-baseline"
+                      className="mr-3 flex flex-row items-baseline"
                     >
                       <StyledText
-                        size="2xl"
+                        size="xl"
                         weight="light"
                         opacity="medium"
                         className="leading-none"
+                        tracking="tighter"
+                        style={{
+                          fontFamily: 'Oswald-Regular',
+                        }}
                       >
-                        {playbackSpeed}
+                        {playbackSpeed}.25
                       </StyledText>
                       <StyledText
                         size="sm"
@@ -397,9 +391,10 @@ const TrackPlayer = () => {
                 {/* End of Controls */}
               </View>
             </View>
-          </View>
+          </ScrollView>
         </Animated.View>
 
+        {/* Menu Modal for selecting playback speed */}
         <MenuModal
           visible={speedOptionsModalVisible}
           onClose={() => setSpeedOptionsModalVisible(false)}
@@ -416,6 +411,17 @@ const TrackPlayer = () => {
             };
           })}
         />
+
+        {/* <ModalWrapper
+          visible={addToPlayListModal}
+          animationType="fade"
+          doNotUseWrapper
+          onRequestClose={onPlaylistModalClose}
+          onClose={onPlaylistModalClose}
+          position="start"
+          fullWidth
+        >
+        </ModalWrapper> */}
       </GestureHandlerRootView>
     </ModalWrapper>
   );

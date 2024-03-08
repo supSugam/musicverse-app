@@ -139,7 +139,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         playUntilLastTrack,
         stopAfterCurrentTrack,
         nextTrack,
-        resetPlayer,
+        volume,
+        playbackSpeed,
       } = get();
 
       if (playbackInstance) {
@@ -156,6 +157,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         {
           progressUpdateIntervalMillis: 1000,
           shouldPlay: true,
+          volume,
+          isLooping: isLoopingSingle,
+          rate: playbackSpeed,
         },
         false
       );

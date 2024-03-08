@@ -51,25 +51,24 @@ const SliderInput = ({
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   const panGestureHandler = Gesture.Pan()
-    .onTouchesMove((event) => {
-      // if (!allowChange) return;
-      const percentage = Math.min(
-        100,
-        Math.max(calculatePercentage(event.allTouches[0].x, containerWidth), 0)
-      );
-      progressValue.value = percentage;
-      sliderDotPositionValue.value = percentage;
+    .onChange((event) => {
+      setIsSeeking(true);
+      const change = event.changeX;
+      console.log('change', change);
+      const percentage = calculatePercentage(change, containerWidth);
+      progressValue.value += percentage;
+      sliderDotPositionValue.value += percentage;
     })
-    .onTouchesUp((event) => {
-      // if (!allowChange) return;
+    .onEnd(() => {
+      setIsSeeking(false);
+
       const throttledFunction = throttle(() => {
         onValueChange?.(
           getValueFromPercentage(progressValue.value, maximumValue)
         );
-      }, 200);
+      }, 500);
       throttledFunction(); // Call the throttled function to execute
     })
-
     .runOnJS(true);
 
   const sliderDotPositionValue = useSharedValue(0);
@@ -85,13 +84,10 @@ const SliderInput = ({
   });
 
   useEffect(() => {
+    if (isSeeking) return;
     const percentage = calculatePercentage(currentValue, maximumValue);
-    progressValue.value = withTiming(percentage, {
-      easing: Easing.linear,
-    });
-    sliderDotPositionValue.value = withTiming(percentage, {
-      easing: Easing.linear,
-    });
+    progressValue.value = percentage;
+    sliderDotPositionValue.value = percentage;
   }, [currentValue, maximumValue]);
 
   // Animated styles for the progress bar

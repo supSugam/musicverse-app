@@ -26,6 +26,7 @@ import SkipIcon from '@/lib/svgs/SkipIcon';
 import { LinearGradient } from 'expo-linear-gradient';
 import LoopIcon from '@/lib/svgs/LoopIcon';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
+import HorizontalMarquee from '../reusables/HorizontalMarquee';
 
 const TrackPlayer = () => {
   // Player Store
@@ -156,7 +157,7 @@ const TrackPlayer = () => {
               </TouchableOpacity>
 
               <View className="flex flex-row justify-between items-center mt-6 mx-3">
-                <View className="flex flex-col">
+                <View className="flex flex-col flex-1">
                   {/* <Link
                   href={`//(tabs)/profile/${track?.creator?.username}` as never}
                 > */}
@@ -169,9 +170,11 @@ const TrackPlayer = () => {
                     {track?.creator?.profile.name}
                   </StyledText>
                   {/* </Link> */}
-                  <StyledText size="2xl" weight="bold">
-                    {track?.title}
-                  </StyledText>
+                  <HorizontalMarquee speed={5000} pauseDuration={2000}>
+                    <StyledText size="2xl" weight="bold">
+                      {track?.title}
+                    </StyledText>
+                  </HorizontalMarquee>
                 </View>
                 <TouchableOpacity activeOpacity={0.7}>
                   <Ionicons
@@ -195,11 +198,11 @@ const TrackPlayer = () => {
                   trackHeight={4}
                   color="white"
                   key={`${track?.id}-SliderInPlayer`}
-                  style={{ paddingVertical: 10 }}
+                  paddingVertical={20}
                 />
 
                 {/* Track Duration Status */}
-                <View className="flex flex-row justify-between items-center mt-3">
+                <View className="flex flex-row justify-between items-center">
                   <StyledText
                     size="sm"
                     weight="light"
@@ -396,24 +399,24 @@ const TrackPlayer = () => {
             </View>
           </View>
         </Animated.View>
-      </GestureHandlerRootView>
 
-      <MenuModal
-        visible={speedOptionsModalVisible}
-        onClose={() => setSpeedOptionsModalVisible(false)}
-        header="Speed"
-        // TODO: Custom Playback Speed
-        items={[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => {
-          return {
-            label: speed === 1 ? 'Normal' : `${speed}x`,
-            onPress: () => {
-              setSpeed(speed);
-              setSpeedOptionsModalVisible(false);
-            },
-            icon: 'speed',
-          };
-        })}
-      />
+        <MenuModal
+          visible={speedOptionsModalVisible}
+          onClose={() => setSpeedOptionsModalVisible(false)}
+          header="Speed"
+          // TODO: Custom Playback Speed
+          items={[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => {
+            return {
+              label: speed === 1 ? 'Normal' : `${speed}x`,
+              onPress: () => {
+                setSpeed(speed);
+                setSpeedOptionsModalVisible(false);
+              },
+              icon: 'speed',
+            };
+          })}
+        />
+      </GestureHandlerRootView>
     </ModalWrapper>
   );
 };

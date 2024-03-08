@@ -14,6 +14,7 @@ import COLORS from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import StyledText from './StyledText';
 import ToastInstance from '../ToastInstance';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 interface IModalWrapperProps extends ModalProps {
   blur?: boolean;
@@ -102,12 +103,12 @@ const ModalWrapper = ({
           <Animated.View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
               {doNotUseWrapper ? (
-                <View className="w-full relative">
+                <GestureHandlerRootView className="w-full relative">
                   <View className="absolute top-0 left-0 z-50 w-full">
                     <ToastInstance />
                   </View>
                   {children}
-                </View>
+                </GestureHandlerRootView>
               ) : (
                 <LinearGradient
                   colors={[

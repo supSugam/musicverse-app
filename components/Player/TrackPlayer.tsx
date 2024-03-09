@@ -8,6 +8,7 @@ import { GLOBAL_STYLES, TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import ModalWrapper from '../reusables/ModalWrapper';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -86,333 +87,322 @@ const TrackPlayer = () => {
   });
 
   useEffect(() => {
-    playerRootTranslateY.value = isPlayerExpanded
-      ? withTiming(0, { duration: 300 })
-      : withTiming(SCREEN_HEIGHT + 50, { duration: 300 });
-  }, [isPlayerExpanded]);
+    // playerRootTranslateY.value = isPlayerExpanded
+    //   ? withTiming(0, { duration: 300 })
+    //   : withTiming(SCREEN_HEIGHT + 50, { duration: 300 });
+    playerRootTranslateY.value = withTiming(0, {
+      duration: 500,
+      easing: Easing.linear,
+    });
+  }, []);
 
   const onPlayPause = () => {
     playPause();
   };
 
   return (
-    <ModalWrapper
-      visible={isPlayerExpanded}
-      animationType="fade"
-      doNotUseWrapper
-      onRequestClose={onPlayerClose}
-      onClose={onPlayerClose}
-      position="start"
-      fullWidth
-    >
-      <GestureHandlerRootView style={{ width: '100%' }}>
-        <Animated.View style={[styles.rootContainer, playerRootAnimatedStyle]}>
-          <PrimaryGradient />
-          <ScrollView style={styles.rootWrapper}>
-            <View className="flex flex-row justify-between items-center mt-4">
-              {/* NavBar */}
-              <TouchableOpacity activeOpacity={0.7} onPress={onPlayerClose}>
-                <Ionicons
-                  name="chevron-down"
-                  size={28}
-                  color={COLORS.neutral.light}
-                />
-              </TouchableOpacity>
+    <GestureHandlerRootView style={{ width: '100%' }}>
+      <Animated.View style={[styles.rootContainer, playerRootAnimatedStyle]}>
+        <PrimaryGradient />
+        <ScrollView style={styles.rootWrapper}>
+          <View className="flex flex-row justify-between items-center mt-4">
+            {/* NavBar */}
+            <TouchableOpacity activeOpacity={0.7} onPress={onPlayerClose}>
+              <Ionicons
+                name="chevron-down"
+                size={28}
+                color={COLORS.neutral.light}
+              />
+            </TouchableOpacity>
 
+            <TouchableOpacity activeOpacity={0.7}>
+              <MaterialIcons
+                name="more-vert"
+                size={28}
+                color={COLORS.neutral.light}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Track Info */}
+          <View className="flex flex-col">
+            <TouchableOpacity activeOpacity={0.7} className="mt-4 mx-4">
+              <ImageDisplay
+                source={
+                  track?.cover ? { uri: track?.cover } : TRACK_PLACEHOLDER_IMAGE
+                }
+                placeholder=""
+                width={'100%'}
+                height={320}
+                borderRadius={8}
+              />
+            </TouchableOpacity>
+
+            <View className="flex flex-row justify-between items-center mt-6 mx-3">
+              <View className="flex flex-col flex-1">
+                {/* <Link
+                  href={`//(tabs)/profile/${track?.creator?.username}` as never}
+                > */}
+                <StyledText
+                  size="sm"
+                  weight="light"
+                  opacity="high"
+                  className="leading-7"
+                >
+                  {track?.creator?.profile.name}
+                </StyledText>
+                {/* </Link> */}
+                <HorizontalMarquee speed={5000} pauseDuration={2000}>
+                  <StyledText size="2xl" weight="bold">
+                    {track?.title}
+                  </StyledText>
+                </HorizontalMarquee>
+              </View>
               <TouchableOpacity activeOpacity={0.7}>
-                <MaterialIcons
-                  name="more-vert"
-                  size={28}
-                  color={COLORS.neutral.light}
-                />
+                <Ionicons name="heart" size={28} color={COLORS.primary.light} />
               </TouchableOpacity>
             </View>
 
-            {/* Track Info */}
-            <View className="flex flex-col">
-              <TouchableOpacity activeOpacity={0.7} className="mt-4 mx-4">
-                <ImageDisplay
-                  source={
-                    track?.cover
-                      ? { uri: track?.cover }
-                      : TRACK_PLACEHOLDER_IMAGE
-                  }
-                  placeholder=""
-                  width={'100%'}
-                  height={320}
-                  borderRadius={8}
-                />
-              </TouchableOpacity>
+            <View className="m-3 mt-6">
+              {/* Main Track Progress Seekbar */}
+              <SliderInput
+                currentValue={playbackPosition}
+                minimumValue={0}
+                maximumValue={track?.trackDuration || 0}
+                allowChange={!isAsyncOperationPending}
+                onValueChange={seek}
+                roundedTrack
+                showDot
+                trackHeight={4}
+                color="white"
+                key={`${track?.id}-SliderInPlayer`}
+                paddingVertical={20}
+              />
 
-              <View className="flex flex-row justify-between items-center mt-6 mx-3">
-                <View className="flex flex-col flex-1">
-                  {/* <Link
-                  href={`//(tabs)/profile/${track?.creator?.username}` as never}
-                > */}
-                  <StyledText
-                    size="sm"
-                    weight="light"
-                    opacity="high"
-                    className="leading-7"
-                  >
-                    {track?.creator?.profile.name}
-                  </StyledText>
-                  {/* </Link> */}
-                  <HorizontalMarquee speed={5000} pauseDuration={2000}>
-                    <StyledText size="2xl" weight="bold">
-                      {track?.title}
-                    </StyledText>
-                  </HorizontalMarquee>
-                </View>
-                <TouchableOpacity activeOpacity={0.7}>
-                  <Ionicons
-                    name="heart"
-                    size={28}
-                    color={COLORS.primary.light}
+              {/* Track Duration Status */}
+              <View className="flex flex-row justify-between items-center">
+                <StyledText
+                  size="sm"
+                  weight="light"
+                  opacity="medium"
+                  tracking="tighter"
+                >
+                  {formatDuration(playbackPosition, true)}
+                </StyledText>
+                <StyledText
+                  size="sm"
+                  weight="light"
+                  opacity="medium"
+                  tracking="tighter"
+                >
+                  {formatDuration(track?.trackDuration, true)}
+                </StyledText>
+              </View>
+
+              {/* Player Controls */}
+              <View className="flex flex-row justify-between items-center mt-3 px-2">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => seekBackward(10)}
+                >
+                  <SkipIcon skipSeconds="10s" skipType="backward" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={prevTrack}
+                  style={GLOBAL_STYLES.getDisabledStyles(
+                    isPrevTrackAvailable()
+                  )}
+                >
+                  <MaterialIcons
+                    name="skip-previous"
+                    color={COLORS.neutral.white}
+                    size={36}
                   />
+                </TouchableOpacity>
+
+                <TouchableOpacity activeOpacity={0.7} onPress={onPlayPause}>
+                  <MaterialIcons
+                    name={
+                      isPlaying ? 'pause-circle-filled' : 'play-circle-filled'
+                    }
+                    size={60}
+                    color={COLORS.neutral.white}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={nextTrack}
+                  style={GLOBAL_STYLES.getDisabledStyles(
+                    isNextTrackAvailable()
+                  )}
+                >
+                  <MaterialIcons
+                    name="skip-next"
+                    color={COLORS.neutral.white}
+                    size={36}
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => seekForward(10)}
+                >
+                  <SkipIcon skipSeconds="10s" skipType="forward" />
                 </TouchableOpacity>
               </View>
 
-              <View className="m-3 mt-6">
-                {/* Main Track Progress Seekbar */}
-                <SliderInput
-                  currentValue={playbackPosition}
-                  minimumValue={0}
-                  maximumValue={track?.trackDuration || 0}
-                  allowChange={!isAsyncOperationPending}
-                  onValueChange={seek}
-                  roundedTrack
-                  showDot
-                  trackHeight={4}
-                  color="white"
-                  key={`${track?.id}-SliderInPlayer`}
-                  paddingVertical={20}
-                />
-
-                {/* Track Duration Status */}
-                <View className="flex flex-row justify-between items-center">
-                  <StyledText
-                    size="sm"
-                    weight="light"
-                    opacity="medium"
-                    tracking="tighter"
-                  >
-                    {formatDuration(playbackPosition, true)}
-                  </StyledText>
-                  <StyledText
-                    size="sm"
-                    weight="light"
-                    opacity="medium"
-                    tracking="tighter"
-                  >
-                    {formatDuration(track?.trackDuration, true)}
-                  </StyledText>
+              {/* Volume Control */}
+              <View className="flex flex-row items-center mt-1">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setVolume(volume > 0 ? 0 : 1)}
+                  className="pr-2"
+                >
+                  <MaterialIcons
+                    name={volume > 0 ? 'volume-up' : 'volume-off'}
+                    size={28}
+                    color={COLORS.neutral.light}
+                  />
+                </TouchableOpacity>
+                <View className="flex-1">
+                  <SliderInput
+                    currentValue={volume}
+                    minimumValue={0}
+                    maximumValue={1}
+                    allowChange
+                    onValueChange={(newVolume) => {
+                      setVolume(newVolume);
+                    }}
+                    roundedTrack
+                    trackHeight={3}
+                    color="gradient"
+                    paddingVertical={16}
+                  />
                 </View>
+              </View>
 
-                {/* Player Controls */}
-                <View className="flex flex-row justify-between items-center mt-3 px-2">
+              <View className="flex flex-row justify-between items-center mt-3">
+                <View className="flex flex-row items-center justify-center">
+                  {/* Loop Button */}
                   <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => seekBackward(10)}
+                    activeOpacity={0.9}
+                    onPress={toggleLoopStates}
+                    className="flex flex-row items-center justify-center mr-2"
                   >
-                    <SkipIcon skipSeconds="10s" skipType="backward" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={prevTrack}
-                    style={GLOBAL_STYLES.getDisabledStyles(
-                      isPrevTrackAvailable()
+                    {stopAfterCurrentTrack && (
+                      <View className="px-1 flex-col">
+                        <StyledText
+                          size="xl"
+                          weight="extrabold"
+                          style={{
+                            color: COLORS.neutral.light,
+                          }}
+                          className="ml-1"
+                        >
+                          1
+                        </StyledText>
+                        <View
+                          style={{
+                            height: 2,
+                            backgroundColor: COLORS.neutral.light,
+                          }}
+                          className="w-5 rounded-md"
+                        />
+                      </View>
                     )}
-                  >
-                    <MaterialIcons
-                      name="skip-previous"
-                      color={COLORS.neutral.white}
-                      size={36}
-                    />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity activeOpacity={0.7} onPress={onPlayPause}>
-                    <MaterialIcons
-                      name={
-                        isPlaying ? 'pause-circle-filled' : 'play-circle-filled'
-                      }
-                      size={60}
-                      color={COLORS.neutral.white}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={nextTrack}
-                    style={GLOBAL_STYLES.getDisabledStyles(
-                      isNextTrackAvailable()
+                    {playUntilLastTrack && (
+                      <MaterialIcons
+                        name="arrow-right-alt"
+                        size={32}
+                        color={COLORS.neutral.light}
+                      />
                     )}
-                  >
-                    <MaterialIcons
-                      name="skip-next"
-                      color={COLORS.neutral.white}
-                      size={36}
-                    />
+                    {!stopAfterCurrentTrack && !playUntilLastTrack && (
+                      <LoopIcon
+                        loopType={
+                          isLoopingSingle
+                            ? 'one'
+                            : isLoopingQueue
+                            ? 'all'
+                            : 'off'
+                        }
+                      />
+                    )}
                   </TouchableOpacity>
+
+                  {/* Add/Remove from/to playlist(s) */}
 
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => seekForward(10)}
-                  >
-                    <SkipIcon skipSeconds="10s" skipType="forward" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Volume Control */}
-                <View className="flex flex-row items-center mt-1">
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => setVolume(volume > 0 ? 0 : 1)}
-                    className="pr-2"
+                    onPress={() =>
+                      navigation.navigate('AddToPlaylist' as never)
+                    }
+                    className="mr-2"
                   >
                     <MaterialIcons
-                      name={volume > 0 ? 'volume-up' : 'volume-off'}
-                      size={28}
+                      name="library-add"
+                      size={24}
                       color={COLORS.neutral.light}
                     />
                   </TouchableOpacity>
-                  <View className="flex-1">
-                    <SliderInput
-                      currentValue={volume}
-                      minimumValue={0}
-                      maximumValue={1}
-                      allowChange
-                      onValueChange={(newVolume) => {
-                        setVolume(newVolume);
+
+                  {/* Playback Speed */}
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => setSpeedOptionsModalVisible(true)}
+                    className="mr-3 flex flex-row items-baseline"
+                  >
+                    <StyledText
+                      size="xl"
+                      weight="light"
+                      opacity="medium"
+                      className="leading-none"
+                      tracking="tighter"
+                      style={{
+                        fontFamily: 'Oswald-Regular',
                       }}
-                      roundedTrack
-                      trackHeight={3}
-                      color="gradient"
-                      paddingVertical={16}
-                    />
-                  </View>
+                    >
+                      {playbackSpeed}.25
+                    </StyledText>
+                    <StyledText
+                      size="sm"
+                      weight="light"
+                      opacity="medium"
+                      className="leading-none"
+                    >
+                      x
+                    </StyledText>
+                  </TouchableOpacity>
                 </View>
-
-                <View className="flex flex-row justify-between items-center mt-3">
-                  <View className="flex flex-row items-center justify-center">
-                    {/* Loop Button */}
-                    <TouchableOpacity
-                      activeOpacity={0.9}
-                      onPress={toggleLoopStates}
-                      className="flex flex-row items-center justify-center mr-2"
-                    >
-                      {stopAfterCurrentTrack && (
-                        <View className="px-1 flex-col">
-                          <StyledText
-                            size="xl"
-                            weight="extrabold"
-                            style={{
-                              color: COLORS.neutral.light,
-                            }}
-                            className="ml-1"
-                          >
-                            1
-                          </StyledText>
-                          <View
-                            style={{
-                              height: 2,
-                              backgroundColor: COLORS.neutral.light,
-                            }}
-                            className="w-5 rounded-md"
-                          />
-                        </View>
-                      )}
-                      {playUntilLastTrack && (
-                        <MaterialIcons
-                          name="arrow-right-alt"
-                          size={32}
-                          color={COLORS.neutral.light}
-                        />
-                      )}
-                      {!stopAfterCurrentTrack && !playUntilLastTrack && (
-                        <LoopIcon
-                          loopType={
-                            isLoopingSingle
-                              ? 'one'
-                              : isLoopingQueue
-                              ? 'all'
-                              : 'off'
-                          }
-                        />
-                      )}
-                    </TouchableOpacity>
-
-                    {/* Add/Remove from/to playlist(s) */}
-
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      onPress={() =>
-                        navigation.navigate('AddToPlaylistSC1' as never)
-                      }
-                      className="mr-2"
-                    >
-                      <MaterialIcons
-                        name="library-add"
-                        size={24}
-                        color={COLORS.neutral.light}
-                      />
-                    </TouchableOpacity>
-
-                    {/* Playback Speed */}
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      onPress={() => setSpeedOptionsModalVisible(true)}
-                      className="mr-3 flex flex-row items-baseline"
-                    >
-                      <StyledText
-                        size="xl"
-                        weight="light"
-                        opacity="medium"
-                        className="leading-none"
-                        tracking="tighter"
-                        style={{
-                          fontFamily: 'Oswald-Regular',
-                        }}
-                      >
-                        {playbackSpeed}.25
-                      </StyledText>
-                      <StyledText
-                        size="sm"
-                        weight="light"
-                        opacity="medium"
-                        className="leading-none"
-                      >
-                        x
-                      </StyledText>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* End of Controls */}
               </View>
+
+              {/* End of Controls */}
             </View>
-          </ScrollView>
-        </Animated.View>
+          </View>
+        </ScrollView>
+      </Animated.View>
 
-        {/* Menu Modal for selecting playback speed */}
-        <MenuModal
-          visible={speedOptionsModalVisible}
-          onClose={() => setSpeedOptionsModalVisible(false)}
-          header="Speed"
-          // TODO: Custom Playback Speed
-          items={[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => {
-            return {
-              label: speed === 1 ? 'Normal' : `${speed}x`,
-              onPress: () => {
-                setSpeed(speed);
-                setSpeedOptionsModalVisible(false);
-              },
-              icon: 'speed',
-            };
-          })}
-        />
+      {/* Menu Modal for selecting playback speed */}
+      <MenuModal
+        visible={speedOptionsModalVisible}
+        onClose={() => setSpeedOptionsModalVisible(false)}
+        header="Speed"
+        // TODO: Custom Playback Speed
+        items={[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => {
+          return {
+            label: speed === 1 ? 'Normal' : `${speed}x`,
+            onPress: () => {
+              setSpeed(speed);
+              setSpeedOptionsModalVisible(false);
+            },
+            icon: 'speed',
+          };
+        })}
+      />
 
-        {/* <ModalWrapper
+      {/* <ModalWrapper
           visible={addToPlayListModal}
           animationType="fade"
           doNotUseWrapper
@@ -422,8 +412,7 @@ const TrackPlayer = () => {
           fullWidth
         >
         </ModalWrapper> */}
-      </GestureHandlerRootView>
-    </ModalWrapper>
+    </GestureHandlerRootView>
   );
 };
 

@@ -46,3 +46,5 @@ export const ALLOWED_AUDIO_MIMETYPES = [
 ];
 
 export const TRACK_PLACEHOLDER_IMAGE = require('@/assets/images/placeholder/track.jpg');
+
+export const TAB_ROUTE_NAMES = ['Home', 'Search', 'Feed', 'MyLibrary'];

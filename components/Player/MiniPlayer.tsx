@@ -18,8 +18,9 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import SliderInput from '../reusables/SliderInput';
 import { msToSeconds } from '@/utils/helpers/string';
 import { GestureDetector } from 'react-native-gesture-handler';
+import { useNavigation } from 'expo-router';
 
-const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
+const MiniPlayer = ({ activeTab }: { activeTab: string | null }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
 
   // Animation when
@@ -93,6 +94,8 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
     onSwipeUp: () => console.log('Swiped up'),
     onSwipeDown: () => console.log('Swiped down'),
   });
+
+  const navigation = useNavigation();
   return (
     <Animated.View
       style={[styles.container, containerAnimatedStyle]}
@@ -100,6 +103,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: string }) => {
     >
       <Pressable
         onPress={() => {
+          navigation.navigate('TrackPlayer' as never);
           setPlayerExpanded(true);
         }}
         style={styles.wrapper}

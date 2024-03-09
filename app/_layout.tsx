@@ -1,22 +1,16 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 
-import {
-  DarkTheme,
-  NavigationContainer,
-  NavigationContainerRef,
-  ThemeProvider,
-} from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import ToastInstance from '@/components/ToastInstance';
 import LoadingModal from '@/components/global/LoadingModal';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -65,17 +59,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  // const rootNavigationRef =
-  //   useRef<NavigationContainerRef<ReactNavigation.RootParamList>>(null);
-  // const { setRootNavigation } = useAppState();
-  // useEffect(() => {
-  //   if (rootNavigationRef.current) {
-  //     setRootNavigation(rootNavigationRef.current);
-  //   }
-  // }, [setRootNavigation, rootNavigationRef.current]);
-
   return (
-    // <NavigationContainer independent ref={rootNavigationRef}>
     <ThemeProvider value={DarkTheme}>
       <LoadingModal />
       <QueryClientProvider client={queryClient}>

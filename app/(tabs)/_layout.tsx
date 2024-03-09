@@ -5,16 +5,15 @@ import COLORS from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
-import { GLOBAL_STYLES } from '@/utils/constants';
+import { GLOBAL_STYLES, TAB_ROUTE_NAMES } from '@/utils/constants';
 import MiniPlayer from '@/components/Player/MiniPlayer';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
+import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import TrackPlayer from '@/components/Player/TrackPlayer';
-import { createNativeStackNavigator } from 'react-native-screens/native-stack';
-import AddToPlaylistSC1 from '@/components/Playlist/AddToPlaylistSC1';
-import BackNavigator from '@/components/reusables/BackNavigator';
+import AddToPlaylistStack from '../screens/add-to-playlist';
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
 
 const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
   let iconName: keyof typeof Ionicons.glyphMap = 'home';
@@ -59,34 +58,31 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 };
 
 export default function TabsLayout() {
-  const [activeTab, setActiveTab] = useState<string>('Home');
+  const [activeTab, setActiveTab] = useState<string | null>('Home');
   return (
     <>
-      <Stack.Group
-        screenOptions={({ navigation }) => ({
-          stackPresentation: 'modal',
-          headerLeft: () => <BackNavigator showBackText />,
-        })}
-      >
-        <Stack.Screen name="AddToPlaylistSC1" component={AddToPlaylistSC1} />
-      </Stack.Group>
       <MiniPlayer activeTab={activeTab} />
-      <TrackPlayer />
       <Tab.Navigator
         initialRouteName="Home"
         screenListeners={({ navigation, route }) => ({
           tabPress: (e) => {
             setActiveTab(route.name);
           },
+          blur: () => {
+            setActiveTab(null);
+          },
+          focus: () => {
+            setActiveTab(route.name);
+          },
         })}
         screenOptions={({ route }) => {
+          const routeName = route.name as string;
           return {
             tabBarIcon: ({ focused }) => (
               <TabBarIcon focused={focused} route={route} />
             ),
 
             tabBarLabel: ({ focused, color }) => {
-              const routeName = route.name as string;
               return (
                 <StyledText
                   size="xs"
@@ -114,6 +110,9 @@ export default function TabsLayout() {
               backgroundColor: 'transparent',
               borderTopWidth: 0,
               elevation: 0,
+              ...(!TAB_ROUTE_NAMES.includes(routeName) && {
+                display: 'none',
+              }),
             },
             tabBarOptions: {
               tabBarPosition: 'bottom',
@@ -157,6 +156,23 @@ export default function TabsLayout() {
           name="Upload"
           options={{
             headerTitle: 'Upload',
+          }}
+        />
+
+        <Tab.Screen
+          component={TrackPlayer}
+          name="TrackPlayer"
+          options={{
+            tabBarButton: () => null,
+          }}
+        />
+
+        <Tab.Screen
+          component={AddToPlaylistStack}
+          name="AddToPlaylist"
+          options={{
+            headerTitle: 'Add to Playlist',
+            tabBarButton: () => null,
           }}
         />
       </Tab.Navigator>

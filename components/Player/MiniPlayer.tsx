@@ -103,8 +103,8 @@ const MiniPlayer = ({ activeTab }: { activeTab: string | null }) => {
     >
       <Pressable
         onPress={() => {
-          navigation.navigate('TrackPlayer' as never);
           setPlayerExpanded(true);
+          navigation.navigate('TrackPlayer' as never);
         }}
         style={styles.wrapper}
         {...changeTrackGesture}

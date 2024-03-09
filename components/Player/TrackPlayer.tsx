@@ -6,7 +6,6 @@ import ImageDisplay from '../reusables/ImageDisplay';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { GLOBAL_STYLES, TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
-import ModalWrapper from '../reusables/ModalWrapper';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -27,6 +26,8 @@ import HorizontalMarquee from '../reusables/HorizontalMarquee';
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 import AddToPlaylistTabs from '@/app/screens/add-to-playlist';
 import { useNavigation } from 'expo-router';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { TransitionPresets } from '@react-navigation/stack';
 
 const TrackPlayer = () => {
   // Player Store
@@ -77,32 +78,13 @@ const TrackPlayer = () => {
   const { SCREEN_HEIGHT } = useScreenDimensions();
   const navigation = useNavigation();
 
-  // Animations
-  const playerRootTranslateY = useSharedValue(SCREEN_HEIGHT + 50);
-
-  const playerRootAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: playerRootTranslateY.value }],
-    };
-  });
-
-  useEffect(() => {
-    // playerRootTranslateY.value = isPlayerExpanded
-    //   ? withTiming(0, { duration: 300 })
-    //   : withTiming(SCREEN_HEIGHT + 50, { duration: 300 });
-    playerRootTranslateY.value = withTiming(0, {
-      duration: 500,
-      easing: Easing.linear,
-    });
-  }, []);
-
   const onPlayPause = () => {
     playPause();
   };
 
   return (
     <GestureHandlerRootView style={{ width: '100%' }}>
-      <Animated.View style={[styles.rootContainer, playerRootAnimatedStyle]}>
+      <Animated.View style={[styles.rootContainer]}>
         <PrimaryGradient />
         <ScrollView style={styles.rootWrapper}>
           <View className="flex flex-row justify-between items-center mt-4">
@@ -431,5 +413,31 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 });
+const Stack = createNativeStackNavigator();
 
-export default TrackPlayer;
+export default () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_bottom',
+        animationDuration: 300,
+        presentation: 'bottomSheet',
+
+        ...(TransitionPresets.BottomSheetAndroid as any),
+      }}
+      initialRouteName="TrackPlayer"
+    >
+      <Stack.Screen
+        name="TrackPlayer"
+        component={TrackPlayer}
+        options={{
+          animation: 'slide_from_bottom',
+          presentation: 'bottomSheet',
+          animationDuration: 300,
+          ...(TransitionPresets.BottomSheetAndroid as any),
+        }}
+      />
+    </Stack.Navigator>
+  );
+};

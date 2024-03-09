@@ -59,6 +59,12 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 
 export default function TabsLayout() {
   const [activeTab, setActiveTab] = useState<string | null>('Home');
+  const { setPlayerExpanded } = usePlayerStore();
+  useEffect(() => {
+    if (activeTab !== 'TrackPlayer') {
+      setPlayerExpanded(false);
+    }
+  }, [activeTab]);
   return (
     <>
       <MiniPlayer activeTab={activeTab} />
@@ -164,6 +170,7 @@ export default function TabsLayout() {
           name="TrackPlayer"
           options={{
             tabBarButton: () => null,
+            headerShown: false,
           }}
         />
 

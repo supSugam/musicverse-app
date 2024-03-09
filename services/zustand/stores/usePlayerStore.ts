@@ -60,13 +60,13 @@ interface PlayerState {
   setVolume: (volume: number) => Promise<void>;
   enableSingleLooping: () => Promise<void>;
   disableSingleLooping: () => Promise<void>;
-  enableQueueLooping: () => Promise<void>;
-  enablePlayUntilLastTrack: () => Promise<void>;
-  enableStopAfterCurrentTrack: () => Promise<void>;
+  enableQueueLooping: () => void;
+  enablePlayUntilLastTrack: () => void;
+  enableStopAfterCurrentTrack: () => void;
 
   seekBackward: (seconds: number) => Promise<void>;
   seekForward: (seconds: number) => Promise<void>;
-  toggleLoopStates: () => Promise<void>;
+  toggleLoopStates: () => void;
 
   resetPlayer: () => void;
 }
@@ -328,9 +328,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  enableQueueLooping: async () => {
+  enableQueueLooping: () => {
     const { disableSingleLooping } = get();
-    await disableSingleLooping();
+    disableSingleLooping();
     set({
       isLoopingQueue: true,
       playUntilLastTrack: false,
@@ -338,9 +338,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     });
   },
 
-  enableStopAfterCurrentTrack: async () => {
+  enableStopAfterCurrentTrack: () => {
     const { disableSingleLooping } = get();
-    await disableSingleLooping();
+    disableSingleLooping();
     set({
       stopAfterCurrentTrack: true,
       isLoopingSingle: false,
@@ -349,9 +349,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     });
   },
 
-  enablePlayUntilLastTrack: async () => {
+  enablePlayUntilLastTrack: () => {
     const { disableSingleLooping } = get();
-    await disableSingleLooping();
+    disableSingleLooping();
     set({
       playUntilLastTrack: true,
       isLoopingSingle: false,
@@ -360,7 +360,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     });
   },
 
-  toggleLoopStates: async () => {
+  toggleLoopStates: () => {
     const {
       isLoopingSingle,
       isLoopingQueue,
@@ -374,19 +374,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     let content: string = '';
 
     if (isLoopingSingle) {
-      await enableQueueLooping();
+      enableQueueLooping();
       content = 'Looping Queue';
     } else if (isLoopingQueue) {
-      await enablePlayUntilLastTrack();
+      enablePlayUntilLastTrack();
       content = 'Play Until Last Song';
     } else if (playUntilLastTrack) {
-      await enableStopAfterCurrentTrack();
+      enableStopAfterCurrentTrack();
       content = 'Stop After Current Song';
     } else if (stopAfterCurrentTrack) {
-      await enableSingleLooping();
+      enableSingleLooping();
       content = 'Repeat Current Song';
     } else {
-      await enableSingleLooping();
+      enableSingleLooping();
       content = 'Repeat Current Song';
     }
     toastResponseMessage({

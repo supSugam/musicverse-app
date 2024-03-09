@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import TabsLayout from './(tabs)/_layout';
 import Login from './screens/Login';
 import { LogBox } from 'react-native';
-import AddToPlaylistScreen from './screens/add-to-playlist';
+
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
@@ -58,13 +58,6 @@ export default function index() {
           <Stack.Screen
             name="Login"
             component={Login}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="AddToPlaylistTabs"
-            component={AddToPlaylistScreen}
             options={{
               headerShown: false,
             }}

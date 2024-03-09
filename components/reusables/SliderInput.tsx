@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   trackContainer: {
     width: '100%',
     overflow: 'hidden',
-    backgroundColor: COLORS.neutral.dark,
+    backgroundColor: COLORS.neutral.gray,
   },
   roundedTrack: {
     borderRadius: 4,

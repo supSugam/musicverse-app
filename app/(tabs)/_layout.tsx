@@ -7,12 +7,14 @@ import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
 import { GLOBAL_STYLES } from '@/utils/constants';
 import MiniPlayer from '@/components/Player/MiniPlayer';
-import { useEffect, useState } from 'react';
-import { useIsFocused } from '@react-navigation/native';
-import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
+import { useState } from 'react';
 import TrackPlayer from '@/components/Player/TrackPlayer';
+import { createNativeStackNavigator } from 'react-native-screens/native-stack';
+import AddToPlaylistSC1 from '@/components/Playlist/AddToPlaylistSC1';
+import BackNavigator from '@/components/reusables/BackNavigator';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
   let iconName: keyof typeof Ionicons.glyphMap = 'home';
@@ -60,6 +62,14 @@ export default function TabsLayout() {
   const [activeTab, setActiveTab] = useState<string>('Home');
   return (
     <>
+      <Stack.Group
+        screenOptions={({ navigation }) => ({
+          stackPresentation: 'modal',
+          headerLeft: () => <BackNavigator showBackText />,
+        })}
+      >
+        <Stack.Screen name="AddToPlaylistSC1" component={AddToPlaylistSC1} />
+      </Stack.Group>
       <MiniPlayer activeTab={activeTab} />
       <TrackPlayer />
       <Tab.Navigator

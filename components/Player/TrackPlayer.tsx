@@ -24,8 +24,8 @@ import LoopIcon from '@/lib/svgs/LoopIcon';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import HorizontalMarquee from '../reusables/HorizontalMarquee';
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
+import AddToPlaylistTabs from '@/app/screens/add-to-playlist';
 import { useNavigation } from 'expo-router';
-import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 const TrackPlayer = () => {
   // Player Store
@@ -74,7 +74,7 @@ const TrackPlayer = () => {
 
   // Stuffs
   const { SCREEN_HEIGHT } = useScreenDimensions();
-  const { rootNavigation } = useAppState();
+  const navigation = useNavigation();
 
   // Animations
   const playerRootTranslateY = useSharedValue(SCREEN_HEIGHT + 50);
@@ -347,7 +347,7 @@ const TrackPlayer = () => {
                     <TouchableOpacity
                       activeOpacity={0.7}
                       onPress={() =>
-                        rootNavigation?.navigate('AddToPlaylistTabs' as never)
+                        navigation.navigate('AddToPlaylistSC1' as never)
                       }
                       className="mr-2"
                     >

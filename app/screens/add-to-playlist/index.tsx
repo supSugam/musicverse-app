@@ -1,40 +1,29 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Platform, View } from 'react-native';
-
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Container from '@/components/Container';
 import BackNavigator from '@/components/reusables/BackNavigator';
-import AddToPlaylistSC1 from '@/components/Playlist/AddToPlaylistSC1';
-
-const Stack = createNativeStackNavigator();
+import AlbumDetailsSC1 from '../upload/AlbumDetailsSC1';
+import { NavigationContainer } from '@react-navigation/native';
+import { useEffect } from 'react';
+import { useNavigation } from 'expo-router';
+import StyledText from '@/components/reusables/StyledText';
+import { View } from 'react-native';
 
 const Tab = createMaterialTopTabNavigator();
+export default function AddToPlaylistTabs() {
+  const navigation = useNavigation();
 
-function AddToPlaylistTabs() {
+  useEffect(() => {
+    navigation.navigate('AlbumDetailsSC1' as never);
+  }, []);
   return (
-    <Container includeNavBar navbarTitle="Add to Playlist">
-      <Tab.Navigator tabBar={() => <BackNavigator showBackText />}>
-        <Tab.Screen name="AddToPlaylistSC1" component={AddToPlaylistSC1} />
-      </Tab.Navigator>
-    </Container>
-  );
-}
-
-export default function AddToPlaylistScreen() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTransparent: true,
-        headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
-      }}
-    >
-      <Stack.Screen
-        name="AddToPlaylistTabs"
-        component={AddToPlaylistTabs}
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack.Navigator>
+    <NavigationContainer independent>
+      <View style={{ flex: 1 }}>
+        <Tab.Navigator
+          initialRouteName="AlbumDetailsSC1"
+          tabBar={() => <BackNavigator showBackText />}
+        >
+          <Tab.Screen name="AlbumDetailsSC1" component={AlbumDetailsSC1} />
+        </Tab.Navigator>
+      </View>
+    </NavigationContainer>
   );
 }

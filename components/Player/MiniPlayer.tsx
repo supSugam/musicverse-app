@@ -16,12 +16,12 @@ import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import SliderInput from '../reusables/SliderInput';
-import { msToSeconds } from '@/utils/helpers/string';
-import { GestureDetector } from 'react-native-gesture-handler';
 import { useNavigation } from 'expo-router';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 
-const MiniPlayer = ({ activeTab }: { activeTab: string | null }) => {
+const MiniPlayer = () => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
+  const { activeTab } = useAppState();
 
   // Animation when
 

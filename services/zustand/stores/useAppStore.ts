@@ -7,6 +7,9 @@ interface IAppGlobalState {
   setRootNavigation: (
     ref: NavigationContainerRef<ReactNavigation.RootParamList>
   ) => void;
+
+  activeTab: string | null;
+  setActiveTab: (activeTab: string | null) => void;
 }
 
 export const useAppState = create<IAppGlobalState>((set) => ({
@@ -16,4 +19,6 @@ export const useAppState = create<IAppGlobalState>((set) => ({
   setRootNavigation: (
     ref: NavigationContainerRef<ReactNavigation.RootParamList>
   ) => set({ rootNavigation: ref }),
+  activeTab: 'Home',
+  setActiveTab: (activeTab: string | null) => set({ activeTab }),
 }));

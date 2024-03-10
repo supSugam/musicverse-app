@@ -7,6 +7,7 @@ import TracksUploadZone from './TracksUploadZone';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Container from '@/components/Container';
 import BackNavigator from '@/components/reusables/BackNavigator';
+import AddToPlaylistStack from '../add-to-playlist';
 
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +60,16 @@ export default function UploadStackScreen() {
           headerShown: false,
         }}
       />
+
+      <Stack.Group>
+        <Stack.Screen
+          component={AddToPlaylistStack}
+          name="AddToPlaylist"
+          options={{
+            headerTitle: 'Add to Playlist',
+          }}
+        />
+      </Stack.Group>
     </Stack.Navigator>
   );
 }

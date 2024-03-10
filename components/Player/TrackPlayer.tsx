@@ -61,6 +61,7 @@ const TrackPlayer = () => {
 
   const onPlayerClose = () => {
     setPlayerExpanded(false);
+    navigation.goBack();
   };
 
   // Modals
@@ -319,7 +320,7 @@ const TrackPlayer = () => {
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() =>
-                      navigation.navigate('AddToPlaylistSC1' as never)
+                      navigation.navigate('AddToPlaylist' as never)
                     }
                     className="mr-2"
                   >
@@ -413,23 +414,5 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 });
-const Stack = createNativeStackNavigator();
 
-export default () => {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-      initialRouteName="TrackPlayer"
-    >
-      <Stack.Screen
-        name="TrackPlayer"
-        component={TrackPlayer}
-        options={{
-          ...(TransitionPresets.ModalTransition as any),
-        }}
-      />
-    </Stack.Navigator>
-  );
-};
+export default TrackPlayer;

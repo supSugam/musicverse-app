@@ -6,13 +6,20 @@ const Stack = createNativeStackNavigator();
 export default function AddToPlaylistStack() {
   return (
     <View style={{ flex: 1, zIndex: 999 }}>
-      <Stack.Group
+      <Stack.Navigator
+        initialRouteName="AddToPlaylistSC1"
         screenOptions={{
           headerTransparent: true,
           headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
-          presentation: 'formSheet',
+          presentation: 'modal',
         }}
       >
+        {/* <Stack.Group
+          screenOptions={{
+            headerTransparent: true,
+            headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
+          }}
+        > */}
         <Stack.Screen
           name="AddToPlaylistSC1"
           component={AddToPlaylistSC1}
@@ -20,7 +27,8 @@ export default function AddToPlaylistStack() {
             headerShown: false,
           }}
         />
-      </Stack.Group>
+        {/* </Stack.Group> */}
+      </Stack.Navigator>
     </View>
   );
 }

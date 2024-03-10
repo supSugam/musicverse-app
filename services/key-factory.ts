@@ -40,7 +40,7 @@ export const albumKeyFactory = {
   getAlbumTracks: (id: string) => ['albums', id, 'tracks'],
 };
 
-export const TRACK_QUERY_KEY = 'tracks';
+export const TRACK_QUERY_KEY = 'tracks' as const;
 
 export const trackKeyFactory = {
   getTracks: () => [TRACK_QUERY_KEY],
@@ -49,4 +49,15 @@ export const trackKeyFactory = {
   updateTrack: (id: string) => [TRACK_QUERY_KEY, id],
   deleteTrack: (id?: string) => [TRACK_QUERY_KEY, ...(id ? [id] : [])],
   toggleLike: (id?: string) => [TRACK_QUERY_KEY, ...(id ? [id] : [])],
+};
+
+export const PLAYLIST_QUERY_KEY = 'playlists' as const;
+
+export const playlistKeyFactory = {
+  getPlaylists: () => [PLAYLIST_QUERY_KEY],
+  getPlaylist: (id: string) => [PLAYLIST_QUERY_KEY, id],
+  createPlaylist: () => [PLAYLIST_QUERY_KEY],
+  updatePlaylist: (id?: string) => [PLAYLIST_QUERY_KEY, ...(id ? [id] : [])],
+  deletePlaylist: (id?: string) => [PLAYLIST_QUERY_KEY, ...(id ? [id] : [])],
+  toggleSave: (id?: string) => [PLAYLIST_QUERY_KEY, ...(id ? [id] : [])],
 };

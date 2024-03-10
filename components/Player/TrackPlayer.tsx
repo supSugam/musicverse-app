@@ -319,7 +319,7 @@ const TrackPlayer = () => {
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() =>
-                      navigation.navigate('AddToPlaylist' as never)
+                      navigation.navigate('AddToPlaylistSC1' as never)
                     }
                     className="mr-2"
                   >
@@ -420,11 +420,6 @@ export default () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_bottom',
-        animationDuration: 300,
-        presentation: 'bottomSheet',
-
-        ...(TransitionPresets.BottomSheetAndroid as any),
       }}
       initialRouteName="TrackPlayer"
     >
@@ -432,10 +427,7 @@ export default () => {
         name="TrackPlayer"
         component={TrackPlayer}
         options={{
-          animation: 'slide_from_bottom',
-          presentation: 'bottomSheet',
-          animationDuration: 300,
-          ...(TransitionPresets.BottomSheetAndroid as any),
+          ...(TransitionPresets.ModalTransition as any),
         }}
       />
     </Stack.Navigator>

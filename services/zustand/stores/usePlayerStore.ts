@@ -50,7 +50,7 @@ interface PlayerState {
   updateTracks: (tracks: ITrackDetails[]) => void;
   isNextTrackAvailable: (ignoreLoopState?: boolean) => boolean;
   isPrevTrackAvailable: (ignoreLoopState?: boolean) => boolean;
-  playPause: (play?: boolean) => Promise<void>;
+  playPause: (play?: boolean) => void;
   playATrackById: (id: string) => Promise<void>;
   nextTrack: () => Promise<void>;
   prevTrack: () => Promise<void>;
@@ -211,19 +211,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  playPause: async (play = false) => {
+  playPause: (play = false) => {
     const { isPlaying, playbackInstance, didJustFinish } = get();
 
     if (!playbackInstance) return;
 
     if (isPlaying && !play) {
-      await playbackInstance.pauseAsync();
+      playbackInstance.pauseAsync();
     } else {
       if (didJustFinish) {
-        await playbackInstance.replayAsync();
+        playbackInstance.replayAsync();
         return;
       }
-      await playbackInstance.playAsync();
+      playbackInstance.playAsync();
     }
   },
 

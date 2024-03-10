@@ -15,7 +15,7 @@ const AddToPlaylistSC1 = () => {
     >
       <PrimaryGradient opacity={0.1} />
 
-      <View className="p-4 w-full h-full flex justify-center items-center relative">
+      <View className="p-8 w-full h-full flex justify-center items-center relative">
         <StyledButton onPress={() => {}} className="w-full">
           <StyledText size="xl" weight="bold" className="text-center">
             Create New Playlist

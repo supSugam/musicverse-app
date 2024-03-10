@@ -135,7 +135,7 @@ const TrackPlayer = () => {
                   {track?.creator?.profile.name}
                 </StyledText>
                 {/* </Link> */}
-                <HorizontalMarquee speed={5000} pauseDuration={2000}>
+                <HorizontalMarquee speed={5000} pauseDuration={3000}>
                   <StyledText size="2xl" weight="bold">
                     {track?.title}
                   </StyledText>
@@ -320,7 +320,7 @@ const TrackPlayer = () => {
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() =>
-                      navigation.navigate('AddToPlaylist' as never)
+                      navigation.navigate('AddToPlaylistSC1' as never)
                     }
                     className="mr-2"
                   >

@@ -6,7 +6,11 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { GLOBAL_STYLES, TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
+import {
+  GLOBAL_STYLES,
+  TAB_ROUTE_NAMES,
+  TRACK_PLACEHOLDER_IMAGE,
+} from '@/utils/constants';
 import COLORS from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import ImageDisplay from '../reusables/ImageDisplay';
@@ -45,7 +49,10 @@ const MiniPlayer = () => {
   const currentTrack = currTrack();
 
   useEffect(() => {
-    const showPlayerAboveTabBar = currentTrack !== null && activeTab === 'Home';
+    const showPlayerAboveTabBar =
+      activeTab !== null &&
+      currentTrack !== null &&
+      TAB_ROUTE_NAMES.includes(activeTab);
 
     if (showPlayerAboveTabBar) {
       translateY.value = withSpring(

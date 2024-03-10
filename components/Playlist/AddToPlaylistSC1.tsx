@@ -8,13 +8,11 @@ import COLORS from '@/constants/Colors';
 const AddToPlaylistSC1 = () => {
   return (
     <View
-      className="flex relative"
-      style={
-        {
-          // backgroundColor: COLORS.neutral.dense,
-          // backgroundColor: 'red',
-        }
-      }
+      className="flex relative h-1/2"
+      style={{
+        // backgroundColor: COLORS.neutral.dense,
+        backgroundColor: 'red',
+      }}
     >
       <PrimaryGradient opacity={0.1} />
 

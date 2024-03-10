@@ -10,6 +10,8 @@ import { LogBox } from 'react-native';
 import TrackPlayer from '@/components/Player/TrackPlayer';
 import MiniPlayer from '@/components/Player/MiniPlayer';
 import AddToPlaylistStack from './screens/add-to-playlist';
+import AddToPlaylistSC1 from '@/components/Playlist/AddToPlaylistSC1';
+import BackNavigator from '@/components/reusables/BackNavigator';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -55,11 +57,23 @@ export default function index() {
               screenOptions={{
                 presentation: 'modal',
                 headerShown: false,
+                header: () => (
+                  <BackNavigator showBackText title="Add to Playlist" />
+                ),
               }}
             >
               <Stack.Screen
-                name="AddToPlaylist"
-                component={AddToPlaylistStack}
+                name="AddToPlaylistSC1"
+                component={AddToPlaylistSC1}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'ios',
+                  animationDuration: 200,
+                  // TODO: make modal appear at bottom
+                  contentStyle: {
+                    justifyContent: 'flex-end',
+                  },
+                }}
               />
             </Stack.Group>
           </Stack.Navigator>

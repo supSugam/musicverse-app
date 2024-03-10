@@ -30,48 +30,35 @@ const HorizontalMarquee: React.FC<IHorizontalMarqueeProps> = ({
   const [widthDiff, setWidthDiff] = useState<number>(0);
 
   useEffect(() => {
-    const shouldAnimate =
-      calculatePercentage(contentWidth.current, containerWidth.current) > 80;
+    const percentage = calculatePercentage(
+      contentWidth.current,
+      containerWidth.current
+    );
+    const shouldAnimate = percentage > 80;
+    const diff = contentWidth.current - containerWidth.current;
+
     setShouldAnimate(shouldAnimate);
-    setWidthDiff(contentWidth.current - containerWidth.current);
+    setWidthDiff(diff);
   }, [containerWidth.current, contentWidth.current]);
 
   useEffect(() => {
     if (!shouldAnimate) return;
 
-    translateXContent.value = withRepeat(
+    const animate = withRepeat(
       withSequence(
         withTiming(-contentWidth.current + widthDiff, {
           duration: speed,
           easing: Easing.linear,
         }),
-        withTiming(0, {
-          duration: 0,
-        }),
-        withTiming(0, {
-          duration: pauseDuration,
-        })
+        withTiming(0, { duration: 0 }),
+        withTiming(0, { duration: pauseDuration })
       ),
       -1,
       true
     );
 
-    followTranslateXContent.value = withRepeat(
-      withSequence(
-        withTiming(-contentWidth.current + widthDiff, {
-          duration: speed,
-          easing: Easing.linear,
-        }),
-        withTiming(0, {
-          duration: 0,
-        }),
-        withTiming(0, {
-          duration: pauseDuration,
-        })
-      ),
-      -1,
-      true
-    );
+    translateXContent.value = animate;
+    followTranslateXContent.value = animate;
   }, [speed, pauseDuration, shouldAnimate, widthDiff]);
 
   const contentAnimatedStyles = useAnimatedStyle(() => {

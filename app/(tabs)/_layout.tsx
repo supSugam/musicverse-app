@@ -6,12 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
 import { GLOBAL_STYLES, TAB_ROUTE_NAMES } from '@/utils/constants';
-import MiniPlayer from '@/components/Player/MiniPlayer';
-import { useEffect, useState } from 'react';
-import { useIsFocused } from '@react-navigation/native';
+import { useEffect } from 'react';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
-import TrackPlayer from '@/components/Player/TrackPlayer';
-import AddToPlaylistStack from '../screens/add-to-playlist';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 const Tab = createBottomTabNavigator();
@@ -59,12 +55,7 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 };
 
 export default function TabsLayout() {
-  const { setPlayerExpanded } = usePlayerStore();
-  const { setActiveTab, activeTab } = useAppState();
-
-  useEffect(() => {
-    console.log('setActiveTab', activeTab);
-  }, [activeTab]);
+  const { setActiveTab } = useAppState();
 
   return (
     <Tab.Navigator
@@ -78,9 +69,6 @@ export default function TabsLayout() {
         },
         focus: () => {
           setActiveTab(route.name);
-        },
-        beforeRemove: (e) => {
-          setActiveTab(null);
         },
       })}
       screenOptions={({ route }) => {

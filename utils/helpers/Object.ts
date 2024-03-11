@@ -21,3 +21,18 @@ export const cleanObject = <T extends Object>(
   }
   return cleanedObj;
 };
+
+export const convertObjectToFormData = (obj: any): FormData => {
+  const formData = new FormData();
+  for (const key in obj) {
+    const val = obj[key];
+    if (Array.isArray(val)) {
+      val.forEach((item: any, index: number) => {
+        formData.append(`${key}[${index}]`, item.toString());
+      });
+    } else {
+      formData.append(key, val);
+    }
+  }
+  return formData;
+};

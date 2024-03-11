@@ -1,12 +1,16 @@
 import React from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '@/constants/Colors';
+import { View } from 'react-native';
 
-interface IPrimaryGradientProps {
+interface IPrimaryGradientProps extends React.ComponentProps<typeof View> {
   opacity?: number;
 }
 
-const PrimaryGradient = ({ opacity = 0.15 }: IPrimaryGradientProps) => {
+const PrimaryGradient = ({
+  opacity = 0.15,
+  ...rest
+}: IPrimaryGradientProps) => {
   return (
     <LinearGradient
       colors={[
@@ -14,16 +18,19 @@ const PrimaryGradient = ({ opacity = 0.15 }: IPrimaryGradientProps) => {
         ...COLORS.gradient.primary,
         COLORS.primary.dark,
       ]}
-      style={{
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        zIndex: -1,
-        opacity,
-        flex: 1,
-        top: 0,
-        left: 0,
-      }}
+      style={[
+        {
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          zIndex: -1,
+          opacity,
+          flex: 1,
+          top: 0,
+          left: 0,
+        },
+        rest.style,
+      ]}
       start={{ x: 0, y: 1 }}
       end={{ x: 1, y: 1 }}
     />

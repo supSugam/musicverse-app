@@ -5,10 +5,12 @@ import { useNavigation } from 'expo-router';
 export interface IBackNavigatorProps {
   showBackText?: boolean;
   title?: string;
+  transparent?: boolean;
 }
 const BackNavigator = ({
   showBackText = false,
   title = '',
+  transparent = false,
 }: IBackNavigatorProps) => {
   const navigation = useNavigation();
   return (
@@ -16,7 +18,7 @@ const BackNavigator = ({
       activeOpacity={0.8}
       className="flex flex-row items-center justify-between w-full"
       style={{
-        backgroundColor: '#000000',
+        backgroundColor: transparent ? 'transparent' : '#000',
         paddingHorizontal: 10,
         paddingVertical: 8,
       }}

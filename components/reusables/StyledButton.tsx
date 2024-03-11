@@ -42,9 +42,13 @@ export function StyledButton(props: StyledButtonProps) {
         colors={
           variant === 'primary'
             ? ['#b11fc8', '#5b21b6']
-            : [COLORS.neutral.dark, COLORS.neutral.dense, COLORS.neutral.dark]
+            : [
+                COLORS.neutral.semidark,
+                COLORS.neutral.dark,
+                COLORS.neutral.semidark,
+              ]
         }
-        start={{ x: 0, y: 0 }}
+        start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
       >
         {loading && <ActivityIndicator size="large" color="#ffffff" />}

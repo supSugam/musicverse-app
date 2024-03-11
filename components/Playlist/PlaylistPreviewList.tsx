@@ -39,7 +39,7 @@ const PlaylistPreviewList = ({
   return (
     <AnimatedTouchable onPress={onPress}>
       <View
-        className="flex w-full flex-row items-center justify-between p-3 rounded-lg"
+        className="flex w-full flex-row items-center justify-between p-2 mb-2 rounded-lg"
         style={[
           {
             backgroundColor: `${COLORS.neutral.dark}80`,
@@ -51,8 +51,8 @@ const PlaylistPreviewList = ({
         <ImageDisplay
           source={cover ? { uri: cover } : PLAYLIST_PLACEHOLDER_IMAGE}
           placeholder={''}
-          width={60}
-          height={60}
+          width={50}
+          height={50}
           borderRadius={4}
           className="mr-3"
         />

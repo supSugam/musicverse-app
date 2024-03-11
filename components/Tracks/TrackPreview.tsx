@@ -55,7 +55,7 @@ const TrackPreview = ({
         translateStyle,
         {
           zIndex: 1,
-          paddingVertical: 20,
+          paddingVertical: 8,
         },
         style,
       ]}

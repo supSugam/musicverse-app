@@ -113,7 +113,7 @@ const TrackListItem = ({
         }
         items={[
           {
-            label: 'Add to Playlist',
+            label: 'Add to Playlists',
             onPress: () => {
               setOptionsMenuVisible(false);
               navigation.dispatch(

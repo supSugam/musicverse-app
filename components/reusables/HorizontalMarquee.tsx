@@ -1,6 +1,6 @@
 import { calculatePercentage } from '@/utils/helpers/number';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Dimensions, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,

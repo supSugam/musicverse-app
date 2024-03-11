@@ -82,7 +82,7 @@ export default function index() {
                 component={CreatePlaylist}
                 options={{
                   presentation: 'transparentModal',
-                  animation: 'slide_from_bottom',
+                  animation: 'slide_from_right',
                   animationDuration: 200,
                 }}
               />

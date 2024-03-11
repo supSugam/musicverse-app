@@ -13,7 +13,6 @@ import { useNavigation } from 'expo-router';
 import { IPlaylistDetails } from '@/utils/Interfaces/IPlaylist';
 import PlaylistPreviewList from './PlaylistPreviewList';
 import { MaterialIcons } from '@expo/vector-icons';
-import StyledTextField from '../reusables/StyledTextInput';
 import SearchField from '../reusables/SearchField';
 import { toastResponseMessage } from '@/utils/toast';
 
@@ -180,13 +179,19 @@ const AddToPlaylistSC1 = () => {
       style={{
         backgroundColor: COLORS.neutral.dark,
         borderRadius: 16,
+        maxHeight: '80%',
       }}
     >
-      <PrimaryGradient opacity={0.2} />
+      <PrimaryGradient
+        opacity={0.2}
+        style={{
+          borderRadius: 16,
+        }}
+      />
 
       {track ? (
         <View className="p-4 w-full flex justify-center items-center relative">
-          <View className="mb-4 w-full">
+          <View className=" w-full">
             <TrackPreview
               cover={track?.cover}
               title={track?.title}
@@ -196,60 +201,24 @@ const AddToPlaylistSC1 = () => {
             />
           </View>
 
-          <StyledButton onPress={onCreatePlaylistClick} className="w-full my-2">
+          <StyledButton
+            onPress={onCreatePlaylistClick}
+            variant="secondary"
+            fullWidth
+            className="my-2 mb-4"
+          >
             <StyledText size="xl" weight="bold" className="text-center">
               Create New Playlist
             </StyledText>
           </StyledButton>
-          <ScrollView
-            className="flex flex-col"
-            style={{
-              maxHeight: playlistsViewHeight,
-            }}
-          >
-            {isPlaylistsLoading ? (
-              <LoadingIcon size={111} />
-            ) : (
-              playlistsContainingThisTrack.map((playlist) => (
-                <PlaylistPreviewList
-                  cover={playlist.cover}
-                  onPress={() => onOldPlaylistSelectClick(playlist.id)}
-                  rightComponent={
-                    <MaterialIcons
-                      name={
-                        isOldPlaylistSelected(playlist.id)
-                          ? 'check-circle'
-                          : 'add-circle-outline'
-                      }
-                      size={28}
-                      color={COLORS.primary.light}
-                      style={{
-                        marginRight: 2,
-                      }}
-                    />
-                  }
-                  subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
-                  title={playlist.title}
-                  onLayout={(event) => {
-                    const { height } = event.nativeEvent.layout;
-                    setPlaylistsViewHeight(height * 3 + 20);
-                  }}
-                />
-              ))
-            )}
-          </ScrollView>
-
           <StyledText
-            size="base"
-            weight="light"
-            className="text-center my-2"
+            size="sm"
+            weight="medium"
             uppercase
+            opacity="medium"
+            tracking="tighter"
           >
-            or
-          </StyledText>
-
-          <StyledText size="xl" weight="bold" className="text-center my-2">
-            Add to Existing Playlists
+            Or Add to Existing Playlists
           </StyledText>
 
           <SearchField
@@ -265,36 +234,66 @@ const AddToPlaylistSC1 = () => {
             style={{
               maxHeight: playlistsViewHeight,
             }}
+            showsVerticalScrollIndicator
           >
             {isPlaylistsLoading ? (
               <LoadingIcon size={111} />
             ) : (
-              userPlaylists.map((playlist) => (
-                <PlaylistPreviewList
-                  cover={playlist.cover}
-                  onPress={() => onNewPlaylistSelectClick(playlist.id)}
-                  rightComponent={
-                    <MaterialIcons
-                      name={
-                        isNewPlaylistSelected(playlist.id)
-                          ? 'check-circle'
-                          : 'add-circle-outline'
-                      }
-                      size={28}
-                      color={COLORS.primary.light}
-                      style={{
-                        marginRight: 2,
-                      }}
-                    />
-                  }
-                  subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
-                  title={playlist.title}
-                  onLayout={(event) => {
-                    const { height } = event.nativeEvent.layout;
-                    setPlaylistsViewHeight(height * 3 + 20);
-                  }}
-                />
-              ))
+              <>
+                {playlistsContainingThisTrack.map((playlist) => (
+                  <PlaylistPreviewList
+                    cover={playlist.cover}
+                    onPress={() => onOldPlaylistSelectClick(playlist.id)}
+                    rightComponent={
+                      <MaterialIcons
+                        name={
+                          isOldPlaylistSelected(playlist.id)
+                            ? 'check-circle'
+                            : 'add-circle-outline'
+                        }
+                        size={28}
+                        color={COLORS.primary.light}
+                        style={{
+                          marginRight: 2,
+                        }}
+                      />
+                    }
+                    subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
+                    title={playlist.title}
+                    onLayout={(event) => {
+                      const { height } = event.nativeEvent.layout;
+                      setPlaylistsViewHeight(height * 5 + 20);
+                    }}
+                  />
+                ))}
+
+                {userPlaylists.map((playlist) => (
+                  <PlaylistPreviewList
+                    cover={playlist.cover}
+                    onPress={() => onNewPlaylistSelectClick(playlist.id)}
+                    rightComponent={
+                      <MaterialIcons
+                        name={
+                          isNewPlaylistSelected(playlist.id)
+                            ? 'check-circle'
+                            : 'add-circle-outline'
+                        }
+                        size={28}
+                        color={COLORS.primary.light}
+                        style={{
+                          marginRight: 2,
+                        }}
+                      />
+                    }
+                    subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
+                    title={playlist.title}
+                    onLayout={(event) => {
+                      const { height } = event.nativeEvent.layout;
+                      setPlaylistsViewHeight(height * 4 + 20);
+                    }}
+                  />
+                ))}
+              </>
             )}
           </ScrollView>
           <StyledButton onPress={onDoneClick} className="w-full my-2">

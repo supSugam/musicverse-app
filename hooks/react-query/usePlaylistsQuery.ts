@@ -103,7 +103,12 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
 
   const createPlaylist = useMutation({
     mutationKey: playlistKeyFactory.createPlaylist(),
-    mutationFn: async (playlist: any) => await api.post('/playlists', playlist),
+    mutationFn: async (playlist: FormData) =>
+      await api.post('/playlists', playlist, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [PLAYLIST_QUERY_KEY],

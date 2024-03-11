@@ -15,6 +15,7 @@ import { usePlaylistsQuery } from '@/hooks/react-query/usePlaylistsQuery';
 import { imageAssetToFile } from '@/utils/helpers/file';
 import { toastResponseMessage } from '@/utils/toast';
 import { useNavigation } from 'expo-router';
+import { convertObjectToFormData } from '@/utils/helpers/Object';
 
 const schema = yup.object().shape({
   title: yup.string().required('Playlist Name is Required'),
@@ -38,30 +39,30 @@ const CreatePlaylist = () => {
     });
 
     const coverFile = imageAssetToFile(image?.[0]);
+
+    const payload = convertObjectToFormData({
+      title: data.title,
+      description: data.description,
+      tags: playlistTags,
+      cover: coverFile,
+    });
+
     await createPlaylist
-      .mutateAsync(
-        {
-          title: data.title,
-          description: data.description,
-          tags: playlistTags,
-          cover: coverFile,
+      .mutateAsync(payload, {
+        onSuccess: () => {
+          toastResponseMessage({
+            content: 'Playlist Created Successfully',
+            type: 'success',
+          });
+          navigation.goBack();
         },
-        {
-          onSuccess: () => {
-            toastResponseMessage({
-              content: 'Playlist Created Successfully',
-              type: 'success',
-            });
-            navigation.goBack();
-          },
-          onError: (error) => {
-            toastResponseMessage({
-              content: error,
-              type: 'error',
-            });
-          },
-        }
-      )
+        onError: (error) => {
+          toastResponseMessage({
+            content: error,
+            type: 'error',
+          });
+        },
+      })
       .finally(() => setLoading(false));
   };
 

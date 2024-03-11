@@ -16,6 +16,8 @@ import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import TrackPreview from './TrackPreview';
 import { toastResponseMessage } from '@/utils/toast';
 import HorizontalMarquee from '../reusables/HorizontalMarquee';
+import { CommonActions } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
 
 interface ITrackListItemProps {
   id: string;
@@ -94,6 +96,7 @@ const TrackListItem = ({
     toggleLike: { mutate: toggleLikeMutate, isPending },
   } = useTracksQuery({ id });
 
+  const navigation = useNavigation();
   return (
     <>
       <MenuModal
@@ -112,11 +115,21 @@ const TrackListItem = ({
           {
             label: 'Add to Playlist',
             onPress: () => {
-              console.log('Add to Playlist');
-              toastResponseMessage({
-                content: 'Feature not available yet',
-                type: 'error',
-              });
+              setOptionsMenuVisible(false);
+              navigation.dispatch(
+                CommonActions.navigate('AddToPlaylist', {
+                  screen: 'AddToPlaylistSC1',
+                  params: {
+                    track: {
+                      id,
+                      title,
+                      creator: { username: artistName },
+                      cover,
+                      trackDuration: duration,
+                    },
+                  },
+                })
+              );
             },
             icon: 'playlist-add',
           },

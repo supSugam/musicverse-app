@@ -12,6 +12,7 @@ import MiniPlayer from '@/components/Player/MiniPlayer';
 import AddToPlaylistStack from './screens/add-to-playlist';
 import AddToPlaylistSC1 from '@/components/Playlist/AddToPlaylistSC1';
 import BackNavigator from '@/components/reusables/BackNavigator';
+import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -57,9 +58,7 @@ export default function index() {
               screenOptions={{
                 presentation: 'modal',
                 headerShown: false,
-                header: () => (
-                  <BackNavigator showBackText title="Add to Playlist" />
-                ),
+
                 contentStyle: {
                   backgroundColor: `rgba(0,0,0,0.5)`,
                   justifyContent: 'flex-end',
@@ -67,8 +66,20 @@ export default function index() {
               }}
             >
               <Stack.Screen
-                name="AddToPlaylistSC1"
+                name="AddToPlaylist"
                 component={AddToPlaylistSC1}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                  animationDuration: 200,
+                  header: () => (
+                    <BackNavigator showBackText title="Add to Playlist" />
+                  ),
+                }}
+              />
+              <Stack.Screen
+                name="CreatePlaylist"
+                component={CreatePlaylist}
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_bottom',

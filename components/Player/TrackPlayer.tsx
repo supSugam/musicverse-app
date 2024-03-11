@@ -28,6 +28,7 @@ import AddToPlaylistTabs from '@/app/screens/add-to-playlist';
 import { useNavigation } from 'expo-router';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TransitionPresets } from '@react-navigation/stack';
+import { CommonActions } from '@react-navigation/native';
 
 const TrackPlayer = () => {
   // Player Store
@@ -319,9 +320,17 @@ const TrackPlayer = () => {
 
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() =>
-                      navigation.navigate('AddToPlaylistSC1' as never)
-                    }
+                    onPress={() => {
+                      const trackToAdd = track;
+                      navigation.dispatch(
+                        CommonActions.navigate('AddToPlaylist', {
+                          screen: 'AddToPlaylistSC1',
+                          params: {
+                            track: trackToAdd,
+                          },
+                        })
+                      );
+                    }}
                     className="mr-2"
                   >
                     <MaterialIcons

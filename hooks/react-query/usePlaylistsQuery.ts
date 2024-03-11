@@ -1,5 +1,6 @@
 import {
   UseMutationResult,
+  UseQueryOptions,
   UseQueryResult,
   useMutation,
   useQuery,
@@ -11,20 +12,33 @@ import { cleanObject } from '@/utils/helpers/Object';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { PLAYLIST_QUERY_KEY, playlistKeyFactory } from '@/services/key-factory';
 import { toastResponseMessage } from '@/utils/toast';
+import { GetAllPlaylistsResponse } from '@/utils/Interfaces/IPlaylist';
 
 export interface IPlaylistsPaginationQueryParams extends IBasePaginationParams {
-  // creator?: boolean;
-  // genre?: boolean;
-  // tags?: boolean;
-  // albums?: boolean;
-  // likedBy?: boolean;
-  // playlists?: boolean;
-  // selectedGenre?: string;
-  // selectedTag?: string;
+  creator?: boolean;
+  tags?: boolean;
+  tracks?: boolean;
+  savedBy?: boolean;
+  collaborators?: boolean;
 }
 
 type PlaylistsQuery<T extends string | undefined = undefined> = {
-  // getAllPlaylists: UseQueryResult<AxiosResponse<GetAllPlaylistsResponse, any>, Error>;
+  getAllPlaylists: UseQueryResult<
+    AxiosResponse<GetAllPlaylistsResponse, any>,
+    Error
+  >;
+  createPlaylist: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    any,
+    unknown
+  >;
+  updatePlaylist: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    any,
+    unknown
+  >;
 } & (T extends string
   ? {
       getPlaylistById: UseQueryResult<AxiosResponse<any, any>, Error>;
@@ -50,24 +64,24 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
   id?: T;
   getAllPlaylistsConfig?: {
     params?: IPlaylistsPaginationQueryParams;
-    // queryOptions?: Partial<
-    //   UseQueryOptions<AxiosResponse<GetAllPlaylistsResponse, any>, Error>
-    // >;
+    queryOptions?: Partial<
+      UseQueryOptions<AxiosResponse<GetAllPlaylistsResponse, any>, Error>
+    >;
   };
 }): PlaylistsQuery<T> => {
   const { api } = useAuthStore();
   const queryClient = useQueryClient();
-  //   const getAllPlaylists = useQuery<AxiosResponse<GetAllPlaylistsResponse, any>>(
-  //     {
-  //       queryKey: [Playlist_QUERY_KEY, getAllPlaylistsConfig?.params],
-  //       queryFn: async () => {
-  //         return await api.get('/Playlists', {
-  //           params: cleanObject(getAllPlaylistsConfig?.params || {}),
-  //         });
-  //       },
-  //       ...getAllPlaylistsConfig?.queryOptions,
-  //     }
-  //   );
+  const getAllPlaylists = useQuery<AxiosResponse<GetAllPlaylistsResponse, any>>(
+    {
+      queryKey: [PLAYLIST_QUERY_KEY, getAllPlaylistsConfig?.params],
+      queryFn: async () => {
+        return await api.get('/playlists', {
+          params: cleanObject(getAllPlaylistsConfig?.params || {}),
+        });
+      },
+      ...getAllPlaylistsConfig?.queryOptions,
+    }
+  );
 
   const createPlaylist = useMutation({
     mutationKey: playlistKeyFactory.createPlaylist(),
@@ -198,10 +212,13 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
   });
 
   return {
-    // getAllPlaylists,
+    getAllPlaylists,
     getPlaylistById,
     deletePlaylistById,
     toggleSavePlaylist,
     addTracksToPlaylist,
+    addTrackToPlaylists,
+    createPlaylist,
+    updatePlaylist,
   };
 };

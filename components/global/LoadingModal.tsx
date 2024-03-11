@@ -9,6 +9,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { Modal } from 'react-native';
+import LoadingIcon from './LoadingIcon';
 
 const LoadingModal: React.FC = () => {
   const { isLoading } = useAppState((state) => state);
@@ -36,17 +37,7 @@ const LoadingModal: React.FC = () => {
           animationStyle,
         ]}
       >
-        <LottieView
-          source={LoadingIndicatorLA}
-          autoPlay
-          loop
-          speed={1}
-          style={{
-            width: 111,
-            height: 111,
-            alignSelf: 'center',
-          }}
-        />
+        <LoadingIcon size={111} />
       </Animated.View>
     </Modal>
   );

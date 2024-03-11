@@ -16,12 +16,12 @@ import { PlayingMusicLA } from '@/assets/lottie';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 
-interface ITrackPreviewProps {
-  id: string;
-  title: string;
+interface ITrackPreviewProps extends React.ComponentProps<typeof View> {
+  id?: string;
+  title?: string;
   artistName?: string;
-  cover: string | null;
-  duration: number;
+  cover?: string | null;
+  duration?: number;
   onPlayClick?: () => void;
 }
 
@@ -31,7 +31,9 @@ const TrackPreview = ({
   artistName,
   cover,
   duration,
+  ...props
 }: ITrackPreviewProps) => {
+  const { className, style } = props;
   const translateX = useSharedValue(400); // Start position outside the screen
 
   const { currentTrack, isPlaying } = usePlayerStore((state) => state);
@@ -55,8 +57,10 @@ const TrackPreview = ({
           zIndex: 1,
           paddingVertical: 20,
         },
+        style,
       ]}
-      className="flex flex-row items-center my-1"
+      className={`flex flex-row items-center my-1 w-full ${className}`}
+      {...props}
     >
       <View className="flex flex-row items-center flex-1 px-2">
         <View

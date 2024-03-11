@@ -60,6 +60,10 @@ export default function index() {
                 header: () => (
                   <BackNavigator showBackText title="Add to Playlist" />
                 ),
+                contentStyle: {
+                  backgroundColor: `rgba(0,0,0,0.5)`,
+                  justifyContent: 'flex-end',
+                },
               }}
             >
               <Stack.Screen
@@ -67,17 +71,12 @@ export default function index() {
                 component={AddToPlaylistSC1}
                 options={{
                   presentation: 'transparentModal',
-                  animation: 'ios',
+                  animation: 'slide_from_bottom',
                   animationDuration: 200,
-                  // TODO: make modal appear at bottom
-                  contentStyle: {
-                    justifyContent: 'flex-end',
-                  },
                 }}
               />
             </Stack.Group>
           </Stack.Navigator>
-          <MiniPlayer />
         </>
       ) : (
         <Stack.Navigator

@@ -6,9 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
 import { GLOBAL_STYLES, TAB_ROUTE_NAMES } from '@/utils/constants';
-import { useEffect } from 'react';
-import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
+import MiniPlayer from '@/components/Player/MiniPlayer';
+import { useState } from 'react';
+import { TabRouteName } from '@/utils/helpers/types';
 
 const Tab = createBottomTabNavigator();
 
@@ -55,103 +56,108 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 };
 
 export default function TabsLayout() {
-  const { setActiveTab } = useAppState();
+  const [activeTab, setActiveTab] = useState<TabRouteName | null>('Home');
 
   return (
-    <Tab.Navigator
-      initialRouteName="Home"
-      screenListeners={({ navigation, route }) => ({
-        tabPress: (e) => {
-          setActiveTab(route.name);
-        },
-        blur: () => {
-          setActiveTab(null);
-        },
-        focus: () => {
-          setActiveTab(route.name);
-        },
-      })}
-      screenOptions={({ route }) => {
-        const routeName = route.name as string;
-        return {
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} route={route} />
-          ),
+    <>
+      <Tab.Navigator
+        initialRouteName="Home"
+        screenListeners={({ navigation, route }) => ({
+          tabPress: (e) => {
+            setActiveTab(route.name as TabRouteName);
+          },
+          blur: () => {
+            setActiveTab(null);
+          },
+          focus: () => {
+            setActiveTab(route.name as TabRouteName);
+          },
+        })}
+        screenOptions={({ route }) => {
+          const routeName = route.name as string;
+          return {
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon focused={focused} route={route} />
+            ),
 
-          tabBarLabel: ({ focused, color }) => {
-            return (
-              <StyledText
-                size="xs"
-                tracking="tight"
-                weight={focused ? 'bold' : 'normal'}
-                opacity={focused ? 'none' : 'high'}
-                style={{
-                  color: focused ? COLORS.neutral.light : COLORS.neutral.normal,
-                }}
-              >
-                {routeName}
-              </StyledText>
-            );
-          },
-          headerShown: Platform.OS === 'ios' ? true : false,
-          headerStyle: {
-            backgroundColor: 'transparent',
-          },
-          tabBarStyle: {
-            paddingBottom: 10,
-            paddingTop: 10,
-            height: GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT,
-            backgroundColor: 'transparent',
-            borderTopWidth: 0,
-            elevation: 0,
-            ...(!TAB_ROUTE_NAMES.includes(routeName) && {
-              display: 'none',
-            }),
-          },
-          tabBarOptions: {
-            tabBarPosition: 'bottom',
-            swipeEnabled: true,
-            animationEnabled: true,
-          },
-          tabBarHideOnKeyboard: true,
-        };
-      }}
-    >
-      <Tab.Screen
-        name="Home"
-        component={Home}
-        options={{
-          headerTitle: 'Home',
+            tabBarLabel: ({ focused, color }) => {
+              return (
+                <StyledText
+                  size="xs"
+                  tracking="tight"
+                  weight={focused ? 'bold' : 'normal'}
+                  opacity={focused ? 'none' : 'high'}
+                  style={{
+                    color: focused
+                      ? COLORS.neutral.light
+                      : COLORS.neutral.normal,
+                  }}
+                >
+                  {routeName}
+                </StyledText>
+              );
+            },
+            headerShown: Platform.OS === 'ios' ? true : false,
+            headerStyle: {
+              backgroundColor: 'transparent',
+            },
+            tabBarStyle: {
+              paddingBottom: 10,
+              paddingTop: 10,
+              height: GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT,
+              backgroundColor: 'transparent',
+              borderTopWidth: 0,
+              elevation: 0,
+              ...(!TAB_ROUTE_NAMES.includes(routeName as TabRouteName) && {
+                display: 'none',
+              }),
+            },
+            tabBarOptions: {
+              tabBarPosition: 'bottom',
+              // swipeEnabled: true,
+              // animationEnabled: true,
+            },
+            tabBarHideOnKeyboard: true,
+          };
         }}
-      />
-      <Tab.Screen
-        name="Search"
-        component={Home}
-        options={{
-          headerTitle: 'Search',
-        }}
-      />
-      <Tab.Screen
-        name="Feed"
-        component={Home}
-        options={{
-          headerTitle: 'Feed',
-        }}
-      />
-      <Tab.Screen
-        name="MyLibrary"
-        component={Home}
-        options={{
-          headerTitle: 'My Library',
-        }}
-      />
-      <Tab.Screen
-        component={UploadStackScreen}
-        name="Upload"
-        options={{
-          headerTitle: 'Upload',
-        }}
-      />
-    </Tab.Navigator>
+      >
+        <Tab.Screen
+          name="Home"
+          component={Home}
+          options={{
+            headerTitle: 'Home',
+          }}
+        />
+        <Tab.Screen
+          name="Search"
+          component={Home}
+          options={{
+            headerTitle: 'Search',
+          }}
+        />
+        <Tab.Screen
+          name="Feed"
+          component={Home}
+          options={{
+            headerTitle: 'Feed',
+          }}
+        />
+        <Tab.Screen
+          name="MyLibrary"
+          component={Home}
+          options={{
+            headerTitle: 'My Library',
+          }}
+        />
+        <Tab.Screen
+          component={UploadStackScreen}
+          name="Upload"
+          options={{
+            headerTitle: 'Upload',
+          }}
+        />
+      </Tab.Navigator>
+      <MiniPlayer activeTab={activeTab} />
+    </>
   );
 }

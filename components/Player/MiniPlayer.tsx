@@ -21,11 +21,10 @@ import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import SliderInput from '../reusables/SliderInput';
 import { useNavigation } from 'expo-router';
-import { useAppState } from '@/services/zustand/stores/useAppStore';
+import { TabRouteName } from '@/utils/helpers/types';
 
-const MiniPlayer = () => {
+const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
-  const { activeTab } = useAppState();
 
   // Animation when
 
@@ -47,27 +46,33 @@ const MiniPlayer = () => {
     currentTrack: currTrack,
   } = usePlayerStore();
   const currentTrack = currTrack();
-
   useEffect(() => {
     const showPlayerAboveTabBar =
-      activeTab !== null &&
-      currentTrack !== null &&
-      TAB_ROUTE_NAMES.includes(activeTab);
+      activeTab &&
+      currentTrack &&
+      TAB_ROUTE_NAMES.includes(activeTab) &&
+      activeTab !== 'Upload';
 
     if (showPlayerAboveTabBar) {
       translateY.value = withSpring(
         0,
         // showPlayerAboveTabBar ? 0 : GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2,
         {
-          damping: 20,
-          stiffness: 90,
-          overshootClamping: false,
-          restDisplacementThreshold: 0.1,
-          restSpeedThreshold: 0.1,
+          damping: 10, // Decreased damping value for faster animation
+          stiffness: 90, // Increased stiffness value for faster animation
+          overshootClamping: true, // Keep overshoot clamping enabled
+          restDisplacementThreshold: 0.01,
+          restSpeedThreshold: 0.01,
         }
       );
     } else {
-      translateY.value = withSpring(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
+      translateY.value = withSpring(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2, {
+        damping: 10, // Decreased damping value for faster animation
+        stiffness: 90, // Increased stiffness value for faster animation
+        overshootClamping: true, // Keep overshoot clamping enabled
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 0.01,
+      });
     }
   }, [currentTrack, activeTab]);
 
@@ -98,7 +103,7 @@ const MiniPlayer = () => {
       nextTrack();
     },
     onSwipeRight: () => prevTrack(),
-    onSwipeUp: () => console.log('Swiped up'),
+    onSwipeUp: () => navigation.navigate('TrackPlayer' as never),
     onSwipeDown: () => console.log('Swiped down'),
   });
 

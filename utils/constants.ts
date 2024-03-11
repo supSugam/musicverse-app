@@ -53,4 +53,4 @@ export const TAB_ROUTE_NAMES = [
   'Feed',
   'MyLibrary',
   'Upload',
-];
+] as const;

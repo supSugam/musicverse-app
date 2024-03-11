@@ -1,4 +1,5 @@
 import { DimensionValue } from 'react-native';
+import { TAB_ROUTE_NAMES } from '../constants';
 
 export type Dimension = DimensionValue;
 
@@ -15,3 +16,5 @@ export type fontWeights =
   | '800'
   | '900'
   | undefined;
+
+export type TabRouteName = (typeof TAB_ROUTE_NAMES)[number];

@@ -20,6 +20,12 @@ export interface IPlaylistsPaginationQueryParams extends IBasePaginationParams {
   tracks?: boolean;
   savedBy?: boolean;
   collaborators?: boolean;
+  containsTrack?: string;
+}
+
+interface TrackToPlaylist {
+  trackId: string;
+  playlists: string[];
 }
 
 type PlaylistsQuery<T extends string | undefined = undefined> = {
@@ -37,6 +43,18 @@ type PlaylistsQuery<T extends string | undefined = undefined> = {
     AxiosResponse<any, any>,
     Error,
     any,
+    unknown
+  >;
+  addTrackToPlaylists: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    TrackToPlaylist,
+    unknown
+  >;
+  removeTrackFromPlaylists: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    TrackToPlaylist,
     unknown
   >;
 } & (T extends string
@@ -169,14 +187,9 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     },
   });
 
-  const addTracksToPlaylist = useMutation({
-    mutationFn: async ({
-      playlistId,
-      tracks,
-    }: {
-      playlistId: string;
-      tracks: string[];
-    }) => await api.post(`/playlists/add-tracks/${playlistId}`, { tracks }),
+  const addTrackToPlaylists = useMutation({
+    mutationFn: async ({ trackId, playlists }: TrackToPlaylist) =>
+      await api.post(`/playlists/add-track/${trackId}`, { playlists }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [PLAYLIST_QUERY_KEY],
@@ -190,14 +203,9 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     },
   });
 
-  const addTrackToPlaylists = useMutation({
-    mutationFn: async ({
-      trackId,
-      playlists,
-    }: {
-      trackId: string;
-      playlists: string[];
-    }) => await api.post(`/playlists/add-track/${trackId}`, { playlists }),
+  const removeTrackFromPlaylists = useMutation({
+    mutationFn: async ({ trackId, playlists }: TrackToPlaylist) =>
+      await api.post(`/playlists/remove-track/${trackId}`, { playlists }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [PLAYLIST_QUERY_KEY],
@@ -216,9 +224,9 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     getPlaylistById,
     deletePlaylistById,
     toggleSavePlaylist,
-    addTracksToPlaylist,
     addTrackToPlaylists,
     createPlaylist,
     updatePlaylist,
+    removeTrackFromPlaylists,
   };
 };

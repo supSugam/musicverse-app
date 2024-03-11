@@ -15,31 +15,51 @@ import PlaylistPreviewList from './PlaylistPreviewList';
 import { MaterialIcons } from '@expo/vector-icons';
 import StyledTextField from '../reusables/StyledTextInput';
 import SearchField from '../reusables/SearchField';
+import { toastResponseMessage } from '@/utils/toast';
 
 const AddToPlaylistSC1 = () => {
   const { params } = useRoute();
   const navigation = useNavigation();
   const [track, setTrack] = useState<Partial<ITrackDetails> | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<IPlaylistDetails[]>([]);
-  const [selectedPlaylists, setSelectedPlaylists] = useState<string[]>([]);
+  const [selectedNewPlaylists, setSelectedNewPlaylists] = useState<string[]>(
+    []
+  );
+  const [selectedOldPlaylists, setSelectedOldPlaylists] = useState<string[]>(
+    []
+  );
   const [playlistsViewHeight, setPlaylistsViewHeight] = useState<number | null>(
     null
   );
+  const [playlistsContainingThisTrack, setPlaylistsContainingThisTrack] =
+    useState<IPlaylistDetails[]>([]);
   const [searchTerm, setSearchTerm] = useState<string | undefined>();
 
-  const isPlaylistSelected = (id: string) => {
-    return selectedPlaylists.includes(id);
+  const isNewPlaylistSelected = (id: string) => {
+    return selectedNewPlaylists.includes(id);
   };
-  const onPlaylistSelectClick = (id: string) => {
-    if (isPlaylistSelected(id)) {
-      setSelectedPlaylists((prev) => prev.filter((item) => item !== id));
+  const onNewPlaylistSelectClick = (id: string) => {
+    if (isNewPlaylistSelected(id)) {
+      setSelectedNewPlaylists((prev) => prev.filter((item) => item !== id));
     } else {
-      setSelectedPlaylists((prev) => [...prev, id]);
+      setSelectedNewPlaylists((prev) => [...prev, id]);
+    }
+  };
+
+  const isOldPlaylistSelected = (id: string) => {
+    return selectedOldPlaylists.includes(id);
+  };
+
+  const onOldPlaylistSelectClick = (id: string) => {
+    if (isOldPlaylistSelected(id)) {
+      setSelectedOldPlaylists((prev) => prev.filter((item) => item !== id));
+    } else {
+      setSelectedOldPlaylists((prev) => [...prev, id]);
     }
   };
 
   const {
-    getAllPlaylists: { data: playlists, isLoading: isPlaylistsLoading },
+    getAllPlaylists: { data: allPlaylists, isLoading: isPlaylistsLoading },
   } = usePlaylistsQuery({
     getAllPlaylistsConfig: {
       params: {
@@ -49,6 +69,22 @@ const AddToPlaylistSC1 = () => {
       },
       queryOptions: {
         enabled: !!track,
+      },
+    },
+  });
+
+  const {
+    getAllPlaylists: { data: allPlaylistsContainingThisTrack },
+    addTrackToPlaylists,
+    removeTrackFromPlaylists,
+  } = usePlaylistsQuery({
+    getAllPlaylistsConfig: {
+      params: {
+        tags: true,
+        containsTrack: track?.id,
+      },
+      queryOptions: {
+        enabled: track?.id !== undefined,
       },
     },
   });
@@ -64,13 +100,78 @@ const AddToPlaylistSC1 = () => {
   }, [params]);
 
   useEffect(() => {
-    if (playlists) {
-      setUserPlaylists(playlists.data.result.items);
+    if (allPlaylists) {
+      const { items: playlists } = allPlaylists.data.result;
+      setUserPlaylists(
+        playlists.filter(
+          (playlist) =>
+            !playlistsContainingThisTrack.map((p) => p.id).includes(playlist.id)
+        )
+      );
     }
-  }, [playlists]);
+  }, [allPlaylists, playlistsContainingThisTrack]);
+
+  useEffect(() => {
+    if (allPlaylistsContainingThisTrack) {
+      const { items: playlists } = allPlaylistsContainingThisTrack.data.result;
+      setPlaylistsContainingThisTrack(playlists);
+      setSelectedOldPlaylists(playlists.map((p) => p.id));
+    }
+  }, [allPlaylistsContainingThisTrack]);
 
   const onCreatePlaylistClick = () => {
     navigation.dispatch(CommonActions.navigate('CreatePlaylist'));
+  };
+
+  const onDoneClick = async () => {
+    if (!track?.id) return;
+
+    const playlistsToRemoveFrom = playlistsContainingThisTrack
+      .filter((playlist) => !selectedOldPlaylists.includes(playlist.id))
+      .map((p) => p.id);
+
+    console.log(playlistsToRemoveFrom);
+    console.log(selectedNewPlaylists);
+
+    if (selectedNewPlaylists.length > 0) {
+      await addTrackToPlaylists.mutateAsync(
+        {
+          trackId: track?.id,
+          playlists: selectedNewPlaylists,
+        },
+        {
+          onError: (error) => {
+            toastResponseMessage({
+              content: error,
+              type: 'error',
+            });
+          },
+        }
+      );
+    }
+
+    if (playlistsToRemoveFrom.length > 0) {
+      await removeTrackFromPlaylists.mutateAsync(
+        {
+          trackId: track?.id,
+          playlists: playlistsToRemoveFrom,
+        },
+        {
+          onError: (error) => {
+            toastResponseMessage({
+              content: error,
+              type: 'error',
+            });
+          },
+        }
+      );
+    }
+    setSelectedNewPlaylists([]);
+
+    toastResponseMessage({
+      content: 'Playlists Updated',
+      type: 'success',
+    });
   };
 
   return (
@@ -100,6 +201,43 @@ const AddToPlaylistSC1 = () => {
               Create New Playlist
             </StyledText>
           </StyledButton>
+          <ScrollView
+            className="flex flex-col"
+            style={{
+              maxHeight: playlistsViewHeight,
+            }}
+          >
+            {isPlaylistsLoading ? (
+              <LoadingIcon size={111} />
+            ) : (
+              playlistsContainingThisTrack.map((playlist) => (
+                <PlaylistPreviewList
+                  cover={playlist.cover}
+                  onPress={() => onOldPlaylistSelectClick(playlist.id)}
+                  rightComponent={
+                    <MaterialIcons
+                      name={
+                        isOldPlaylistSelected(playlist.id)
+                          ? 'check-circle'
+                          : 'add-circle-outline'
+                      }
+                      size={28}
+                      color={COLORS.primary.light}
+                      style={{
+                        marginRight: 2,
+                      }}
+                    />
+                  }
+                  subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
+                  title={playlist.title}
+                  onLayout={(event) => {
+                    const { height } = event.nativeEvent.layout;
+                    setPlaylistsViewHeight(height * 3 + 20);
+                  }}
+                />
+              ))
+            )}
+          </ScrollView>
 
           <StyledText
             size="base"
@@ -134,11 +272,11 @@ const AddToPlaylistSC1 = () => {
               userPlaylists.map((playlist) => (
                 <PlaylistPreviewList
                   cover={playlist.cover}
-                  onPress={() => onPlaylistSelectClick(playlist.id)}
+                  onPress={() => onNewPlaylistSelectClick(playlist.id)}
                   rightComponent={
                     <MaterialIcons
                       name={
-                        isPlaylistSelected(playlist.id)
+                        isNewPlaylistSelected(playlist.id)
                           ? 'check-circle'
                           : 'add-circle-outline'
                       }
@@ -159,6 +297,11 @@ const AddToPlaylistSC1 = () => {
               ))
             )}
           </ScrollView>
+          <StyledButton onPress={onDoneClick} className="w-full my-2">
+            <StyledText size="xl" weight="bold" className="text-center">
+              Done
+            </StyledText>
+          </StyledButton>
         </View>
       ) : (
         <LoadingIcon size={111} />

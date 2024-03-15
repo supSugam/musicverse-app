@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Audio } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
+import { playATrack } from '@/services/api/play';
 
 const InitialState = {
   isPlaying: false,
@@ -148,9 +149,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       }
       const newPlaybackInstance = new Audio.Sound();
 
-      const { src } = tracks[index];
+      const { src, id } = tracks[index];
+
+      // Play
 
       if (!src) return;
+      playATrack(id);
 
       await newPlaybackInstance.loadAsync(
         { uri: src },

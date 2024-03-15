@@ -33,6 +33,7 @@ import { CommonActions } from '@react-navigation/native';
 import DarkGradient from '../Playlist/DarkGradient';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import TrackPreview from '../Tracks/TrackPreview';
+import { getFormattedCount } from '@/utils/helpers/number';
 
 const TrackPlayer = () => {
   // Player Store
@@ -424,6 +425,17 @@ const TrackPlayer = () => {
                         x
                       </StyledText>
                     </TouchableOpacity>
+                  </View>
+
+                  <View className="flex flex-row items-center justify-center">
+                    <StyledText
+                      size="sm"
+                      weight="light"
+                      opacity="medium"
+                      className="leading-none"
+                    >
+                      {getFormattedCount(track?.plays)} plays
+                    </StyledText>
                   </View>
                 </View>
 

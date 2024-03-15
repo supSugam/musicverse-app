@@ -1,9 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import COLORS from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const DarkGradient = () => {
+const DarkGradient = ({ opacity = 0.15 }: { opacity?: number }) => {
   return (
     <LinearGradient
       colors={[COLORS.neutral.black, COLORS.neutral.dark, COLORS.neutral.dense]}
@@ -12,7 +11,7 @@ const DarkGradient = () => {
         height: '100%',
         position: 'absolute',
         zIndex: -1,
-        opacity: 0.15,
+        opacity: opacity,
         flex: 1,
         top: 0,
         left: 0,

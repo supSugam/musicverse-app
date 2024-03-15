@@ -19,6 +19,7 @@ import { toastResponseMessage } from '@/utils/toast';
 const AddToPlaylistSC1 = () => {
   const { params } = useRoute();
   const navigation = useNavigation();
+  const [loading, setLoading] = useState<boolean>(false);
   const [track, setTrack] = useState<Partial<ITrackDetails> | null>(null);
   const [userPlaylists, setUserPlaylists] = useState<IPlaylistDetails[]>([]);
   const [selectedNewPlaylists, setSelectedNewPlaylists] = useState<string[]>(
@@ -26,9 +27,6 @@ const AddToPlaylistSC1 = () => {
   );
   const [selectedOldPlaylists, setSelectedOldPlaylists] = useState<string[]>(
     []
-  );
-  const [playlistsViewHeight, setPlaylistsViewHeight] = useState<number | null>(
-    null
   );
   const [playlistsContainingThisTrack, setPlaylistsContainingThisTrack] =
     useState<IPlaylistDetails[]>([]);
@@ -58,7 +56,11 @@ const AddToPlaylistSC1 = () => {
   };
 
   const {
-    getAllPlaylists: { data: allPlaylists, isLoading: isPlaylistsLoading },
+    getAllPlaylists: {
+      data: allPlaylists,
+      isLoading: isPlaylistsLoading,
+      isRefetching: isPlaylistsRefetching,
+    },
   } = usePlaylistsQuery({
     getAllPlaylistsConfig: {
       params: {
@@ -73,7 +75,11 @@ const AddToPlaylistSC1 = () => {
   });
 
   const {
-    getAllPlaylists: { data: allPlaylistsContainingThisTrack },
+    getAllPlaylists: {
+      data: allPlaylistsContainingThisTrack,
+      isLoading: isPlaylistsContainingThisTrackLoading,
+      isRefetching: isPlaylistsContainingThisTrackRefetching,
+    },
     addTrackToPlaylists,
     removeTrackFromPlaylists,
   } = usePlaylistsQuery({
@@ -118,6 +124,20 @@ const AddToPlaylistSC1 = () => {
     }
   }, [allPlaylistsContainingThisTrack]);
 
+  useEffect(() => {
+    setLoading(
+      isPlaylistsLoading ||
+        isPlaylistsContainingThisTrackLoading ||
+        isPlaylistsRefetching ||
+        isPlaylistsContainingThisTrackRefetching
+    );
+  }, [
+    isPlaylistsLoading,
+    isPlaylistsContainingThisTrackLoading,
+    isPlaylistsRefetching,
+    isPlaylistsContainingThisTrackRefetching,
+  ]);
+
   const onCreatePlaylistClick = () => {
     navigation.dispatch(CommonActions.navigate('CreatePlaylist'));
   };
@@ -128,9 +148,6 @@ const AddToPlaylistSC1 = () => {
     const playlistsToRemoveFrom = playlistsContainingThisTrack
       .filter((playlist) => !selectedOldPlaylists.includes(playlist.id))
       .map((p) => p.id);
-
-    console.log(playlistsToRemoveFrom);
-    console.log(selectedNewPlaylists);
 
     if (selectedNewPlaylists.length > 0) {
       await addTrackToPlaylists.mutateAsync(
@@ -180,6 +197,9 @@ const AddToPlaylistSC1 = () => {
         backgroundColor: COLORS.neutral.dark,
         borderRadius: 16,
         maxHeight: '80%',
+        minHeight: '40%',
+        justifyContent: 'center',
+        display: 'flex',
       }}
     >
       <PrimaryGradient
@@ -189,7 +209,7 @@ const AddToPlaylistSC1 = () => {
         }}
       />
 
-      {track ? (
+      {!loading ? (
         <View className="p-4 w-full flex justify-center items-center relative">
           <View className=" w-full">
             <TrackPreview
@@ -232,7 +252,7 @@ const AddToPlaylistSC1 = () => {
           <ScrollView
             className="flex flex-col"
             style={{
-              maxHeight: playlistsViewHeight,
+              maxHeight: 300,
             }}
             showsVerticalScrollIndicator
           >
@@ -260,10 +280,6 @@ const AddToPlaylistSC1 = () => {
                     }
                     subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
                     title={playlist.title}
-                    onLayout={(event) => {
-                      const { height } = event.nativeEvent.layout;
-                      setPlaylistsViewHeight(height * 5 + 20);
-                    }}
                   />
                 ))}
 
@@ -287,10 +303,6 @@ const AddToPlaylistSC1 = () => {
                     }
                     subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
                     title={playlist.title}
-                    onLayout={(event) => {
-                      const { height } = event.nativeEvent.layout;
-                      setPlaylistsViewHeight(height * 4 + 20);
-                    }}
                   />
                 ))}
               </>

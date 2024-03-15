@@ -78,13 +78,14 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
 
   // API
 
+  const [isTrackLiked, setIsTrackLiked] = useState<boolean>(false);
   const {
     toggleLike: { mutate, isPending },
   } = useTracksQuery({ id: currentTrack?.id });
 
   const onLikeClick = () => {
-    if (isPending) return;
-    if (!currentTrack) return;
+    setIsTrackLiked((prev) => !prev);
+    if (isPending || !currentTrack?.id) return;
     mutate(currentTrack.id);
   };
 
@@ -96,6 +97,9 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
   const onFavBtnLeave = () => {
     favoriteButtonScale.value = withTiming(1, { duration: 250 });
   };
+  useEffect(() => {
+    setIsTrackLiked(currentTrack?.isLiked || false);
+  }, []);
 
   const changeTrackGesture = useSwipeGesture({
     onSwipeLeft: () => {
@@ -192,14 +196,11 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
             >
               <Animated.View style={favoriteButtonStyle}>
                 <FontAwesome
-                  name={currentTrack?.isLiked ? 'heart' : 'heart-o'}
-                  size={26}
+                  name={isTrackLiked ? 'heart' : 'heart-o'}
+                  size={24}
                   color={
-                    currentTrack?.isLiked
-                      ? COLORS.neutral.white
-                      : COLORS.neutral.light
+                    isTrackLiked ? COLORS.neutral.white : COLORS.neutral.light
                   }
-                  className="mr-3"
                   style={{
                     marginRight: 16,
                   }}

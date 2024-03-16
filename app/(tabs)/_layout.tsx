@@ -10,6 +10,7 @@ import { useAppState } from '@/services/zustand/stores/useAppStore';
 import MiniPlayer from '@/components/Player/MiniPlayer';
 import { useState } from 'react';
 import { TabRouteName } from '@/utils/helpers/types';
+import MyLibrary from './library';
 
 const Tab = createBottomTabNavigator();
 
@@ -144,7 +145,7 @@ export default function TabsLayout() {
         />
         <Tab.Screen
           name="MyLibrary"
-          component={Home}
+          component={MyLibrary}
           options={{
             headerTitle: 'My Library',
           }}

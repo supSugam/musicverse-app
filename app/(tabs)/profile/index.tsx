@@ -18,7 +18,7 @@ const ProfilePage: React.FC = () => {
   console.log(params);
 
   return (
-    <Container includeNavBar navbarTitle="Home">
+    <Container includeNavBar navbarTitle="Profile">
       <ScrollView style={styles.scrollView}>
         <View>
           <StyledText>Profile Page</StyledText>

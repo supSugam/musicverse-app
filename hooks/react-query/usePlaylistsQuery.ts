@@ -21,6 +21,9 @@ export interface IPlaylistsPaginationQueryParams extends IBasePaginationParams {
   savedBy?: boolean;
   collaborators?: boolean;
   containsTrack?: string;
+  owned?: boolean;
+  collaborated?: boolean;
+  saved?: boolean;
 }
 
 interface TrackToPlaylist {

@@ -5,13 +5,65 @@ import {
   createMaterialTopTabNavigator,
 } from '@react-navigation/material-top-tabs';
 import Playlists from '@/components/MyLibrary/Playlists';
-import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { consoleLogFormattedObject } from '@/utils/helpers/Object';
-
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ParamListBase, TabNavigationState } from '@react-navigation/native';
 
 const Tab = createMaterialTopTabNavigator();
+
+const TabBarIndicator = ({
+  state,
+  layout,
+}: {
+  state: TabNavigationState<ParamListBase>;
+  layout: { width: number; height: number };
+}) => {
+  const insets = useSafeAreaInsets();
+  const inputRange = state.routes.map((_, i) => i);
+  const animatedStyle = useAnimatedStyle(() => {
+    const outputRange = inputRange.map((i) => {
+      const tabWidth = layout.width / inputRange.length;
+      const tabLeft = i * tabWidth;
+      return {
+        left: tabLeft,
+        width: tabWidth,
+      };
+    });
+    const left = interpolate(
+      state.index,
+      inputRange,
+      outputRange.map((o) => o.left)
+    );
+    const width = interpolate(
+      state.index,
+      inputRange,
+      outputRange.map((o) => o.width)
+    );
+    return {
+      left,
+      width,
+      transform: [{ translateX: insets.left }],
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[
+        styles.tabBarIndicator, // Apply the styles for the indicator
+        animatedStyle,
+      ]}
+    />
+  );
+};
 
 const TabBarIcon = ({
   routeName,
@@ -20,27 +72,34 @@ const TabBarIcon = ({
   routeName: string;
   isFocused: boolean;
 }) => {
-  const animatedIconWidth = new Animated.Value(0);
+  const animatedIconWidth = useSharedValue(0);
+  const animatedIconStyle = useAnimatedStyle(() => {
+    return {
+      width: animatedIconWidth.value,
+      overflow: 'hidden',
+    };
+  });
 
-  Animated.timing(animatedIconWidth, {
-    toValue: isFocused ? 1 : 0,
-    duration: 200,
-    useNativeDriver: false,
-  }).start();
+  useEffect(() => {
+    animatedIconWidth.value = withTiming(isFocused ? 24 : 0, {
+      duration: 300,
+    });
+  }, [isFocused]);
 
   return (
     <Animated.View
       style={[
         {
           marginRight: isFocused ? 5 : 0,
-          width: animatedIconWidth.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 24],
-          }),
         },
+        animatedIconStyle,
       ]}
     >
-      <MaterialIcons name={getIconName(routeName)} size={24} color="white" />
+      {routeName === 'Uploads' ? (
+        <Ionicons name="earth" size={24} color="white" />
+      ) : (
+        <MaterialIcons name={getIconName(routeName)} size={24} color="white" />
+      )}
     </Animated.View>
   );
 };
@@ -54,9 +113,7 @@ const getIconName = (
     case 'Albums':
       return 'album';
     case 'Tracks':
-      return 'music-note';
-    case 'Uploads':
-      return 'cloud-upload';
+      return 'favorite';
     default:
       return 'library-music';
   }
@@ -72,6 +129,7 @@ const TabBar = ({
 }: MaterialTopTabBarProps): React.ReactNode => {
   return (
     <View style={styles.tabBarRoot}>
+      {/* <TabBarIndicator state={state} layout={layout} /> */}
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label = (
@@ -106,6 +164,7 @@ const TabBar = ({
         return (
           <TouchableOpacity
             accessibilityRole="button"
+            activeOpacity={0.8}
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
             testID={options.tabBarTestID}
@@ -117,6 +176,7 @@ const TabBar = ({
                 backgroundColor: isFocused
                   ? 'rgba(255, 255, 255, 0.1)'
                   : 'transparent',
+                paddingHorizontal: isFocused ? 10 : 0,
               },
             ]}
           >
@@ -144,6 +204,7 @@ const MyLibrary = () => {
         screenOptions={{
           swipeEnabled: true,
           animationEnabled: true,
+          tabBarBounces: true,
         }}
         tabBar={(props) => <TabBar {...props} />}
       >
@@ -157,12 +218,19 @@ const MyLibrary = () => {
 };
 
 export default MyLibrary;
-
 const styles = StyleSheet.create({
   tabBarRoot: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
+    position: 'relative',
+  },
+
+  tabBarIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    height: 2, // Adjust the height as needed
+    backgroundColor: 'white', // Change the color as needed
   },
 
   tabBarRoute: {

@@ -75,9 +75,13 @@ const PlaylistPreviewList = ({
             {subtitle}
           </StyledText>
         </View>
-        <View className="flex flex-row items-center ml-auto justify-end">
+        <TouchableOpacity
+          onPress={onPress}
+          activeOpacity={0.8}
+          className="flex flex-row items-center ml-auto justify-end"
+        >
           {rightComponent}
-        </View>
+        </TouchableOpacity>
       </View>
     </AnimatedTouchable>
   );

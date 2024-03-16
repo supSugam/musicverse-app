@@ -5,6 +5,9 @@ import { Mode, useForm } from 'react-hook-form';
 import { useEffect, useMemo } from 'react';
 import { debounce } from '@/utils/helpers/debounce';
 import { throttle } from '@/utils/helpers/throttle';
+import { View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import COLORS from '@/constants/Colors';
 
 const searchSchema = yup.object().shape({
   search: yup.string().nullable(),
@@ -65,21 +68,33 @@ export default function SearchField({
   }, [watchSearch, triggerMode, debouncedSearch, throttledSearch, onSearch]);
 
   return (
-    <StyledTextField
-      control={control}
-      rules={{
-        required: 'Search is required',
-      }}
-      controllerName="search"
-      label={label}
-      placeholder={placeholder}
-      errorMessage={errors.search?.message}
-      variant="underlined"
-      textSize="lg"
-      backgroundColor="transparent"
-      borderColor="#fff"
-      textAlign="left"
-      wrapperClassName="mb-3"
-    />
+    <View className="w-full relative">
+      <StyledTextField
+        control={control}
+        rules={{
+          required: 'Search is required',
+        }}
+        controllerName="search"
+        label={label}
+        placeholder={placeholder}
+        errorMessage={errors.search?.message}
+        variant="underlined"
+        textSize="lg"
+        backgroundColor="transparent"
+        borderColor="#fff"
+        textAlign="left"
+        wrapperClassName="mb-3"
+      />
+      <MaterialIcons
+        name="search"
+        size={24}
+        color={COLORS.neutral.normal}
+        style={{
+          position: 'absolute',
+          top: 15,
+          right: 15,
+        }}
+      />
+    </View>
   );
 }

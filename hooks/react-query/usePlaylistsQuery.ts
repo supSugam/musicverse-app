@@ -12,7 +12,11 @@ import { cleanObject } from '@/utils/helpers/Object';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { PLAYLIST_QUERY_KEY, playlistKeyFactory } from '@/services/key-factory';
 import { toastResponseMessage } from '@/utils/toast';
-import { GetAllPlaylistsResponse } from '@/utils/Interfaces/IPlaylist';
+import {
+  GetAllPlaylistsResponse,
+  IPlaylistDetails,
+} from '@/utils/Interfaces/IPlaylist';
+import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 
 export interface IPlaylistsPaginationQueryParams extends IBasePaginationParams {
   creator?: boolean;
@@ -62,7 +66,10 @@ type PlaylistsQuery<T extends string | undefined = undefined> = {
   >;
 } & (T extends string
   ? {
-      getPlaylistById: UseQueryResult<AxiosResponse<any, any>, Error>;
+      getPlaylistById: UseQueryResult<
+        AxiosResponse<SuccessResponse<IPlaylistDetails>, any>,
+        Error
+      >;
       deletePlaylistById: UseMutationResult<
         AxiosResponse<any, any>,
         Error,
@@ -175,7 +182,7 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     queryKey: [PLAYLIST_QUERY_KEY, id], // Include the id in the queryKey
     enabled: !!id, // Ensure the query runs only if id is provided
     queryFn: async () => {
-      return await api.get(`/playlists/${id}`);
+      return await api.get(`/playlists/${id}?tracks=true`);
     },
   });
 

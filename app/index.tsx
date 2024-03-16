@@ -13,6 +13,7 @@ import AddToPlaylistStack from './screens/add-to-playlist';
 import AddToPlaylistSC1 from '@/components/Playlist/AddToPlaylistSC1';
 import BackNavigator from '@/components/reusables/BackNavigator';
 import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
+import UpdatePlaylist from '@/components/Playlist/UpdatePlaylist';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -83,6 +84,15 @@ export default function index() {
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_right',
+                  animationDuration: 200,
+                }}
+              />
+              <Stack.Screen
+                name="UpdatePlaylist"
+                component={UpdatePlaylist}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
                   animationDuration: 200,
                 }}
               />

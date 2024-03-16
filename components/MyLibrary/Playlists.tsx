@@ -9,8 +9,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '@/constants/Colors';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import { IMenuItemProps } from '../reusables/BottomSheetMenu/MenuItem';
+import { useNavigation } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
 
 const Playlists = () => {
+  const navigation = useNavigation();
   const [ownedPlaylists, setOwnedPlaylists] = useState<IPlaylistDetails[]>([]);
   const [collaboratedPlaylists, setCollaboratedPlaylists] = useState<
     IPlaylistDetails[]
@@ -99,8 +102,14 @@ const Playlists = () => {
     switch (selectedPlaylist?.type) {
       case 'owned':
         options.push({
-          label: 'Edit',
-          onPress: () => {},
+          label: 'Update Playlist',
+          onPress: () => {
+            navigation.dispatch(
+              CommonActions.navigate('UpdatePlaylist', {
+                id: playlistId,
+              })
+            );
+          },
           icon: 'edit',
         });
         options.push({

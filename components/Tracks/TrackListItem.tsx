@@ -18,6 +18,7 @@ import { toastResponseMessage } from '@/utils/toast';
 import HorizontalMarquee from '../reusables/HorizontalMarquee';
 import { CommonActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
+import { IMenuItemProps } from '../reusables/BottomSheetMenu/MenuItem';
 
 interface ITrackListItemProps {
   id: string;
@@ -31,6 +32,7 @@ interface ITrackListItemProps {
   isLiked?: boolean;
   label?: string | number;
   isBuffering?: boolean;
+  options?: IMenuItemProps[];
 }
 
 const TrackListItem = ({
@@ -45,6 +47,7 @@ const TrackListItem = ({
   onPlayClick,
   isPlaying,
   isBuffering = false,
+  options,
 }: ITrackListItemProps) => {
   const translateX = useSharedValue(400); // Start position outside the screen
 
@@ -111,42 +114,44 @@ const TrackListItem = ({
             duration={duration}
           />
         }
-        items={[
-          {
-            label: 'Add to Playlists',
-            onPress: () => {
-              setOptionsMenuVisible(false);
-              navigation.dispatch(
-                CommonActions.navigate('AddToPlaylist', {
-                  screen: 'AddToPlaylistSC1',
-                  params: {
-                    track: {
-                      id,
-                      title,
-                      creator: { username: artistName },
-                      cover,
-                      trackDuration: duration,
+        items={
+          options || [
+            {
+              label: 'Add to Playlists',
+              onPress: () => {
+                setOptionsMenuVisible(false);
+                navigation.dispatch(
+                  CommonActions.navigate('AddToPlaylist', {
+                    screen: 'AddToPlaylistSC1',
+                    params: {
+                      track: {
+                        id,
+                        title,
+                        creator: { username: artistName },
+                        cover,
+                        trackDuration: duration,
+                      },
                     },
-                  },
-                })
-              );
+                  })
+                );
+              },
+              icon: 'playlist-add',
             },
-            icon: 'playlist-add',
-          },
 
-          {
-            label: isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs',
-            onPress: () => {
-              toggleLikeMutate(id);
+            {
+              label: isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs',
+              onPress: () => {
+                toggleLikeMutate(id);
+              },
+              icon: isLiked ? 'favorite' : 'favorite-border',
             },
-            icon: isLiked ? 'favorite' : 'favorite-border',
-          },
-          {
-            label: 'See Artist Profile',
-            onPress: () => {},
-            icon: 'person',
-          },
-        ]}
+            {
+              label: 'See Artist Profile',
+              onPress: () => {},
+              icon: 'person',
+            },
+          ]
+        }
       />
       <Animated.View
         style={[
@@ -230,19 +235,22 @@ const TrackListItem = ({
             </StyledText>
           </View>
           <View className="flex flex-row items-center ml-auto justify-end">
-            <Animated.View style={favoriteButtonStyle}>
-              <TouchableOpacity
-                className="mr-2"
-                onPress={onPlayClick}
-                activeOpacity={0.8}
-              >
-                <MaterialIcons
-                  name={isPlaying ? 'pause' : 'play-arrow'}
-                  size={28}
-                  color={COLORS.neutral.light}
-                />
-              </TouchableOpacity>
-            </Animated.View>
+            {onPlayClick && (
+              <Animated.View style={favoriteButtonStyle}>
+                <TouchableOpacity
+                  className="mr-2"
+                  onPress={onPlayClick}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons
+                    name={isPlaying ? 'pause' : 'play-arrow'}
+                    size={28}
+                    color={COLORS.neutral.light}
+                  />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+
             <TouchableOpacity
               className="ml-1"
               onPress={() => {

@@ -15,6 +15,9 @@ import PlaylistPreviewList from './PlaylistPreviewList';
 import { MaterialIcons } from '@expo/vector-icons';
 import SearchField from '../reusables/SearchField';
 import { toastResponseMessage } from '@/utils/toast';
+import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
+import { consoleLogFormattedObject } from '@/utils/helpers/Object';
+import TrackListItem from '../Tracks/TrackListItem';
 
 const UpdatePlaylist = () => {
   const { params } = useRoute();
@@ -28,7 +31,38 @@ const UpdatePlaylist = () => {
     getPlaylistById: { data: playlistData, isLoading: isPlaylistLoading },
   } = usePlaylistsQuery({
     id: (params as any)?.id as string,
+    getAllPlaylistsConfig: {
+      params: {
+        tracks: true,
+      },
+    },
   });
+
+  const {
+    getAllTracks: { data: searchedTracksData, isLoading: isTracksLoading },
+  } = useTracksQuery({
+    getAllTracksConfig: {
+      params: {
+        search: searchTerm,
+        pageSize: 20,
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (playlistData) {
+      const playlist = playlistData?.data?.result;
+      setPlaylist(playlist);
+    }
+  }, [playlistData]);
+
+  // useEffect(() => {
+  //   const playlist = playlistData?.data;
+  //   if (playlist) {
+  //     consoleLogFormattedObject({ playlist });
+  //     setPlaylist(playlist);
+  //   }
+  // }, [playlistData]);
 
   const onSaveClick = async () => {};
 
@@ -59,7 +93,7 @@ const UpdatePlaylist = () => {
             <PlaylistPreviewList
               cover={playlist?.cover || null}
               onPress={() => {}}
-              subtitle={`${playlist?._count.tracks} tracks • ${playlist?._count.savedBy} saves`}
+              subtitle={`${playlist?._count?.tracks} tracks • ${playlist?._count?.savedBy} saves`}
               title={playlist?.title || ''}
             />
           </View>
@@ -76,9 +110,24 @@ const UpdatePlaylist = () => {
             className="flex flex-col"
             style={{
               maxHeight: 300,
+              width: '100%',
             }}
             showsVerticalScrollIndicator
-          ></ScrollView>
+          >
+            {playlist?.tracks?.map((track) => (
+              <TrackListItem
+                cover={track.cover}
+                title={track.title}
+                artistName={
+                  track.creator?.profile?.name || track.creator?.username || ''
+                }
+                artistId={track.creator?.id}
+                key={track.id}
+                id={track.id}
+                duration={track.trackDuration}
+              />
+            ))}
+          </ScrollView>
           <StyledButton onPress={onSaveClick} className="w-full my-2">
             <StyledText size="xl" weight="bold" className="text-center">
               Save

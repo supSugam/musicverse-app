@@ -25,6 +25,7 @@ export interface IPlaylistPreviewListProps
   title: string;
   subtitle: string;
   rightComponent?: React.ReactNode;
+  duration?: number;
 }
 
 const PlaylistPreviewList = ({
@@ -33,18 +34,29 @@ const PlaylistPreviewList = ({
   title,
   subtitle,
   rightComponent,
+  duration = 300,
   ...rest
 }: IPlaylistPreviewListProps) => {
   const { style, className, ...props } = rest;
+  const translateX = useSharedValue(100);
+  const translateStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+  useEffect(() => {
+    translateX.value = withTiming(0, { duration });
+  }, []);
   return (
     <AnimatedTouchable onPress={onPress}>
-      <View
+      <Animated.View
         className="flex w-full flex-row items-center justify-between p-2 mb-2 rounded-lg"
         style={[
           {
             backgroundColor: `${COLORS.neutral.dark}80`,
           },
           style,
+          translateStyle,
         ]}
         {...props}
       >
@@ -82,7 +94,7 @@ const PlaylistPreviewList = ({
         >
           {rightComponent}
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     </AnimatedTouchable>
   );
 };

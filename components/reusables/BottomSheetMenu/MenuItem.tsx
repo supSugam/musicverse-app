@@ -30,7 +30,7 @@ const MenuItem = ({
   borderTop = false,
   ...rest
 }: IMenuItemProps) => {
-  const translateX = useSharedValue(50); // Start position outside the screen
+  const translateX = useSharedValue(100);
   const translateStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: translateX.value }],
@@ -51,7 +51,7 @@ const MenuItem = ({
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      onPressIn={() => (scale.value = withTiming(0.95, { duration: 500 }))}
+      onPressIn={() => (scale.value = withTiming(0.95, { duration: 200 }))}
       onPressOut={leaveAnimation}
     >
       <Animated.View

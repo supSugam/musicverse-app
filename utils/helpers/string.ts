@@ -69,3 +69,15 @@ export const formatDuration = (seconds?: number, ms = false): string => {
 export const msToSeconds = (ms: number): number => {
   return ms / 1000;
 };
+
+export const parseStringToNullUndefined = (
+  value: string | null | undefined
+): null | undefined => {
+  if (value === '') return null;
+  if (value === 'null') return null;
+  if (value === 'undefined') return undefined;
+};
+
+export const parseStringToBoolean = (value: string): boolean => {
+  return value === 'true';
+};

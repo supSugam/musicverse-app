@@ -70,6 +70,12 @@ type PlaylistsQuery<T extends string | undefined = undefined> = {
     { playlistId: string; tracks: string[] },
     unknown
   >;
+  deletePlaylistById: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    string,
+    unknown
+  >;
 } & (T extends string
   ? {
       getPlaylistById: UseQueryResult<
@@ -151,7 +157,7 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
         queryKey: playlistKeyFactory.updatePlaylist(id),
       });
       toastResponseMessage({
-        content: 'Playlist updated',
+        content: 'Playlist Updated',
         type: 'success',
       });
     },
@@ -172,7 +178,7 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
         queryKey: playlistKeyFactory.deletePlaylist(id),
       });
       toastResponseMessage({
-        content: 'Playlist deleted',
+        content: 'Playlist Deleted',
         type: 'success',
       });
     },

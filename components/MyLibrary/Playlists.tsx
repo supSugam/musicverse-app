@@ -11,6 +11,7 @@ import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import { IMenuItemProps } from '../reusables/BottomSheetMenu/MenuItem';
 import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
+import ReusableAlert from '../reusables/ReusableAlert';
 
 const Playlists = () => {
   const navigation = useNavigation();
@@ -20,12 +21,14 @@ const Playlists = () => {
   >([]);
   const [savedPlaylists, setSavedPlaylists] = useState<IPlaylistDetails[]>([]);
   const [searchTerm, setSearchTerm] = useState<string | undefined>();
+  const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
 
   const {
     getAllPlaylists: {
       data: ownedPlaylistsData,
       refetch: refetchOwnedPlaylists,
     },
+    deletePlaylistById,
   } = usePlaylistsQuery({
     getAllPlaylistsConfig: {
       params: {
@@ -115,7 +118,10 @@ const Playlists = () => {
         });
         options.push({
           label: 'Delete',
-          onPress: () => {},
+          onPress: () => {
+            setIsPlaylistOptionsModalVisible(false);
+            setShowDeleteAlert(true);
+          },
           icon: 'delete',
         });
         options.push({
@@ -169,6 +175,23 @@ const Playlists = () => {
 
   return (
     <>
+      <ReusableAlert
+        cancelText="Cancel"
+        confirmText="Delete"
+        visible={showDeleteAlert}
+        onClose={() => setShowDeleteAlert(false)}
+        onConfirm={() => {
+          const id = selectedPlaylist?.playlist?.id;
+          if (id) deletePlaylistById.mutate(id);
+          setShowDeleteAlert(false);
+        }}
+        type="alert"
+        header="Delete Playlist"
+      >
+        <StyledText size="base">
+          Are you sure you want to delete this playlist?
+        </StyledText>
+      </ReusableAlert>
       <MenuModal
         visible={isPlaylistOptionsModalVisible}
         onClose={() => setIsPlaylistOptionsModalVisible(false)}
@@ -194,13 +217,14 @@ const Playlists = () => {
               Owned Playlists
             </StyledText>
 
-            {ownedPlaylists.map((playlist) => (
+            {ownedPlaylists.map((playlist, i) => (
               <PlaylistPreviewList
                 cover={playlist.cover}
                 onPress={() => {
                   setSelectedPlaylist({ playlist, type: 'owned' });
                   setIsPlaylistOptionsModalVisible(true);
                 }}
+                duration={i * 100}
                 rightComponent={
                   <MaterialIcons
                     name={'more-vert'}
@@ -224,7 +248,7 @@ const Playlists = () => {
               Collaborated Playlists
             </StyledText>
 
-            {collaboratedPlaylists.map((playlist) => (
+            {collaboratedPlaylists.map((playlist, i) => (
               <PlaylistPreviewList
                 cover={playlist.cover}
                 onPress={() => {
@@ -232,6 +256,7 @@ const Playlists = () => {
 
                   setIsPlaylistOptionsModalVisible(true);
                 }}
+                duration={i * 100}
                 rightComponent={
                   <MaterialIcons
                     name={'more-vert'}
@@ -253,13 +278,14 @@ const Playlists = () => {
                   Saved Playlists
                 </StyledText>
 
-                {savedPlaylists.map((playlist) => (
+                {savedPlaylists.map((playlist, i) => (
                   <PlaylistPreviewList
                     cover={playlist.cover}
                     onPress={() => {
                       setSelectedPlaylist({ playlist, type: 'saved' });
                       setIsPlaylistOptionsModalVisible(true);
                     }}
+                    duration={i * 100}
                     rightComponent={
                       <MaterialIcons
                         name={'more-vert'}

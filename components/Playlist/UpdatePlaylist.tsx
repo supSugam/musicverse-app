@@ -6,27 +6,48 @@ import StyledText from '../reusables/StyledText';
 import COLORS from '@/constants/Colors';
 import { CommonActions, useRoute } from '@react-navigation/native';
 import TrackPreview from '../Tracks/TrackPreview';
-import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import LoadingIcon from '../global/LoadingIcon';
 import { usePlaylistsQuery } from '@/hooks/react-query/usePlaylistsQuery';
 import { useNavigation } from 'expo-router';
 import { IPlaylistDetails } from '@/utils/Interfaces/IPlaylist';
-import PlaylistPreviewList from './PlaylistPreviewList';
-import { MaterialIcons } from '@expo/vector-icons';
-import SearchField from '../reusables/SearchField';
 import { toastResponseMessage } from '@/utils/toast';
-import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
-import { consoleLogFormattedObject } from '@/utils/helpers/Object';
-import TrackListItem from '../Tracks/TrackListItem';
 import SelectedTouchable from '../reusables/SelectedTouchable';
+import * as yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import StyledTextField from '../reusables/StyledTextInput';
+import ImageDisplay from '../reusables/ImageDisplay';
+import { useImagePicker } from '@/hooks/useImagePicker';
+import { parseStringToNullUndefined } from '@/utils/helpers/string';
+
+const playlistUpdateSchema = yup.object().shape({
+  title: yup.string().required('Title is required'),
+  description: yup
+    .string()
+    .nullable()
+    .min(10, 'Description must be empty or at least 10 characters')
+    .transform((value, originalValue) => originalValue || null),
+});
 
 const UpdatePlaylist = () => {
   const { params } = useRoute();
   const navigation = useNavigation();
   const [loading, setLoading] = useState<boolean>(false);
   const [playlist, setPlaylist] = useState<IPlaylistDetails | undefined>();
-  const [searchTerm, setSearchTerm] = useState<string | undefined>();
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
+  const [playlistCoverSource, setPlaylistCoverSource] = useState<string | null>(
+    null
+  );
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(playlistUpdateSchema),
+    mode: 'onChange',
+  });
 
   const onTrackPress = (trackId: string) => {
     if (selectedTracks.includes(trackId)) {
@@ -49,21 +70,16 @@ const UpdatePlaylist = () => {
     },
   });
 
-  const {
-    getAllTracks: { data: searchedTracksData, isLoading: isTracksLoading },
-  } = useTracksQuery({
-    getAllTracksConfig: {
-      params: {
-        search: searchTerm,
-        pageSize: 20,
-      },
-    },
-  });
-
   useEffect(() => {
     if (playlistData) {
       const playlist = playlistData?.data?.result;
       setPlaylist(playlist);
+      setPlaylistCoverSource(playlist?.cover);
+      setValue('title', playlist?.title);
+      setValue(
+        'description',
+        parseStringToNullUndefined(playlist?.description)
+      );
       if (playlist.tracks)
         setSelectedTracks(playlist.tracks?.map((track) => track.id));
     }
@@ -109,6 +125,18 @@ const UpdatePlaylist = () => {
     navigation.goBack();
   };
 
+  //Image Picker
+
+  const {
+    pickImage,
+    deleteAllImages,
+    image: newCover,
+  } = useImagePicker({
+    selectionLimit: 1,
+    allowsEditing: true,
+    aspect: [1, 1],
+  });
+
   return (
     <View
       className="flex relative"
@@ -132,27 +160,52 @@ const UpdatePlaylist = () => {
         <LoadingIcon size={111} />
       ) : (
         <View className="p-4 w-full flex justify-center items-center relative">
-          <View className=" w-full">
-            <PlaylistPreviewList
-              cover={playlist?.cover || null}
-              onPress={() => {}}
-              subtitle={`${playlist?._count?.tracks} tracks • ${playlist?._count?.savedBy} saves`}
-              title={playlist?.title || ''}
+          {/* Playlist Info */}
+
+          <View className="flex flex-col w-full items-center justify-center">
+            <StyledTextField
+              control={control}
+              controllerName="title"
+              variant="underlined"
+              textAlign="center"
+              textSize="lg"
+              fontWeight="bold"
+            />
+            <ImageDisplay
+              source={
+                newCover?.[0]
+                  ? { uri: newCover[0].uri }
+                  : playlistCoverSource
+                  ? { uri: playlistCoverSource }
+                  : null
+              }
+              placeholder="Select Album Cover"
+              width={150}
+              height={150}
+              onPress={pickImage}
+              onDelete={() => {
+                deleteAllImages();
+                setPlaylistCoverSource(null);
+              }}
+              onEdit={pickImage}
+              onUndoChanges={deleteAllImages}
+              bordered
+              shadows
+              className="my-6"
+            />
+            <StyledTextField
+              control={control}
+              controllerName="description"
+              variant="default"
+              placeholder="Description of the playlist.."
+              numberOfLines={2}
             />
           </View>
-
-          <SearchField
-            placeholder="Search for tracks"
-            onSearch={(text) => {
-              setSearchTerm(text);
-            }}
-            triggerMode="debounce"
-          />
 
           <ScrollView
             className="flex flex-col"
             style={{
-              maxHeight: 300,
+              maxHeight: 250,
               width: '100%',
             }}
             showsVerticalScrollIndicator
@@ -177,7 +230,11 @@ const UpdatePlaylist = () => {
               />
             ))}
           </ScrollView>
-          <StyledButton onPress={onSaveClick} className="w-full my-2">
+          <StyledButton
+            onPress={onSaveClick}
+            className="w-full my-2"
+            loading={loading}
+          >
             <StyledText size="xl" weight="bold" className="text-center">
               Save
             </StyledText>

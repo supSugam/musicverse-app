@@ -26,6 +26,7 @@ interface IImageDisplayProps
   onPress?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onUndoChanges?: () => void;
   bordered?: boolean;
   shadows?: boolean;
 }
@@ -41,6 +42,7 @@ const ImageDisplay = ({
   onDelete,
   bordered = false,
   shadows = false,
+  onUndoChanges,
   ...rest
 }: IImageDisplayProps) => {
   const borderRadiusStyle =
@@ -70,12 +72,25 @@ const ImageDisplay = ({
     ],
   }));
 
+  //For the undo changes icon
+  const undoChanges = useSharedValue(0);
+  const undoChangesRotation = useSharedValue(0);
+
+  const undoChangesAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: undoChanges.value },
+      { rotate: `${undoChangesRotation.value}deg` },
+    ],
+  }));
+
   useEffect(() => {
     editScale.value = withSpring(source && onEdit ? 1 : 0);
     editRotation.value = withSpring(source && onEdit ? 0 : 180);
     deleteScale.value = withSpring(source && onDelete ? 1 : 0);
     deleteRotation.value = withSpring(source && onDelete ? 0 : 180);
-  }, [source, onDelete, onEdit]);
+    undoChanges.value = withSpring(source && onUndoChanges ? 1 : 0);
+    undoChangesRotation.value = withSpring(source && onUndoChanges ? 0 : 180);
+  }, [source, onDelete, onEdit, onUndoChanges]);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} {...rest}>
@@ -117,6 +132,12 @@ const ImageDisplay = ({
         <Animated.View style={[styles.deleteIcon, deleteAnimatedStyle]}>
           <TouchableOpacity onPress={onDelete} activeOpacity={0.8}>
             <MaterialIcons name="clear" size={18} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
+
+        <Animated.View style={[styles.undoIcon, undoChangesAnimatedStyle]}>
+          <TouchableOpacity onPress={onUndoChanges} activeOpacity={0.8}>
+            <MaterialIcons name="undo" size={18} color="white" />
           </TouchableOpacity>
         </Animated.View>
       </LinearGradient>
@@ -165,6 +186,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -18,
     right: -18,
+    backgroundColor: `${COLORS.neutral.black}80`,
+    padding: 6,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: COLORS.neutral.normal,
+  },
+  undoIcon: {
+    position: 'absolute',
+    bottom: -18,
+    left: -18,
     backgroundColor: `${COLORS.neutral.black}80`,
     padding: 6,
     borderRadius: 50,

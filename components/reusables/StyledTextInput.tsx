@@ -93,7 +93,7 @@ export default function StyledTextField({
               onChangeText={(text) => onChange(text)}
               value={value}
               placeholderTextColor={'#ffffff80'}
-              className={`text-${textSize} font-${fontWeight} text-${textAlign} text-white rounded-md p-3 px-4 w-full placeholder:white placeholder-opacity-50`}
+              className={`text-white text-${textSize} font-${fontWeight} text-${textAlign} rounded-md p-3 px-4 w-full placeholder:white placeholder-opacity-50`}
               autoCorrect={false}
               autoComplete="off"
               autoCapitalize="none"

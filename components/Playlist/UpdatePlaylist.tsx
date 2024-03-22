@@ -18,6 +18,7 @@ import { toastResponseMessage } from '@/utils/toast';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { consoleLogFormattedObject } from '@/utils/helpers/Object';
 import TrackListItem from '../Tracks/TrackListItem';
+import SelectedTouchable from '../reusables/SelectedTouchable';
 
 const UpdatePlaylist = () => {
   const { params } = useRoute();
@@ -25,10 +26,20 @@ const UpdatePlaylist = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [playlist, setPlaylist] = useState<IPlaylistDetails | undefined>();
   const [searchTerm, setSearchTerm] = useState<string | undefined>();
+  const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
+
+  const onTrackPress = (trackId: string) => {
+    if (selectedTracks.includes(trackId)) {
+      setSelectedTracks(selectedTracks.filter((id) => id !== trackId));
+    } else {
+      setSelectedTracks([...selectedTracks, trackId]);
+    }
+  };
 
   const {
     updatePlaylist,
     getPlaylistById: { data: playlistData, isLoading: isPlaylistLoading },
+    removeTracksFromPlaylist,
   } = usePlaylistsQuery({
     id: (params as any)?.id as string,
     getAllPlaylistsConfig: {
@@ -53,6 +64,8 @@ const UpdatePlaylist = () => {
     if (playlistData) {
       const playlist = playlistData?.data?.result;
       setPlaylist(playlist);
+      if (playlist.tracks)
+        setSelectedTracks(playlist.tracks?.map((track) => track.id));
     }
   }, [playlistData]);
 
@@ -64,7 +77,37 @@ const UpdatePlaylist = () => {
   //   }
   // }, [playlistData]);
 
-  const onSaveClick = async () => {};
+  const onSaveClick = async () => {
+    if (!playlist) return;
+    setLoading(true);
+    const tracksToRemove = playlist.tracks?.filter(
+      (track) => !selectedTracks.includes(track.id)
+    );
+    if (tracksToRemove?.length) {
+      await removeTracksFromPlaylist.mutateAsync(
+        {
+          playlistId: playlist.id,
+          tracks: tracksToRemove.map((track) => track.id),
+        },
+        {
+          onSuccess: () => {
+            toastResponseMessage({
+              content: 'Playlist Updated',
+              type: 'success',
+            });
+          },
+          onError: (error) => {
+            toastResponseMessage({
+              content: error,
+              type: 'error',
+            });
+          },
+        }
+      );
+    }
+    setLoading(false);
+    navigation.goBack();
+  };
 
   return (
     <View
@@ -114,17 +157,23 @@ const UpdatePlaylist = () => {
             }}
             showsVerticalScrollIndicator
           >
+            {/* TODO: Change order of tracks ( not mandatory though) */}
             {playlist?.tracks?.map((track) => (
-              <TrackListItem
+              <TrackPreview
                 cover={track.cover}
                 title={track.title}
                 artistName={
                   track.creator?.profile?.name || track.creator?.username || ''
                 }
-                artistId={track.creator?.id}
                 key={track.id}
                 id={track.id}
                 duration={track.trackDuration}
+                onPress={() => onTrackPress(track.id)}
+                rightComponent={
+                  <SelectedTouchable
+                    selected={selectedTracks.includes(track.id)}
+                  />
+                }
               />
             ))}
           </ScrollView>

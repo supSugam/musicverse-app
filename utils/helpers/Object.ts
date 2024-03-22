@@ -28,9 +28,11 @@ export const convertObjectToFormData = (obj: any): FormData => {
     const val = obj[key];
     if (Array.isArray(val)) {
       val.forEach((item: any, index: number) => {
+        if (item === null || item === undefined) return;
         formData.append(`${key}[${index}]`, item.toString());
       });
     } else {
+      if (val === null || val === undefined) continue;
       formData.append(key, val);
     }
   }

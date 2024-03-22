@@ -16,7 +16,7 @@ import {
   GetAllPlaylistsResponse,
   IPlaylistDetails,
 } from '@/utils/Interfaces/IPlaylist';
-import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
+import { BaseResponse, SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 
 export interface IPlaylistsPaginationQueryParams extends IBasePaginationParams {
   creator?: boolean;
@@ -62,6 +62,12 @@ type PlaylistsQuery<T extends string | undefined = undefined> = {
     AxiosResponse<any, any>,
     Error,
     TrackToPlaylist,
+    unknown
+  >;
+  removeTracksFromPlaylist: UseMutationResult<
+    AxiosResponse<BaseResponse, any>,
+    Error,
+    { playlistId: string; tracks: string[] },
     unknown
   >;
 } & (T extends string
@@ -234,6 +240,27 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     },
   });
 
+  const removeTracksFromPlaylist = useMutation({
+    mutationFn: async ({
+      playlistId,
+      tracks,
+    }: {
+      playlistId: string;
+      tracks: string[];
+    }) => await api.post(`/playlists/remove-tracks/${playlistId}`, { tracks }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [PLAYLIST_QUERY_KEY],
+      });
+    },
+    onError: (error) => {
+      toastResponseMessage({
+        content: error,
+        type: 'error',
+      });
+    },
+  });
+
   return {
     getAllPlaylists,
     getPlaylistById,
@@ -243,5 +270,6 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     createPlaylist,
     updatePlaylist,
     removeTrackFromPlaylists,
+    removeTracksFromPlaylist,
   };
 };

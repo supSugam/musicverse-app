@@ -104,6 +104,7 @@ const Playlists = () => {
         options.push({
           label: 'Update Playlist',
           onPress: () => {
+            setIsPlaylistOptionsModalVisible(false);
             navigation.dispatch(
               CommonActions.navigate('UpdatePlaylist', {
                 id: playlistId,

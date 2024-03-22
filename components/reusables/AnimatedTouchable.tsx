@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export interface IMenuItemProps {
-  onPress: () => void;
+  onPress?: () => void;
   children?: React.ReactNode;
   duration?: number;
   onPressAnimation?: {

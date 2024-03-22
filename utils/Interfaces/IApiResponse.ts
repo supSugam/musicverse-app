@@ -1,6 +1,10 @@
-export type SuccessResponse<T extends Object> = {
+export type BaseResponse = {
   path: string;
   success: boolean;
   statusCode: number;
-  result: T;
+  message?: string;
 };
+
+export type SuccessResponse<T extends Object> = {
+  result: T;
+} & BaseResponse;

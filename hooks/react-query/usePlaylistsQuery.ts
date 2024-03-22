@@ -46,12 +46,6 @@ type PlaylistsQuery<T extends string | undefined = undefined> = {
     any,
     unknown
   >;
-  updatePlaylist: UseMutationResult<
-    AxiosResponse<any, any>,
-    Error,
-    any,
-    unknown
-  >;
   addTrackToPlaylists: UseMutationResult<
     AxiosResponse<any, any>,
     Error,
@@ -92,6 +86,12 @@ type PlaylistsQuery<T extends string | undefined = undefined> = {
         AxiosResponse<any, any>,
         Error,
         string,
+        unknown
+      >;
+      updatePlaylist: UseMutationResult<
+        AxiosResponse<any, any>,
+        Error,
+        FormData,
         unknown
       >;
     }
@@ -150,8 +150,12 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
 
   const updatePlaylist = useMutation({
     mutationKey: playlistKeyFactory.updatePlaylist(id),
-    mutationFn: async (playlist: any) =>
-      await api.patch(`/playlists/${id}`, playlist),
+    mutationFn: async (playlist: FormData) =>
+      await api.patch(`/playlists/${id}`, playlist, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: playlistKeyFactory.updatePlaylist(id),

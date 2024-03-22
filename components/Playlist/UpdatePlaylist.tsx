@@ -19,6 +19,9 @@ import StyledTextField from '../reusables/StyledTextInput';
 import ImageDisplay from '../reusables/ImageDisplay';
 import { useImagePicker } from '@/hooks/useImagePicker';
 import { parseStringToNullUndefined } from '@/utils/helpers/string';
+import { imageAssetToFile } from '@/utils/helpers/file';
+import { getObjectAsFormData } from '@/utils/helpers/ts-utilities';
+import { convertObjectToFormData } from '@/utils/helpers/Object';
 
 const playlistUpdateSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
@@ -93,12 +96,27 @@ const UpdatePlaylist = () => {
   //   }
   // }, [playlistData]);
 
-  const onSaveClick = async () => {
+  const onSaveClick = async (data: any) => {
     if (!playlist) return;
     setLoading(true);
     const tracksToRemove = playlist.tracks?.filter(
       (track) => !selectedTracks.includes(track.id)
     );
+    const payload = {
+      title: data.title,
+      description: data.description,
+    } as any;
+
+    if (newCover?.length) {
+      const cover = imageAssetToFile(newCover[0]);
+      payload['cover'] = cover;
+    } else {
+      if (!playlistCoverSource && playlist.cover) {
+        payload['deleteCover'] = true;
+      }
+    }
+    const formPayload = convertObjectToFormData(payload) as FormData;
+
     if (tracksToRemove?.length) {
       await removeTracksFromPlaylist.mutateAsync(
         {
@@ -106,12 +124,6 @@ const UpdatePlaylist = () => {
           tracks: tracksToRemove.map((track) => track.id),
         },
         {
-          onSuccess: () => {
-            toastResponseMessage({
-              content: 'Playlist Updated',
-              type: 'success',
-            });
-          },
           onError: (error) => {
             toastResponseMessage({
               content: error,
@@ -121,6 +133,8 @@ const UpdatePlaylist = () => {
         }
       );
     }
+    await updatePlaylist.mutateAsync(formPayload);
+
     setLoading(false);
     navigation.goBack();
   };
@@ -184,8 +198,8 @@ const UpdatePlaylist = () => {
               height={150}
               onPress={pickImage}
               onDelete={() => {
-                deleteAllImages();
                 setPlaylistCoverSource(null);
+                deleteAllImages();
               }}
               onEdit={pickImage}
               onUndoChanges={deleteAllImages}
@@ -218,7 +232,7 @@ const UpdatePlaylist = () => {
                 artistName={
                   track.creator?.profile?.name || track.creator?.username || ''
                 }
-                key={track.id}
+                key={`playlist-track-${track.id}`}
                 id={track.id}
                 duration={track.trackDuration}
                 onPress={() => onTrackPress(track.id)}
@@ -231,7 +245,7 @@ const UpdatePlaylist = () => {
             ))}
           </ScrollView>
           <StyledButton
-            onPress={onSaveClick}
+            onPress={handleSubmit(onSaveClick)}
             className="w-full my-2"
             loading={loading}
           >

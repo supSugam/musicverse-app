@@ -163,6 +163,7 @@ const TabBar = ({
 
         return (
           <TouchableOpacity
+            key={route.key + index}
             accessibilityRole="button"
             activeOpacity={0.8}
             accessibilityState={isFocused ? { selected: true } : {}}

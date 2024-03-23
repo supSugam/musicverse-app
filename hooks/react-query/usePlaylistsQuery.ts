@@ -260,7 +260,7 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     }) => await api.post(`/playlists/remove-tracks/${playlistId}`, { tracks }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [PLAYLIST_QUERY_KEY],
+        queryKey: [PLAYLIST_QUERY_KEY, playlistKeyFactory.deletePlaylist(id)],
       });
     },
     onError: (error) => {

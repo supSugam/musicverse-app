@@ -219,6 +219,7 @@ const Playlists = () => {
 
             {ownedPlaylists.map((playlist, i) => (
               <PlaylistPreviewList
+                key={playlist.id}
                 cover={playlist.cover}
                 onPress={() => {
                   setSelectedPlaylist({ playlist, type: 'owned' });
@@ -250,6 +251,7 @@ const Playlists = () => {
 
             {collaboratedPlaylists.map((playlist, i) => (
               <PlaylistPreviewList
+                key={playlist.id}
                 cover={playlist.cover}
                 onPress={() => {
                   setSelectedPlaylist({ playlist, type: 'collaborated' });
@@ -280,6 +282,7 @@ const Playlists = () => {
 
                 {savedPlaylists.map((playlist, i) => (
                   <PlaylistPreviewList
+                    key={playlist.id}
                     cover={playlist.cover}
                     onPress={() => {
                       setSelectedPlaylist({ playlist, type: 'saved' });

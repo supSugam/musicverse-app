@@ -18,7 +18,6 @@ import {
 import { EmptyGhostLA } from '@/assets/lottie';
 import LottieView from 'lottie-react-native';
 import useUploadAssets from '@/hooks/react-query/useUploadAssets';
-import { useAlbumQuery } from '@/hooks/react-query/useAlbumQuery';
 import { ICreateAlbumPayload } from '@/utils/Interfaces/IAlbum';
 
 import {
@@ -31,6 +30,7 @@ import AddTrackButton from './components/AddTrackButton';
 import { cleanObject } from '@/utils/helpers/Object';
 import { ITrack } from '@/utils/Interfaces/ITrack';
 import { ActionsEnum } from '@/utils/enums/Action';
+import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -88,7 +88,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
       setLoading(false);
     },
   });
-  const { create: createAlbum } = useAlbumQuery();
+  const { createAlbum } = useAlbumsQuery({});
 
   useEffect(() => {
     const isUploading = Object.values(progressDetails).some(

@@ -21,7 +21,9 @@ import { useImagePicker } from '@/hooks/useImagePicker';
 import { parseStringToNullUndefined } from '@/utils/helpers/string';
 import { imageAssetToFile } from '@/utils/helpers/file';
 import { getObjectAsFormData } from '@/utils/helpers/ts-utilities';
-import { convertObjectToFormData } from '@/utils/helpers/Object';
+import { cleanArray, convertObjectToFormData } from '@/utils/helpers/Object';
+import { useTagsQuery } from '@/hooks/react-query/useTagsQuery';
+import SelectOption from '../reusables/SelectOption';
 
 const playlistUpdateSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
@@ -41,6 +43,14 @@ const UpdatePlaylist = () => {
   const [playlistCoverSource, setPlaylistCoverSource] = useState<string | null>(
     null
   );
+
+  // Tags
+  const { tags } = useTagsQuery();
+
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const onSelectedTagsChange = (selected: string[]) => {
+    setSelectedTags(selected);
+  };
 
   const {
     control,
@@ -69,6 +79,7 @@ const UpdatePlaylist = () => {
     getAllPlaylistsConfig: {
       params: {
         tracks: true,
+        tags: true,
       },
     },
   });
@@ -102,9 +113,13 @@ const UpdatePlaylist = () => {
     const tracksToRemove = playlist.tracks?.filter(
       (track) => !selectedTracks.includes(track.id)
     );
+    const updatedTags = cleanArray(
+      selectedTags.map((t) => tags.find((tag) => tag.id === t)?.id)
+    );
     const payload = {
       title: data.title,
       description: data.description,
+      ...(updatedTags && { tags: updatedTags }),
     } as any;
 
     if (newCover?.length) {
@@ -215,7 +230,16 @@ const UpdatePlaylist = () => {
               numberOfLines={2}
             />
           </View>
-
+          <View className="w-full">
+            <SelectOption
+              options={tags.map((tag) => tag.name)}
+              placeholder="Select Tags (Optional, Max 3)"
+              selected={selectedTags}
+              onChange={onSelectedTagsChange}
+              minSelection={0}
+              maxSelection={3}
+            />
+          </View>
           <ScrollView
             className="flex flex-col"
             style={{

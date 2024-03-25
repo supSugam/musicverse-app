@@ -47,3 +47,22 @@ export const consoleLogFormattedObject = (obj: any, name?: string) => {
   console.log(JSON.stringify(obj, null, 2));
   console.log(`\n------------------ ${name} ------------------\n`);
 };
+
+export const cleanArray = <T extends unknown>(
+  arr: T[],
+  { includeNull = false, includeUndefined = false } = {
+    includeNull: false,
+    includeUndefined: false,
+  }
+): T[] => {
+  return arr.filter((val) => {
+    switch (val) {
+      case undefined:
+        return includeUndefined;
+      case null:
+        return includeNull;
+      default:
+        return true;
+    }
+  });
+};

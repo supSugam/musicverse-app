@@ -134,7 +134,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               albumIds: [albumId] as string[],
             }));
 
-            uploadTracks(albumTracksWithAlbumId);
+            await uploadTracks(albumTracksWithAlbumId);
           },
 
           onError: (e) => {

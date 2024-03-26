@@ -31,14 +31,18 @@ export interface IAlbumDetails {
   createdAt: string;
   updatedAt: string;
   genreId: string;
-  publicStatus: string;
+  publicStatus: ReviewStatus;
   creatorId: string;
+  _count: {
+    tracks: number;
+    tags: number;
+    savedBy: number;
+  };
   creator?: IUserWithProfile;
   genre?: IGenre;
   tags?: ITag[];
   tracks?: ITrackDetails[];
-  // savedBy?:
-  // Add savedBy
+  savedBy?: IUserProfile[];
 }
 export interface IGetAllAlbumsResponse {
   items: IAlbumDetails[];

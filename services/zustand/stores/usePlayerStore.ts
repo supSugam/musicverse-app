@@ -21,9 +21,11 @@ const InitialState = {
   stopAfterCurrentTrack: false,
   playbackError: null,
   isPlayerExpanded: false,
+  queueId:null
 };
 
 interface PlayerState {
+  queueId:string|null;
   isPlaying: boolean;
   isAsyncOperationPending: boolean;
   isBuffering: boolean;
@@ -46,7 +48,7 @@ interface PlayerState {
   setPlayerExpanded: (isPlayerExpanded: boolean) => void;
   togglePlayerExpanded: () => void;
   setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => void;
-
+  setQueueId:(queueId:string)=>void
   loadTrack: (index: number) => Promise<void>;
   updateTracks: (tracks: ITrackDetails[]) => void;
   isNextTrackAvailable: (ignoreLoopState?: boolean) => boolean;
@@ -82,6 +84,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   isPlayerExpanded: false,
   isAsyncOperationPending: false,
+
+  setQueueId:(queueId:string)=>{
+    set({queueId})
+  },
 
   setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => {
     set({ isAsyncOperationPending });

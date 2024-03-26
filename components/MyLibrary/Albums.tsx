@@ -12,6 +12,8 @@ import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
 import ReusableAlert from '../reusables/ReusableAlert';
 import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
+import AlbumCard from '../Albums/AlbumCard';
+import Animated from 'react-native-reanimated';
 
 const Albums = () => {
   const navigation = useNavigation();
@@ -27,7 +29,8 @@ const Albums = () => {
     getAllAlbumsConfig: {
       params: {
         owned: true,
-        search: searchTerm,
+        creator: true,
+        genre: true,
       },
     },
   });
@@ -38,22 +41,22 @@ const Albums = () => {
     getAllAlbumsConfig: {
       params: {
         saved: true,
-        search: searchTerm,
       },
     },
   });
 
   useEffect(() => {
-    const Albums = ownedAlbumsData?.data?.result?.items;
-    if (Albums) {
-      setOwnedAlbums(Albums);
+    const albums = ownedAlbumsData?.data?.result?.items;
+
+    if (albums) {
+      setOwnedAlbums(albums);
     }
   }, [ownedAlbumsData]);
 
   useEffect(() => {
-    const Albums = savedAlbumsData?.data?.result?.items;
-    if (Albums) {
-      setSavedAlbums(Albums);
+    const albums = savedAlbumsData?.data?.result?.items;
+    if (albums) {
+      setSavedAlbums(albums);
     }
   }, [savedAlbumsData]);
 
@@ -167,33 +170,23 @@ const Albums = () => {
         />
         {ownedAlbums.length > 0 && (
           <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="lg" className="mt-4">
+            <StyledText weight="semibold" size="lg" className="my-4">
               Owned Albums
             </StyledText>
 
-            {ownedAlbums.map((album, i) => (
-              <></>
-              //   <PlaylistPreviewList
-              //     key={playlist.id}
-              //     cover={playlist.cover}
-              //     onPress={() => {
-
-              //     }}
-              //     duration={i * 100}
-              //     rightComponent={
-              //       <MaterialIcons
-              //         name={'more-vert'}
-              //         size={28}
-              //         color={COLORS.neutral.normal}
-              //         style={{
-              //           marginRight: 2,
-              //         }}
-              //       />
-              //     }
-              //     subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
-              //     title={album.title}
-              //   />
-            ))}
+            <ScrollView horizontal>
+              {ownedAlbums.map((album, i) => (
+                <AlbumCard
+                  key={album.id}
+                  cover={album.cover}
+                  title={album.title}
+                  subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
+                  genre={album.genre}
+                  id={album.id}
+                  onPlayClick={() => {}}
+                />
+              ))}
+            </ScrollView>
           </View>
         )}
         {savedAlbums.length > 0 && (
@@ -202,29 +195,16 @@ const Albums = () => {
               Saved Albums
             </StyledText>
 
-            {savedAlbums.map((playlist, i) => (
-              <></>
-              //   <PlaylistPreviewList
-              //     key={playlist.id}
-              //     cover={playlist.cover}
-              //     onPress={() => {
-              //       setSelectedPlaylist({ playlist, type: 'saved' });
-              //       setIsPlaylistOptionsModalVisible(true);
-              //     }}
-              //     duration={i * 100}
-              //     rightComponent={
-              //       <MaterialIcons
-              //         name={'more-vert'}
-              //         size={28}
-              //         color={COLORS.neutral.normal}
-              //         style={{
-              //           marginRight: 2,
-              //         }}
-              //       />
-              //     }
-              //     subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
-              //     title={playlist.title}
-              //   />
+            {savedAlbums.map((album, i) => (
+              <AlbumCard
+                key={album.id}
+                cover={album.cover}
+                title={album.title}
+                subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
+                genre={album.genre}
+                id={album.id}
+                onPlayClick={() => {}}
+              />
             ))}
           </View>
         )}

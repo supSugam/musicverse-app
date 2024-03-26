@@ -16,10 +16,11 @@ import { BaseResponse, SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 import { cleanObject } from '@/utils/helpers/Object';
 
 export interface IAlbumsPaginationQueryParams extends IBasePaginationParams {
-  creator?: boolean;
+  genre?: boolean;
   tags?: boolean;
-  savedBy?: boolean;
   tracks?: boolean;
+  savedBy?: boolean;
+  creator?: boolean;
   owned?: boolean;
   saved?: boolean;
 }

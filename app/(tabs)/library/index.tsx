@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ParamListBase, TabNavigationState } from '@react-navigation/native';
+import Albums from '@/components/MyLibrary/Albums';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -210,7 +211,7 @@ const MyLibrary = () => {
         tabBar={(props) => <TabBar {...props} />}
       >
         <Tab.Screen name="Playlists" component={Playlists} />
-        <Tab.Screen name="Albums" component={Playlists} />
+        <Tab.Screen name="Albums" component={Albums} />
         <Tab.Screen name="Tracks" component={Playlists} />
         <Tab.Screen name="Uploads" component={Playlists} />
       </Tab.Navigator>

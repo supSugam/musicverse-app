@@ -21,11 +21,11 @@ const InitialState = {
   stopAfterCurrentTrack: false,
   playbackError: null,
   isPlayerExpanded: false,
-  queueId:null
+  queueId: null,
 };
 
 interface PlayerState {
-  queueId:string|null;
+  queueId: string | null;
   isPlaying: boolean;
   isAsyncOperationPending: boolean;
   isBuffering: boolean;
@@ -48,7 +48,7 @@ interface PlayerState {
   setPlayerExpanded: (isPlayerExpanded: boolean) => void;
   togglePlayerExpanded: () => void;
   setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => void;
-  setQueueId:(queueId:string)=>void
+  setQueueId: (queueId: string) => void;
   loadTrack: (index: number) => Promise<void>;
   updateTracks: (tracks: ITrackDetails[]) => void;
   isNextTrackAvailable: (ignoreLoopState?: boolean) => boolean;
@@ -85,8 +85,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   isPlayerExpanded: false,
   isAsyncOperationPending: false,
 
-  setQueueId:(queueId:string)=>{
-    set({queueId})
+  setQueueId: (queueId: string) => {
+    set({ queueId });
   },
 
   setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => {
@@ -127,7 +127,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   updateTracks: (tracks: ITrackDetails[]) => {
-    set({ tracks });
+    set({ tracks, queueId: tracks[0].id });
     const { playbackInstance, currentTrack } = get();
     tracks.forEach((track) => {
       if (track.id === currentTrack()?.id) {

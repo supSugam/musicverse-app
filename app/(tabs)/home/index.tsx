@@ -114,6 +114,7 @@ const HomeScreen: React.FC = () => {
               id={track.id}
               title={track.title}
               onPlayClick={async () => {
+                updateTracks(tracksOfSelectedGenre);
                 await playATrackById(track.id);
               }}
               isPlaying={currentTrack()?.id === track.id && isPlaying}

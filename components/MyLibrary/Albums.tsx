@@ -14,6 +14,7 @@ import ReusableAlert from '../reusables/ReusableAlert';
 import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
 import AlbumCard from '../Albums/AlbumCard';
 import Animated from 'react-native-reanimated';
+import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 
 const Albums = () => {
   const navigation = useNavigation();
@@ -31,6 +32,7 @@ const Albums = () => {
         owned: true,
         creator: true,
         genre: true,
+        tracks: true,
       },
     },
   });
@@ -41,6 +43,9 @@ const Albums = () => {
     getAllAlbumsConfig: {
       params: {
         saved: true,
+        tracks: true,
+        genre: true,
+        creator: true,
       },
     },
   });
@@ -130,6 +135,10 @@ const Albums = () => {
   //     [selectedPlaylist]
   //   );
 
+  // Player
+
+  const { setQueueId, updateTracks, playATrackById } = usePlayerStore();
+
   return (
     <>
       <ReusableAlert
@@ -177,13 +186,20 @@ const Albums = () => {
             <ScrollView horizontal>
               {ownedAlbums.map((album, i) => (
                 <AlbumCard
-                  key={album.id}
+                  key={album.id + 'owned'}
                   cover={album.cover}
                   title={album.title}
                   subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
                   genre={album.genre}
                   id={album.id}
-                  onPlayClick={() => {}}
+                  onPlayClick={() => {
+                    console.log('Play Clicked', album.tracks?.length);
+                    if (album.tracks?.length) {
+                      updateTracks(album.tracks);
+                      setQueueId(album.id);
+                      playATrackById(album.tracks[0].id);
+                    }
+                  }}
                 />
               ))}
             </ScrollView>
@@ -203,7 +219,9 @@ const Albums = () => {
                 subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
                 genre={album.genre}
                 id={album.id}
-                onPlayClick={() => {}}
+                onPlayClick={() => {
+                  console.log('Play Clicked');
+                }}
               />
             ))}
           </View>

@@ -1,13 +1,15 @@
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { IGenre } from '@/utils/Interfaces/IGenre';
-import DarkGradient from '../Playlist/DarkGradient';
 import { Image } from 'expo-image';
 import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import COLORS from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import {
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native-gesture-handler';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import Animated, {
   useAnimatedStyle,
@@ -15,6 +17,15 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import {
+  Circle,
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Rect,
+  Stop,
+  Svg,
+} from 'react-native-svg';
 
 interface IAlbumCard {
   id: string;
@@ -34,8 +45,12 @@ const AlbumCard = ({
   onPlayClick,
 }: IAlbumCard) => {
   const [cardWidth, setCardWidth] = useState<number>(0);
-  const { queueId } = usePlayerStore();
-  const isThisQueuePlaying = queueId === id;
+  const { queueId, isPlaying } = usePlayerStore();
+  const [isThisQueuePlaying, setIsThisQueuePlaying] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsThisQueuePlaying(queueId === id && isPlaying);
+  }, [queueId]);
 
   const playButtonOpacity = useSharedValue(1);
   const playButtonAnimatedStyle = useAnimatedStyle(() => {
@@ -47,7 +62,7 @@ const AlbumCard = ({
   useEffect(() => {
     if (isThisQueuePlaying) {
       const pulseAnimation = withRepeat(
-        withTiming(0, {
+        withTiming(0.8, {
           duration: 1000,
         }),
         -1,
@@ -59,69 +74,140 @@ const AlbumCard = ({
     }
   }, [isThisQueuePlaying]);
 
+  const { playPause } = usePlayerStore();
   return (
-    <View
-      className="flex flex-col w-[50%]"
-      onLayout={(event) => {
-        setCardWidth(event.nativeEvent.layout.width);
-      }}
-    >
+    <>
       <View
-        className="w-full relative"
+        className="flex flex-col w-[60%] max-w-[60%]"
+        onLayout={(e) => {
+          setCardWidth(e.nativeEvent.layout.width);
+        }}
         style={{
-          height: cardWidth,
+          borderRadius: 6,
+          overflow: 'hidden',
+          borderColor: COLORS.neutral.semidark,
+          borderWidth: 1,
         }}
       >
-        <Image
-          source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
+        <View
+          className="relative"
           style={{
-            width: '100%',
-            height: '100%',
+            width: cardWidth,
+            height: cardWidth,
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
-        {/* Play Pause */}
-        <Animated.View
-          className="w-full h-full top-0 left-0 flex justify-center items-center absolute"
-          style={playButtonAnimatedStyle}
         >
-          <TouchableOpacity activeOpacity={0.7} onPress={onPlayClick}>
-            <Ionicons
-              name={isThisQueuePlaying ? 'pause' : 'play'}
-              size={28}
-              color={'white'}
-            />
-          </TouchableOpacity>
-        </Animated.View>
-
-        <View className="w-full flex flex-row justify-between items-end absolute bottom-0 p-2">
-          <View className="flex flex-col">
-            <StyledText size="lg" ellipsizeMode="tail" numberOfLines={1}>
-              {title}
-            </StyledText>
-            <StyledText
-              size="base"
-              opacity="high"
-              ellipsizeMode="tail"
-              numberOfLines={1}
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { alignItems: 'center', justifyContent: 'center', zIndex: 1 },
+            ]}
+          >
+            <Svg
+              height="100%"
+              width="100%"
+              viewBox={`0 0 ${cardWidth} ${cardWidth}`}
             >
-              {subtitle}
-            </StyledText>
+              <Defs>
+                <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
+                  <Stop offset="0.5" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
+                  <Stop
+                    offset="0.8"
+                    stopColor="rgb(0,0,0)"
+                    stopOpacity="0.85"
+                  />
+                  <Stop offset="1" stopColor="rgb(0,0,0)" stopOpacity="1" />
+                </LinearGradient>
+              </Defs>
+              <Rect
+                x="0"
+                y="0"
+                width={cardWidth}
+                height={cardWidth}
+                fill="url(#grad)"
+              />
+            </Svg>
           </View>
 
-          {/* TODO: genre based search on click */}
-          <View
-            className="rounded-full py-1 px-3"
+          <Image
+            source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
             style={{
-              backgroundColor: COLORS.neutral.dense,
+              width: '100%',
+              height: '100%',
+            }}
+          />
+
+          {/* Options Button */}
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            containerStyle={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 2,
             }}
           >
-            <StyledText size="base" opacity="high">
-              {genre?.name}
-            </StyledText>
+            <MaterialIcons
+              name="more-vert"
+              size={24}
+              color={COLORS.neutral.light}
+            />
+          </TouchableOpacity>
+
+          {/* Play Pause */}
+          <Animated.View
+            className="self-center absolute pb-2"
+            style={[playButtonAnimatedStyle, { zIndex: 2 }]}
+          >
+            <TouchableWithoutFeedback
+              onPress={() => {
+                if (isThisQueuePlaying) {
+                  playPause();
+                } else {
+                  onPlayClick?.();
+                }
+              }}
+            >
+              <MaterialIcons
+                name={
+                  isThisQueuePlaying
+                    ? 'pause-circle-filled'
+                    : 'play-circle-filled'
+                }
+                size={36}
+                color={'white'}
+              />
+            </TouchableWithoutFeedback>
+          </Animated.View>
+
+          {/* Info */}
+
+          <View
+            className="absolute bottom-0 left-0 p-3 w-full flex flex-row justify-between items-end"
+            style={{ zIndex: 2 }}
+          >
+            <View className="flex flex-col">
+              <StyledText size="lg" ellipsizeMode="tail" numberOfLines={1}>
+                {title}
+              </StyledText>
+              <StyledText
+                size="sm"
+                opacity="high"
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                weight="light"
+              >
+                {subtitle}
+              </StyledText>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+      <View className="w-5" />
+    </>
   );
 };
 

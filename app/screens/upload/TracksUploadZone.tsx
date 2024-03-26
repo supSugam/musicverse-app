@@ -113,6 +113,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         const formData = getObjectAsFormData<ICreateAlbumPayload>(
           rest as ICreateAlbumPayload
         );
+
         await createAlbum.mutateAsync(formData, {
           onSuccess: async (data) => {
             toastResponseMessage({
@@ -129,6 +130,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               setLoading(false);
               return;
             }
+
             const albumTracksWithAlbumId = tracks.map((track) => ({
               ...track,
               albumIds: [albumId] as string[],

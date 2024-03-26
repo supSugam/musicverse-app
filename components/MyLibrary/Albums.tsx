@@ -152,17 +152,17 @@ const Albums = () => {
           setShowDeleteAlert(false);
         }}
         type="alert"
-        header="Delete Playlist"
+        header="Delete Album"
       >
         <StyledText size="base">
-          Are you sure you want to delete this playlist?
+          Are you sure you want to delete this album?
         </StyledText>
       </ReusableAlert>
       <MenuModal
         visible={isAlbumOptionsModalVisible}
         onClose={() => setIsAlbumOptionsModalVisible(false)}
         items={getAlbumOptions(selectedAlbum?.album.id)}
-        // header={getModalHeader}
+        header={selectedAlbum?.album.title}
       />
 
       <ScrollView
@@ -193,12 +193,15 @@ const Albums = () => {
                   genre={album.genre}
                   id={album.id}
                   onPlayClick={() => {
-                    console.log('Play Clicked', album.tracks?.length);
                     if (album.tracks?.length) {
                       updateTracks(album.tracks);
                       setQueueId(album.id);
                       playATrackById(album.tracks[0].id);
                     }
+                  }}
+                  onOptionsClick={() => {
+                    setSelectedAlbum({ album, type: 'owned' });
+                    setIsAlbumOptionsModalVisible(true);
                   }}
                 />
               ))}
@@ -220,7 +223,15 @@ const Albums = () => {
                 genre={album.genre}
                 id={album.id}
                 onPlayClick={() => {
-                  console.log('Play Clicked');
+                  if (album.tracks?.length) {
+                    updateTracks(album.tracks);
+                    setQueueId(album.id);
+                    playATrackById(album.tracks[0].id);
+                  }
+                }}
+                onOptionsClick={() => {
+                  setSelectedAlbum({ album, type: 'saved' });
+                  setIsAlbumOptionsModalVisible(true);
                 }}
               />
             ))}

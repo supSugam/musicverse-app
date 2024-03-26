@@ -1,10 +1,10 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 import { StyledButton } from '../reusables/StyledButton';
 import StyledText from '../reusables/StyledText';
 import COLORS from '@/constants/Colors';
-import { CommonActions, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import TrackPreview from '../Tracks/TrackPreview';
 import LoadingIcon from '../global/LoadingIcon';
 import { usePlaylistsQuery } from '@/hooks/react-query/usePlaylistsQuery';

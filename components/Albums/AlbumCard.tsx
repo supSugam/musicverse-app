@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { IGenre } from '@/utils/Interfaces/IGenre';
 import { Image } from 'expo-image';
 import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import COLORS from '@/constants/Colors';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import {
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -21,19 +21,19 @@ import {
   Circle,
   Defs,
   LinearGradient,
-  RadialGradient,
   Rect,
   Stop,
   Svg,
 } from 'react-native-svg';
 
-interface IAlbumCard {
+interface IAlbumCardProps {
   id: string;
   cover: string | null;
   title: string;
   subtitle: string;
   genre?: IGenre;
   onPlayClick?: () => void;
+  onOptionsClick?: () => void;
 }
 
 const AlbumCard = ({
@@ -43,7 +43,8 @@ const AlbumCard = ({
   genre,
   id,
   onPlayClick,
-}: IAlbumCard) => {
+  onOptionsClick,
+}: IAlbumCardProps) => {
   const [cardWidth, setCardWidth] = useState<number>(0);
   const { queueId, isPlaying } = usePlayerStore();
   const [isThisQueuePlaying, setIsThisQueuePlaying] = useState<boolean>(false);
@@ -76,138 +77,133 @@ const AlbumCard = ({
 
   const { playPause } = usePlayerStore();
   return (
-    <>
+    <View
+      className="flex flex-col w-48 h-48 bg-gray-800 mr-5"
+      style={{
+        borderRadius: 6,
+        overflow: 'hidden',
+        borderColor: COLORS.neutral.semidark,
+        borderWidth: 1,
+      }}
+      onLayout={(event) => {
+        const { width } = event.nativeEvent.layout;
+        setCardWidth(width);
+      }}
+    >
       <View
-        className="flex flex-col w-[60%] max-w-[60%]"
-        onLayout={(e) => {
-          setCardWidth(e.nativeEvent.layout.width);
-        }}
+        className="relative"
         style={{
-          borderRadius: 6,
-          overflow: 'hidden',
-          borderColor: COLORS.neutral.semidark,
-          borderWidth: 1,
+          width: '100%',
+          height: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <View
-          className="relative"
-          style={{
-            width: cardWidth,
-            height: cardWidth,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          style={[
+            StyleSheet.absoluteFill,
+            { alignItems: 'center', justifyContent: 'center', zIndex: 1 },
+          ]}
         >
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              { alignItems: 'center', justifyContent: 'center', zIndex: 1 },
-            ]}
+          <Svg
+            height="100%"
+            width="100%"
+            viewBox={`0 0 ${cardWidth} ${cardWidth}`}
           >
-            <Svg
-              height="100%"
-              width="100%"
-              viewBox={`0 0 ${cardWidth} ${cardWidth}`}
-            >
-              <Defs>
-                <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
-                  <Stop offset="0.5" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
-                  <Stop
-                    offset="0.8"
-                    stopColor="rgb(0,0,0)"
-                    stopOpacity="0.85"
-                  />
-                  <Stop offset="1" stopColor="rgb(0,0,0)" stopOpacity="1" />
-                </LinearGradient>
-              </Defs>
-              <Rect
-                x="0"
-                y="0"
-                width={cardWidth}
-                height={cardWidth}
-                fill="url(#grad)"
-              />
-            </Svg>
-          </View>
+            <Defs>
+              <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
+                <Stop offset="0.5" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
+                <Stop offset="0.8" stopColor="rgb(0,0,0)" stopOpacity="0.85" />
+                <Stop offset="1" stopColor="rgb(0,0,0)" stopOpacity="1" />
+              </LinearGradient>
+            </Defs>
+            <Rect
+              x="0"
+              y="0"
+              width={cardWidth}
+              height={cardWidth}
+              fill="url(#grad)"
+            />
+          </Svg>
+        </View>
 
-          <Image
-            source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
-            style={{
-              width: '100%',
-              height: '100%',
-            }}
+        <Image
+          source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
+        />
+
+        {/* Options Button */}
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          containerStyle={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 2,
+          }}
+          onPress={onOptionsClick}
+        >
+          <MaterialIcons
+            name="more-vert"
+            size={24}
+            color={COLORS.neutral.light}
           />
+        </TouchableOpacity>
 
-          {/* Options Button */}
-
-          <TouchableOpacity
-            activeOpacity={0.7}
-            containerStyle={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 2,
+        {/* Play Pause */}
+        <Animated.View
+          className="absolute pb-4"
+          style={[playButtonAnimatedStyle, { zIndex: 2 }]}
+        >
+          <TouchableWithoutFeedback
+            onPress={() => {
+              if (isThisQueuePlaying) {
+                playPause();
+              } else {
+                onPlayClick?.();
+              }
             }}
           >
             <MaterialIcons
-              name="more-vert"
-              size={24}
+              name={
+                isThisQueuePlaying
+                  ? 'pause-circle-filled'
+                  : 'play-circle-filled'
+              }
+              size={38}
               color={COLORS.neutral.light}
             />
-          </TouchableOpacity>
+          </TouchableWithoutFeedback>
+        </Animated.View>
 
-          {/* Play Pause */}
-          <Animated.View
-            className="self-center absolute pb-2"
-            style={[playButtonAnimatedStyle, { zIndex: 2 }]}
-          >
-            <TouchableWithoutFeedback
-              onPress={() => {
-                if (isThisQueuePlaying) {
-                  playPause();
-                } else {
-                  onPlayClick?.();
-                }
-              }}
+        {/* Info */}
+
+        <View
+          className="absolute bottom-0 left-0 p-3 w-full flex flex-row justify-between items-end"
+          style={{ zIndex: 2 }}
+        >
+          <View className="flex flex-col">
+            <StyledText size="lg" ellipsizeMode="tail" numberOfLines={1}>
+              {title}
+            </StyledText>
+            <StyledText
+              size="sm"
+              opacity="high"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              weight="light"
             >
-              <MaterialIcons
-                name={
-                  isThisQueuePlaying
-                    ? 'pause-circle-filled'
-                    : 'play-circle-filled'
-                }
-                size={36}
-                color={'white'}
-              />
-            </TouchableWithoutFeedback>
-          </Animated.View>
-
-          {/* Info */}
-
-          <View
-            className="absolute bottom-0 left-0 p-3 w-full flex flex-row justify-between items-end"
-            style={{ zIndex: 2 }}
-          >
-            <View className="flex flex-col">
-              <StyledText size="lg" ellipsizeMode="tail" numberOfLines={1}>
-                {title}
-              </StyledText>
-              <StyledText
-                size="sm"
-                opacity="high"
-                ellipsizeMode="tail"
-                numberOfLines={1}
-                weight="light"
-              >
-                {subtitle}
-              </StyledText>
-            </View>
+              {subtitle}
+            </StyledText>
           </View>
         </View>
       </View>
-      <View className="w-5" />
-    </>
+    </View>
   );
 };
 

@@ -34,6 +34,7 @@ interface IAlbumCardProps {
   genre?: IGenre;
   onPlayClick?: () => void;
   onOptionsClick?: () => void;
+  isCardViewable?: boolean;
 }
 
 const AlbumCard = ({
@@ -44,6 +45,7 @@ const AlbumCard = ({
   id,
   onPlayClick,
   onOptionsClick,
+  isCardViewable = false,
 }: IAlbumCardProps) => {
   const [cardWidth, setCardWidth] = useState<number>(0);
   const { queueId, isPlaying } = usePlayerStore();
@@ -54,6 +56,14 @@ const AlbumCard = ({
   }, [queueId]);
 
   const playButtonOpacity = useSharedValue(1);
+  const albumCardScale = useSharedValue(1);
+
+  const albumCardAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: albumCardScale.value }],
+    };
+  });
+
   const playButtonAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: playButtonOpacity.value,
@@ -75,16 +85,19 @@ const AlbumCard = ({
     }
   }, [isThisQueuePlaying]);
 
+  useEffect(() => {
+    if (isCardViewable) {
+      albumCardScale.value = withTiming(1.1);
+    } else {
+      albumCardScale.value = withTiming(1);
+    }
+  }, [isCardViewable]);
+
   const { playPause } = usePlayerStore();
   return (
-    <View
+    <Animated.View
       className="flex flex-col w-48 h-48 bg-gray-800 mr-5"
-      style={{
-        borderRadius: 6,
-        overflow: 'hidden',
-        borderColor: COLORS.neutral.semidark,
-        borderWidth: 1,
-      }}
+      style={albumCardAnimatedStyle}
       onLayout={(event) => {
         const { width } = event.nativeEvent.layout;
         setCardWidth(width);
@@ -97,12 +110,20 @@ const AlbumCard = ({
           height: '100%',
           alignItems: 'center',
           justifyContent: 'center',
+          borderColor: COLORS.neutral.semidark,
+          borderWidth: 1,
+          overflow: 'hidden',
+          borderRadius: 6,
         }}
       >
         <View
           style={[
             StyleSheet.absoluteFill,
-            { alignItems: 'center', justifyContent: 'center', zIndex: 1 },
+            {
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1,
+            },
           ]}
         >
           <Svg
@@ -203,7 +224,7 @@ const AlbumCard = ({
           </View>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 

@@ -1,5 +1,11 @@
-import { View, Text, ScrollView, RefreshControl } from 'react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  ViewabilityConfigCallbackPairs,
+} from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import StyledText from '../reusables/StyledText';
 import SearchField from '../reusables/SearchField';
 import { IAlbumDetails } from '@/utils/Interfaces/IAlbum';
@@ -139,6 +145,28 @@ const Albums = () => {
 
   const { setQueueId, updateTracks, playATrackById } = usePlayerStore();
 
+  const [viewableAlbumCardId, setViewableAlbumCardId] = useState<{
+    owned?: string;
+    saved?: string;
+  }>({});
+
+  const viewabilityConfigCallbackPairsOwned =
+    useRef<ViewabilityConfigCallbackPairs>([
+      {
+        viewabilityConfig: {
+          itemVisiblePercentThreshold: 50,
+        },
+        onViewableItemsChanged: ({ viewableItems, changed }) => {
+          setViewableAlbumCardId((prev) => {
+            return {
+              ...prev,
+              owned: viewableItems[0].item.id,
+            };
+          });
+        },
+      },
+    ]);
+
   return (
     <>
       <ReusableAlert
@@ -178,12 +206,52 @@ const Albums = () => {
           placeholder="Search Albums"
         />
         {ownedAlbums.length > 0 && (
-          <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="lg" className="my-4">
+          <View className="flex flex-col w-full overflow-visible flex-1">
+            <StyledText weight="semibold" size="xl" className="my-4">
               Owned Albums
             </StyledText>
 
-            <ScrollView horizontal>
+            <Animated.FlatList
+              horizontal
+              data={ownedAlbums}
+              renderItem={({ item, index }) => (
+                <AlbumCard
+                  key={item.id + index}
+                  cover={item.cover}
+                  title={item.title}
+                  subtitle={`${item._count.tracks} tracks • ${item._count.savedBy} saves`}
+                  genre={item.genre}
+                  id={`${item.id}owned-${index}`}
+                  isCardViewable={
+                    viewableAlbumCardId.owned === item.id &&
+                    ownedAlbums.length > 1
+                  }
+                  onPlayClick={() => {
+                    if (item.tracks?.length) {
+                      updateTracks(item.tracks);
+                      setQueueId(item.id);
+                      playATrackById(item.tracks[0].id);
+                    }
+                  }}
+                  onOptionsClick={() => {
+                    setSelectedAlbum({ album: item, type: 'owned' });
+                    setIsAlbumOptionsModalVisible(true);
+                  }}
+                />
+              )}
+              keyExtractor={(item, i) => `${item.id}${i}owned`}
+              viewabilityConfigCallbackPairs={
+                viewabilityConfigCallbackPairsOwned.current
+              }
+              style={{
+                // items should be able to overflow
+                overflow: 'visible',
+              }}
+            />
+
+            {/* <ScrollView horizontal
+            
+            >
               {ownedAlbums.map((album, i) => (
                 <AlbumCard
                   key={album.id + 'owned'}
@@ -205,7 +273,7 @@ const Albums = () => {
                   }}
                 />
               ))}
-            </ScrollView>
+            </ScrollView> */}
           </View>
         )}
         {savedAlbums.length > 0 && (

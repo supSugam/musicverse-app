@@ -33,6 +33,7 @@ interface ITrackListItemProps {
   label?: string | number;
   isBuffering?: boolean;
   options?: IMenuItemProps[];
+  onOptionsClick?: () => void;
 }
 
 const TrackListItem = ({
@@ -48,6 +49,7 @@ const TrackListItem = ({
   isPlaying,
   isBuffering = false,
   options,
+  onOptionsClick,
 }: ITrackListItemProps) => {
   const translateX = useSharedValue(400); // Start position outside the screen
 
@@ -254,6 +256,7 @@ const TrackListItem = ({
             <TouchableOpacity
               className="ml-1"
               onPress={() => {
+                onOptionsClick?.();
                 setOptionsMenuVisible(true);
               }}
             >

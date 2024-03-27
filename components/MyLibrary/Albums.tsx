@@ -32,6 +32,7 @@ const Albums = () => {
   const {
     getAllAlbums: { data: ownedAlbumsData, refetch: refetchOwnedAlbums },
     deleteAlbumById,
+    toggleSaveAlbum,
   } = useAlbumsQuery({
     getAllAlbumsConfig: {
       params: {
@@ -113,7 +114,9 @@ const Albums = () => {
       case 'saved':
         options.push({
           label: 'Unsave',
-          onPress: () => {},
+          onPress: () => {
+            toggleSaveAlbum.mutate(albumId);
+          },
           icon: 'delete',
         });
         break;
@@ -128,20 +131,6 @@ const Albums = () => {
   }>();
   const [isAlbumOptionsModalVisible, setIsAlbumOptionsModalVisible] =
     useState<boolean>(false);
-
-  //   const getModalHeader = useMemo(
-  //     () => (
-  //       <PlaylistPreviewList
-  //         cover={selectedPlaylist?.playlist.cover || null}
-  //         onPress={() => {}}
-  //         subtitle={`${selectedPlaylist?.playlist._count.tracks} tracks • ${selectedPlaylist?.playlist._count.savedBy} saves`}
-  //         title={selectedPlaylist?.playlist.title || ''}
-  //       />
-  //     ),
-  //     [selectedPlaylist]
-  //   );
-
-  // Player
 
   const { setQueueId, updateTracks, playATrackById } = usePlayerStore();
 
@@ -223,7 +212,7 @@ const Albums = () => {
         />
         {ownedAlbums.length > 0 && (
           <View className="flex flex-col w-full overflow-visible flex-1">
-            <StyledText weight="semibold" size="xl" className="my-4">
+            <StyledText weight="semibold" size="xl" className="my-3">
               Owned Albums
             </StyledText>
 
@@ -259,16 +248,12 @@ const Albums = () => {
               viewabilityConfigCallbackPairs={
                 viewabilityConfigCallbackPairsOwned.current
               }
-              style={{
-                // items should be able to overflow
-                overflow: 'visible',
-              }}
             />
           </View>
         )}
         {savedAlbums.length > 0 && (
           <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="xl" className="mt-4">
+            <StyledText weight="semibold" size="xl" className="my-3">
               Saved Albums
             </StyledText>
 
@@ -303,33 +288,7 @@ const Albums = () => {
               viewabilityConfigCallbackPairs={
                 viewabilityConfigCallbackPairsSaved.current
               }
-              style={{
-                // items should be able to overflow
-                overflow: 'visible',
-              }}
             />
-
-            {/* {savedAlbums.map((album, i) => (
-              <AlbumCard
-                key={album.id}
-                cover={album.cover}
-                title={album.title}
-                subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
-                genre={album.genre}
-                id={album.id}
-                onPlayClick={() => {
-                  if (album.tracks?.length) {
-                    updateTracks(album.tracks);
-                    setQueueId(album.id);
-                    playATrackById(album.tracks[0].id);
-                  }
-                }}
-                onOptionsClick={() => {
-                  setSelectedAlbum({ album, type: 'saved' });
-                  setIsAlbumOptionsModalVisible(true);
-                }}
-              />
-            ))} */}
           </View>
         )}
       </ScrollView>

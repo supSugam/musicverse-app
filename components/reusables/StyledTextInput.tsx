@@ -56,9 +56,7 @@ export default function StyledTextField({
   }, [errorMessage]);
 
   return (
-    <View
-      className={`flex flex-col justify-center w-full my-1 ${wrapperClassName}`}
-    >
+    <View className={`flex flex-col justify-center w-full ${wrapperClassName}`}>
       {label && (
         <StyledText
           size="base"

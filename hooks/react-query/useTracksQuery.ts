@@ -23,40 +23,39 @@ export interface ITracksPaginationQueryParams extends IBasePaginationParams {
   playlists?: boolean;
   selectedGenre?: string;
   selectedTag?: string;
+  owned?: boolean;
+  liked?: boolean;
 }
 
 type TracksQuery<T extends string | undefined = undefined> = {
   getAllTracks: UseQueryResult<AxiosResponse<GetAllTracksResponse, any>, Error>;
-} & (T extends string
-  ? {
-      getTrackById: UseQueryResult<AxiosResponse<any, any>, Error>;
-      deleteTrackById: UseMutationResult<
-        AxiosResponse<any, any>,
-        Error,
-        string,
-        unknown
-      >;
-      toggleLike: UseMutationResult<
-        AxiosResponse<any, any>,
-        Error,
-        string,
-        unknown
-      >;
-    }
-  : {});
+  getTrackById: UseQueryResult<AxiosResponse<any, any>, Error>;
+  deleteTrackById: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    string,
+    unknown
+  >;
+  toggleLike: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    string,
+    unknown
+  >;
+};
 
-export const useTracksQuery = <T extends string | undefined = undefined>({
+export const useTracksQuery = ({
   id,
   getAllTracksConfig,
 }: {
-  id?: T;
+  id?: string;
   getAllTracksConfig?: {
     params?: ITracksPaginationQueryParams;
     queryOptions?: Partial<
       UseQueryOptions<AxiosResponse<GetAllTracksResponse, any>, Error>
     >;
   };
-}): TracksQuery<T> => {
+}): TracksQuery => {
   const { api } = useAuthStore();
   const queryClient = useQueryClient();
   const getAllTracks = useQuery<AxiosResponse<GetAllTracksResponse, any>>({

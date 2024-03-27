@@ -166,6 +166,22 @@ const Albums = () => {
         },
       },
     ]);
+  const viewabilityConfigCallbackPairsSaved =
+    useRef<ViewabilityConfigCallbackPairs>([
+      {
+        viewabilityConfig: {
+          itemVisiblePercentThreshold: 50,
+        },
+        onViewableItemsChanged: ({ viewableItems, changed }) => {
+          setViewableAlbumCardId((prev) => {
+            return {
+              ...prev,
+              saved: viewableItems[0].item.id,
+            };
+          });
+        },
+      },
+    ]);
 
   return (
     <>
@@ -248,41 +264,52 @@ const Albums = () => {
                 overflow: 'visible',
               }}
             />
-
-            {/* <ScrollView horizontal
-            
-            >
-              {ownedAlbums.map((album, i) => (
-                <AlbumCard
-                  key={album.id + 'owned'}
-                  cover={album.cover}
-                  title={album.title}
-                  subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
-                  genre={album.genre}
-                  id={album.id}
-                  onPlayClick={() => {
-                    if (album.tracks?.length) {
-                      updateTracks(album.tracks);
-                      setQueueId(album.id);
-                      playATrackById(album.tracks[0].id);
-                    }
-                  }}
-                  onOptionsClick={() => {
-                    setSelectedAlbum({ album, type: 'owned' });
-                    setIsAlbumOptionsModalVisible(true);
-                  }}
-                />
-              ))}
-            </ScrollView> */}
           </View>
         )}
         {savedAlbums.length > 0 && (
           <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="lg" className="mt-4">
+            <StyledText weight="semibold" size="xl" className="mt-4">
               Saved Albums
             </StyledText>
 
-            {savedAlbums.map((album, i) => (
+            <Animated.FlatList
+              data={savedAlbums}
+              renderItem={({ item, index }) => (
+                <AlbumCard
+                  key={item.id + index}
+                  cover={item.cover}
+                  title={item.title}
+                  subtitle={`${item._count.tracks} tracks • ${item._count.savedBy} saves`}
+                  genre={item.genre}
+                  id={`${item.id}saved-${index}`}
+                  isCardViewable={
+                    viewableAlbumCardId.saved === item.id &&
+                    savedAlbums.length > 1
+                  }
+                  onPlayClick={() => {
+                    if (item.tracks?.length) {
+                      updateTracks(item.tracks);
+                      setQueueId(item.id);
+                      playATrackById(item.tracks[0].id);
+                    }
+                  }}
+                  onOptionsClick={() => {
+                    setSelectedAlbum({ album: item, type: 'saved' });
+                    setIsAlbumOptionsModalVisible(true);
+                  }}
+                />
+              )}
+              keyExtractor={(item, i) => `${item.id}${i}saved`}
+              viewabilityConfigCallbackPairs={
+                viewabilityConfigCallbackPairsSaved.current
+              }
+              style={{
+                // items should be able to overflow
+                overflow: 'visible',
+              }}
+            />
+
+            {/* {savedAlbums.map((album, i) => (
               <AlbumCard
                 key={album.id}
                 cover={album.cover}
@@ -302,7 +329,7 @@ const Albums = () => {
                   setIsAlbumOptionsModalVisible(true);
                 }}
               />
-            ))}
+            ))} */}
           </View>
         )}
       </ScrollView>

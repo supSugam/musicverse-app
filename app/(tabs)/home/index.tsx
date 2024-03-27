@@ -3,7 +3,10 @@ import Container from '@/components/Container';
 import TrackListItem from '@/components/Tracks/TrackListItem';
 import GenreScrollView from '@/components/home/GenreScrollView';
 import { useGenreQuery } from '@/hooks/react-query/useGenreQuery';
-import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
+import {
+  ITracksPaginationQueryParams,
+  useTracksQuery,
+} from '@/hooks/react-query/useTracksQuery';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
@@ -25,13 +28,14 @@ const HomeScreen: React.FC = () => {
     ITrackDetails[]
   >([]);
 
-  const InitialTracksParams = useMemo(() => {
+  const InitialTracksParams: ITracksPaginationQueryParams = useMemo(() => {
     return {
       genre: true,
       creator: true,
       ...(selectedGenre !== 'All' && {
         selectedGenre: genres.find((genre) => genre.name === selectedGenre)?.id,
       }),
+      pageSize: 5,
     };
   }, [selectedGenre, genres]);
 

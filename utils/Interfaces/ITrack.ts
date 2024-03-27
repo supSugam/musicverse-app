@@ -56,4 +56,6 @@ export interface ITrackDetails {
   creator?: IUserWithProfile;
   isLiked?: boolean;
   plays?: number;
+  downloaded?: boolean;
+  downloadedAt?: string;
 }

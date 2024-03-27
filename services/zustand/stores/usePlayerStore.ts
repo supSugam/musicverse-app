@@ -32,7 +32,7 @@ interface PlayerState {
   isMuted: boolean;
   isLoaded: boolean;
   currentTrackIndex: number | null;
-  tracks: ITrackDetails[];
+  tracks: Partial<ITrackDetails>[];
   volume: number;
   playbackInstance: Audio.Sound | null;
   playbackPosition: number;
@@ -57,7 +57,7 @@ interface PlayerState {
   playATrackById: (id: string) => Promise<void>;
   nextTrack: () => Promise<void>;
   prevTrack: () => Promise<void>;
-  currentTrack: () => ITrackDetails | null;
+  currentTrack: () => Partial<ITrackDetails> | null;
   seek: (position: number) => Promise<void>;
   setSpeed: (speed: number) => Promise<void>;
   setVolume: (volume: number) => Promise<void>;
@@ -159,7 +159,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       // Play
 
-      if (!src) return;
+      if (!src || !id) return;
       playATrack(id);
 
       await newPlaybackInstance.loadAsync(

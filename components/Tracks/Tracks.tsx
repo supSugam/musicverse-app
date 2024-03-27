@@ -18,7 +18,7 @@ import Animated from 'react-native-reanimated';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import TrackListItem from './TrackListItem';
-
+import * as FileSystem from 'expo-file-system';
 const Tracks = () => {
   const navigation = useNavigation();
   const [ownedTracks, setOwnedTracks] = useState<ITrackDetails[]>([]);
@@ -62,8 +62,8 @@ const Tracks = () => {
   }, [ownedTracksData]);
 
   useEffect(() => {
+    console.log(FileSystem.documentDirectory);
     const tracks = likedTracksData?.data?.result?.items;
-    console.log('savedTracksData', tracks);
     if (tracks) {
       setLikedTracks(tracks);
     }

@@ -3,7 +3,7 @@ import { BASE_URL } from '@env';
 import 'react-native-get-random-values';
 import { v4 } from 'uuid';
 import { UserRole } from './Interfaces/IUser';
-
+import * as FileSystem from 'expo-file-system';
 export const api = axios.create({
   baseURL: BASE_URL,
 });
@@ -94,3 +94,32 @@ export const PLAYBACK_SPEEDS: { label: string; value: number }[] = [
     value: 2,
   },
 ];
+
+export const Downloaded_Tracks_Paths = {
+  TRACKS_DIR: `${FileSystem.documentDirectory}Music`,
+  TRACK_DIR: (id: string) => `${FileSystem.documentDirectory}Music/${id}`,
+  TRACK_SRC: (id: string, fileName: string) =>
+    `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
+  TRACK_COVER: (id: string, fileName: string) =>
+    `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
+  TRACK_ARTIST_AVATAR: (id: string, fileName: string) =>
+    `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
+} as const;
+
+// use expo sqlite then.
+
+// User should be able to download tracks.
+// Track details: export interface IUserProfile { avatar: string | null; cover: string | null; createdAt: string; id: string; name: string; userId: string; } export interface IUserWithProfile{ id: string; email: string; username: string; role: UserRole; isVerified: boolean; profile: IUserProfile; } export interface ITrackDetails { id: string; title: string; description: string | null; src: string; // this is a audio link (you have to download and save this) cover: string | null; // this is a image link (you have to download and save this as well) lyrics: string | null; // this ican be large text, publicStatus: string; trackDuration: number; trackSize: number; creator: IUserWithProfile; plays?: number; createdAt: string; downloaded?: boolean; downloadedAt?: string; }
+// make a useDownloadTrack hook that will handle everything from saving tracks and related info to storing them and retreiving or deleting them. react native expo, typescript, use expo's libraries, generate full working code fully, download should be done with using axios, also a progress percentage of type number ranging from 1-100, isDownloading bool, cancel download method, and edit filepath according to this new design:
+// export const DOWNLOADED_TRACK_PATHS = {
+//   TRACKS_DIR: `${FileSystem.documentDirectory}Music`,
+//   TRACK_DIR: (id: string) => `${FileSystem.documentDirectory}Music/${id}`,
+//   TRACK_SRC: (id: string, fileName: string) =>
+//     `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
+//   TRACK_COVER: (id: string, fileName: string) =>
+//     `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
+//   TRACK_ARTIST_AVATAR: (id: string, fileName: string) =>
+//     `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
+// };
+//  also you were wrong about filesystem stuff, for example: Property 'path' does not exist on type 'typeof import("c:/Users/sugam/OneDrive/Documents/Year 3rd/FYP/musicverse-app/node\_modules/expo-file-system/build/index")', use the latest version of expo-file-system
+//  and generate me full working code

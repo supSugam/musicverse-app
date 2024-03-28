@@ -1,21 +1,27 @@
-import { View, TextInput } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, TextInput, StyleSheet, Keyboard } from 'react-native';
+import React, { RefCallback, useEffect, useRef, useState } from 'react';
 import COLORS from '@/constants/Colors';
 import StyledText, {
   TextSizeOptions,
   TextWeightOptions,
 } from '@/components/reusables/StyledText';
-import { Controller, RegisterOptions } from 'react-hook-form';
+import { Control, Controller, RegisterOptions } from 'react-hook-form';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import {
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native-gesture-handler';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import AnimatedTouchable from './AnimatedTouchable';
 
 type TextFieldProps = {
   errorMessage?: any;
   label?: string;
-  control?: any;
+  control?: Control<any>;
   rules?: RegisterOptions;
   controllerName: string;
   variant?: 'default' | 'underlined';
@@ -25,6 +31,7 @@ type TextFieldProps = {
   textAlign?: 'center' | 'left';
   wrapperClassName?: string;
   borderColor?: string;
+  toggleableVisibility?: boolean;
 } & React.ComponentProps<typeof TextInput>;
 export default function StyledTextField({
   label,
@@ -39,19 +46,22 @@ export default function StyledTextField({
   textAlign = 'left',
   wrapperClassName,
   borderColor = COLORS.purple.dark,
+  toggleableVisibility = false,
   ...rest
 }: TextFieldProps) {
   const [borderOpacity, setBorderOpacity] = useState<number>(40);
   const isUnderlined = variant === 'underlined';
   const errorMessageHeight = useSharedValue<number>(0);
+  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
+  const [inputWrapperHeight, setInputWrapperHeight] = useState<number>(0);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       height: errorMessageHeight.value,
     };
   });
-
   useEffect(() => {
+    console.log(inputWrapperHeight);
     errorMessageHeight.value = withTiming(errorMessage ? 35 : 0);
   }, [errorMessage]);
 
@@ -67,56 +77,89 @@ export default function StyledTextField({
         </StyledText>
       )}
 
-      <View
-        style={{
-          backgroundColor: backgroundColor
-            ? backgroundColor
-            : isUnderlined
-            ? 'transparent'
-            : COLORS.background.dark,
-        }}
-        className="w-full"
-      >
-        <Controller
-          control={control}
-          rules={{
-            ...(rules || {}),
-          }}
-          render={({ field: { onChange, onBlur, value, ref } }) => (
-            <TextInput
-              onBlur={() => {
-                onBlur();
-                setBorderOpacity(40);
-              }}
-              onChangeText={(text) => onChange(text)}
-              value={value}
-              placeholderTextColor={'#ffffff80'}
-              className={`text-white text-${textSize} font-${fontWeight} text-${textAlign} rounded-md p-3 px-4 w-full placeholder:white placeholder-opacity-50`}
-              autoCorrect={false}
-              autoComplete="off"
-              autoCapitalize="none"
-              onSubmitEditing={() => onBlur()}
-              blurOnSubmit
-              onFocus={() => setBorderOpacity(100)}
+      <Controller
+        control={control}
+        rules={rules}
+        render={({ field: { onChange, onBlur, value, ref } }) => {
+          return (
+            <TouchableWithoutFeedback
               style={{
-                borderColor: errorMessage
-                  ? COLORS.red.light
+                backgroundColor: backgroundColor
+                  ? backgroundColor
                   : isUnderlined
-                  ? `rgba(255, 255, 255, ${borderOpacity / 100})`
-                  : borderColor,
-                borderTopWidth: isUnderlined ? 0 : 1,
-                borderBottomWidth: isUnderlined ? 1 : 1,
-                borderLeftWidth: isUnderlined ? 0 : 1,
-                borderRightWidth: isUnderlined ? 0 : 1,
-                // TODO: Border optacity animation on blur and focus
+                  ? 'transparent'
+                  : COLORS.background.dark,
               }}
-              ref={ref}
-              {...rest}
-            />
-          )}
-          name={controllerName}
-        />
-      </View>
+              className="w-full relative"
+              onLayout={(event) => {
+                const { height } = event.nativeEvent.layout;
+                setInputWrapperHeight(height);
+              }}
+            >
+              <TextInput
+                onBlur={() => {
+                  onBlur();
+                  setBorderOpacity(40);
+                }}
+                secureTextEntry={toggleableVisibility && !isPasswordVisible}
+                onChangeText={(text) => onChange(text)}
+                value={value}
+                placeholderTextColor={'#ffffff80'}
+                className={`text-white text-${textSize} font-${fontWeight} text-${textAlign} rounded-md p-3 px-4 w-full placeholder:white placeholder-opacity-50`}
+                autoCorrect={false}
+                autoComplete="off"
+                autoCapitalize="none"
+                onSubmitEditing={() => onBlur()}
+                blurOnSubmit
+                onFocus={() => setBorderOpacity(100)}
+                style={{
+                  borderColor: errorMessage
+                    ? COLORS.red.light
+                    : isUnderlined
+                    ? `rgba(255, 255, 255, ${borderOpacity / 100})`
+                    : borderColor,
+                  borderTopWidth: isUnderlined ? 0 : 1,
+                  borderBottomWidth: isUnderlined ? 1 : 1,
+                  borderLeftWidth: isUnderlined ? 0 : 1,
+                  borderRightWidth: isUnderlined ? 0 : 1,
+                  // TODO: Border optacity animation on blur and focus
+                }}
+                ref={ref}
+                {...rest}
+              />
+              {toggleableVisibility && (
+                <AnimatedTouchable
+                  onPress={(e) => {
+                    setIsPasswordVisible((prev) => !prev);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 20,
+                    paddingHorizontal: 16,
+                  }}
+                  activeOpacity={0.8}
+                  onPressAnimation={{
+                    duration: 100,
+                    scale: 0.5,
+                  }}
+                  onPressOutAnimation={{
+                    duration: 100,
+                    scale: 1,
+                  }}
+                >
+                  <FontAwesome
+                    name={isPasswordVisible ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color={COLORS.neutral.light}
+                  />
+                </AnimatedTouchable>
+              )}
+            </TouchableWithoutFeedback>
+          );
+        }}
+        name={controllerName}
+      />
 
       <Animated.View style={[{ overflow: 'hidden' }, animatedStyle]}>
         <StyledText size="sm" weight="medium" className="text-red-500 mt-2">

@@ -77,25 +77,39 @@ const Tracks = () => {
   };
 
   const getTrackOptions = (trackId?: string): IMenuItemProps[] => {
-    if (!trackId) return [];
-
     const track = [...ownedTracks, ...likedTracks].find(
       (track) => track.id === trackId
     );
+
+    if (!track || !trackId) return [];
     let options: IMenuItemProps[] = [
       {
         label: 'Share',
         onPress: () => {},
         icon: 'share',
       },
-      {
+    ];
+    const downloaded = isTrackDownloaded(trackId);
+
+    if (downloaded) {
+      options.push({
+        label: 'Delete from Downloads',
+        onPress: () => {
+          setIsTrackOptionsModalVisible(false);
+          deleteTrack(trackId);
+        },
+        icon: 'delete',
+      });
+    } else {
+      options.push({
         label: 'Download',
         onPress: () => {
-          if (track) downloadAndSaveTrack(track);
+          downloadAndSaveTrack(track);
+          setIsTrackOptionsModalVisible(false);
         },
         icon: 'download',
-      },
-    ];
+      });
+    }
 
     switch (selectedTrack?.type) {
       case 'owned':
@@ -144,8 +158,9 @@ const Tracks = () => {
   const {
     downloadAndSaveTrack,
     progressPercentage,
-    deleteAllTracks,
     tracks: downloadedTracks,
+    isTrackDownloaded,
+    deleteTrack,
   } = useDownloadTrack();
 
   useEffect(() => {

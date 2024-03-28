@@ -109,6 +109,7 @@ export default function Login({ navigation }: { navigation: any }) {
                 secureTextEntry
                 controllerName="password"
                 autoComplete="password"
+                toggleableVisibility
               />
             </View>
 

@@ -118,7 +118,7 @@ export const useAuthStore = create<AuthStore>(
       } else {
         set(() => ({ currentUser: null }));
       }
-      return get().currentUser !== null;
+      return true;
     },
   })
 );

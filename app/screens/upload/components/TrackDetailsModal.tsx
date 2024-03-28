@@ -262,14 +262,14 @@ const TrackDetailsModal = ({
       setValue('lyrics', trackToUpdate.lyrics);
 
       const genreName = genres.find(
-        (g) => g.id === trackToUpdate.genreId
+        (g) => g?.id === trackToUpdate.genreId
       )?.name;
       if (genreName) {
         setSelectedGenre([genreName]);
       }
 
       const selectedTags = tags
-        .filter((tag) => trackToUpdate?.tags?.includes(tag.id))
+        .filter((tag) => trackToUpdate?.tags?.includes(tag?.id))
         .map((tag) => tag.name);
       if (selectedTags) {
         setSelectedTags(selectedTags);

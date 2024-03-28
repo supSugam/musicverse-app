@@ -21,7 +21,7 @@ LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
 
 export default function index() {
-  const { currentUser, initialize } = useAuthStore((state) => state);
+  const { currentUser, initialize } = useAuthStore();
 
   useEffect(() => {
     const onInitialize = async () => {
@@ -29,7 +29,7 @@ export default function index() {
     };
 
     onInitialize();
-  }, [initialize]);
+  }, [initialize, currentUser]);
 
   return (
     <>

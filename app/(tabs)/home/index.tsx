@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 const HomeScreen: React.FC = () => {
-  const { currentUser, currentUserProfile } = useAuthStore((state) => state);
+  const { currentUser, currentUserProfile } = useAuthStore();
 
   // Genres
   const { genres, isLoading: isGenresLoading } = useGenreQuery();
@@ -62,7 +62,6 @@ const HomeScreen: React.FC = () => {
     if (data) {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
-      updateTracks(tracks);
     }
   }, [data]);
 

@@ -92,7 +92,6 @@ export default function Register({ navigation }: { navigation: any }) {
             height: '100%',
             backgroundColor: 'red',
           }}
-          automaticallyAdjustKeyboardInsets={true}
         >
           <View
             style={{
@@ -121,9 +120,9 @@ export default function Register({ navigation }: { navigation: any }) {
                 label="Password"
                 control={control}
                 errorMessage={errors.password?.message}
-                secureTextEntry
                 controllerName="password"
                 autoComplete="password-new"
+                toggleableVisibility
               />
             </View>
 

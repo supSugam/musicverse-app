@@ -6,8 +6,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-export interface IMenuItemProps {
-  onPress?: () => void;
+interface IAnimatedTouchableProps
+  extends React.ComponentProps<typeof TouchableOpacity> {
   children?: React.ReactNode;
   duration?: number;
   onPressAnimation?: {
@@ -21,7 +21,6 @@ export interface IMenuItemProps {
 }
 
 const AnimatedTouchable = ({
-  onPress,
   children,
   duration = 200,
   onPressAnimation = {
@@ -32,7 +31,8 @@ const AnimatedTouchable = ({
     scale: 1,
     duration: 250,
   },
-}: IMenuItemProps) => {
+  ...rest
+}: IAnimatedTouchableProps) => {
   const translateX = useSharedValue(50); // Start position outside the screen
   const translateStyle = useAnimatedStyle(() => {
     return {
@@ -55,13 +55,13 @@ const AnimatedTouchable = ({
   return (
     <TouchableOpacity
       activeOpacity={0.8}
-      onPress={onPress}
       onPressIn={() =>
         (scale.value = withTiming(onPressAnimation.scale, {
           duration: onPressAnimation.duration,
         }))
       }
       onPressOut={leaveAnimation}
+      {...rest}
     >
       <Animated.View style={[scaleStyle, translateStyle]}>
         {children}

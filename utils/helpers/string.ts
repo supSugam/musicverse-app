@@ -81,3 +81,12 @@ export const parseStringToNullUndefined = (
 export const parseStringToBoolean = (value: string): boolean => {
   return value === 'true';
 };
+
+// Helper function to convert Blob to Base64 string
+export const blobToBase64 = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });

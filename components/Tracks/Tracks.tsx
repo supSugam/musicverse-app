@@ -19,6 +19,8 @@ import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import TrackListItem from './TrackListItem';
 import * as FileSystem from 'expo-file-system';
+import { useDownloadTrack } from '@/hooks/useDownloadTrack';
+import ProgressBar from '../reusables/ProgressBar';
 const Tracks = () => {
   const navigation = useNavigation();
   const [ownedTracks, setOwnedTracks] = useState<ITrackDetails[]>([]);
@@ -76,11 +78,22 @@ const Tracks = () => {
 
   const getTrackOptions = (trackId?: string): IMenuItemProps[] => {
     if (!trackId) return [];
+
+    const track = [...ownedTracks, ...likedTracks].find(
+      (track) => track.id === trackId
+    );
     let options: IMenuItemProps[] = [
       {
         label: 'Share',
         onPress: () => {},
         icon: 'share',
+      },
+      {
+        label: 'Download',
+        onPress: () => {
+          if (track) downloadAndSaveTrack(track);
+        },
+        icon: 'download',
       },
     ];
 
@@ -128,6 +141,19 @@ const Tracks = () => {
     useState<boolean>(false);
 
   const { updateTracks, playATrackById } = usePlayerStore();
+  const {
+    downloadAndSaveTrack,
+    progressPercentage,
+    deleteAllTracks,
+    tracks: downloadedTracks,
+  } = useDownloadTrack();
+
+  useEffect(() => {
+    console.log(
+      'downloadedTracks',
+      downloadedTracks.map((track) => track.src)
+    );
+  }, [downloadedTracks]);
 
   return (
     <>
@@ -161,6 +187,7 @@ const Tracks = () => {
           <RefreshControl refreshing={false} onRefresh={refetchAllTracks} />
         }
       >
+        <ProgressBar progress={progressPercentage} className="w-full" />
         <SearchField
           onSearch={(text) => {
             setSearchTerm(text);
@@ -188,6 +215,10 @@ const Tracks = () => {
                   }}
                   cover={track.cover}
                   duration={track.trackDuration}
+                  onOptionsClick={() => {
+                    setSelectedTrack({ track, type: 'owned' });
+                    setIsTrackOptionsModalVisible(true);
+                  }}
                 />
               ))}
               {likedTracks.map((track, i) => (
@@ -204,6 +235,10 @@ const Tracks = () => {
                   }}
                   cover={track.cover}
                   duration={track.trackDuration}
+                  onOptionsClick={() => {
+                    setSelectedTrack({ track, type: 'liked' });
+                    setIsTrackOptionsModalVisible(true);
+                  }}
                 />
               ))}
             </ScrollView>

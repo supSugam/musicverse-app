@@ -100,9 +100,6 @@ export const useAuthStore = create<AuthStore>(
       return await resendOtp(email);
     },
     initialize: async (): Promise<boolean> => {
-      const { data: profile } = useProfileQuery().get;
-      const userProfile = profile?.data.result;
-
       const userJson = await AsyncStorage.getItem('current-user');
       if (userJson) {
         const user = JSON.parse(userJson) as ICurrentUser;
@@ -119,7 +116,6 @@ export const useAuthStore = create<AuthStore>(
         } else {
           set(() => ({
             currentUser: user as ICurrentUser,
-            ...(userProfile && { currentUserProfile: userProfile }),
           }));
         }
       } else {

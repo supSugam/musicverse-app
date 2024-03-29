@@ -23,6 +23,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { toastResponseMessage } from '@/utils/toast';
+import AnimatedTouchable from './AnimatedTouchable';
 
 const schema = yup.object().shape({
   search: yup.string(),
@@ -193,24 +194,27 @@ const SelectOption: React.FC<SelectOptionProps> = ({
               showsVerticalScrollIndicator
               contentContainerStyle={{ flexGrow: 1 }}
             >
-              {filteredOptions.map((option, index) => {
-                const isSelected = tempSelected.includes(option);
-                return (
-                  <Pressable
-                    key={index}
-                    style={[
-                      styles.optionItem,
-                      isSelected && styles.selectedOptionItem,
-                    ]}
-                    onPress={() => handleOptionPress(option)}
-                  >
-                    <StyledText weight="normal" size="lg">
-                      {option}
-                      {isSelected && ' ✓'}
-                    </StyledText>
-                  </Pressable>
-                );
-              })}
+              <FlatList
+                data={filteredOptions}
+                keyExtractor={(item, index) => item + index}
+                renderItem={({ item }) => {
+                  const isSelected = tempSelected.includes(item);
+                  return (
+                    <Pressable
+                      style={[
+                        styles.optionItem,
+                        isSelected && styles.selectedOptionItem,
+                      ]}
+                      onPress={() => handleOptionPress(item)}
+                    >
+                      <StyledText weight="normal" size="lg">
+                        {item}
+                        {isSelected && ' ✓'}
+                      </StyledText>
+                    </Pressable>
+                  );
+                }}
+              />
             </ScrollView>
 
             {!single && (

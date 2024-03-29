@@ -21,12 +21,7 @@ export interface IUpdateUserProfileDTO extends ICreateUserProfileDTO {}
 
 interface IProfileQuery {
   get: UseQueryResult<AxiosResponse<any, any>, Error>;
-  create: UseMutationResult<
-    AxiosResponse<any, any>,
-    Error,
-    ICreateUserProfileDTO,
-    unknown
-  >;
+  create: UseMutationResult<AxiosResponse<any, any>, Error, FormData, unknown>;
   update: UseMutationResult<
     AxiosResponse<any, any>,
     Error,
@@ -36,13 +31,18 @@ interface IProfileQuery {
 }
 
 export const useProfileQuery = (): IProfileQuery => {
-  const { api, currentUserProfile } = useAuthStore((state) => state);
+  const { api, currentUserProfile } = useAuthStore();
   const queryClient = useQueryClient();
 
   const create = useMutation({
     mutationKey: ['createProfile'],
-    mutationFn: async (data: ICreateUserProfileDTO) =>
-      await api.post('/profile', data),
+    mutationFn: async (data: FormData) =>
+      await api.post('/profile', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: PROFILE_QUERY_KEY(),

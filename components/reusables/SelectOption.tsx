@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
-  Modal,
-  TextInput,
   FlatList,
   StyleSheet,
-  TouchableWithoutFeedback,
+  Pressable,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
@@ -25,6 +22,7 @@ import StyledTextField from './StyledTextInput';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { toastResponseMessage } from '@/utils/toast';
 
 const schema = yup.object().shape({
   search: yup.string(),
@@ -94,6 +92,11 @@ const SelectOption: React.FC<SelectOptionProps> = ({
       onChange([option]);
       toggleModal();
     } else {
+      if (
+        tempSelected.length === maxSelection &&
+        !tempSelected.includes(option)
+      )
+        return;
       const newSelected = tempSelected.includes(option)
         ? tempSelected.filter((item) => item !== option)
         : [...tempSelected, option];
@@ -108,21 +111,6 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   const handleConfirm = () => {
     onChange([...tempSelected]); // Update the selected state immediately
     toggleModal();
-  };
-
-  const renderOptionItem = ({ item }: { item: string }) => {
-    const isSelected = tempSelected.includes(item);
-    return (
-      <TouchableOpacity
-        style={[styles.optionItem, isSelected && styles.selectedOptionItem]}
-        onPress={() => handleOptionPress(item)}
-      >
-        <StyledText weight="normal" size="lg">
-          {item}
-          {isSelected && ' ✓'}
-        </StyledText>
-      </TouchableOpacity>
-    );
   };
 
   const filteredOptions = options.filter((option) =>
@@ -198,11 +186,32 @@ const SelectOption: React.FC<SelectOptionProps> = ({
                 {/* Close button */}
               </TouchableOpacity>
             </View>
-            <FlatList
-              data={filteredOptions}
-              renderItem={renderOptionItem}
-              keyExtractor={(item, index) => index.toString()}
-            />
+
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              scrollEnabled
+              showsVerticalScrollIndicator
+            >
+              {filteredOptions.map((option, index) => {
+                const isSelected = tempSelected.includes(option);
+                return (
+                  <Pressable
+                    key={index}
+                    style={[
+                      styles.optionItem,
+                      isSelected && styles.selectedOptionItem,
+                    ]}
+                    onPress={() => handleOptionPress(option)}
+                  >
+                    <StyledText weight="normal" size="lg">
+                      {option}
+                      {isSelected && ' ✓'}
+                    </StyledText>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
             {!single && (
               <View style={styles.buttonContainer}>
                 <StyledTouchableOpacity

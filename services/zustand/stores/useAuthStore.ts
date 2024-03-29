@@ -13,6 +13,7 @@ import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob'; // <- polyfill here
 import { BASE_URL } from '@env';
 import { toastResponseMessage } from '@/utils/toast';
+import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 interface AuthStore {
   currentUser: ICurrentUser | null;
   currentUserProfile: IUserProfile | null;
@@ -99,6 +100,9 @@ export const useAuthStore = create<AuthStore>(
       return await resendOtp(email);
     },
     initialize: async (): Promise<boolean> => {
+      const { data: profile } = useProfileQuery().get;
+      const userProfile = profile?.data.result;
+
       const userJson = await AsyncStorage.getItem('current-user');
       if (userJson) {
         const user = JSON.parse(userJson) as ICurrentUser;
@@ -111,12 +115,15 @@ export const useAuthStore = create<AuthStore>(
         set(() => ({ api: axiosInstance }));
         if (user.exp < Date.now() / 1000) {
           await AsyncStorage.removeItem('current-user');
-          set(() => ({ currentUser: null }));
+          set(() => ({ currentUser: null, currentUserProfile: null }));
         } else {
-          set(() => ({ currentUser: user as ICurrentUser }));
+          set(() => ({
+            currentUser: user as ICurrentUser,
+            ...(userProfile && { currentUserProfile: userProfile }),
+          }));
         }
       } else {
-        set(() => ({ currentUser: null }));
+        set(() => ({ currentUser: null, currentUserProfile: null }));
       }
       return true;
     },

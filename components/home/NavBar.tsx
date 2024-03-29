@@ -20,6 +20,7 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
   const { data: profile } = useProfileQuery().get;
 
   useEffect(() => {
+    console.log(profile?.data.result.avatar[0]);
     if (profile) {
       setCurrentUserProfile(profile.data.result as IUserProfile);
     }

@@ -30,7 +30,7 @@ export default function Login({ navigation }: { navigation: any }) {
   };
 
   const [loading, setLoading] = useState<boolean>(false);
-  const { login, setCurrentUser } = useAuthStore((state) => state);
+  const { login, setCurrentUser, currentUserProfile } = useAuthStore();
 
   const loginUserMutation = useMutation({
     mutationFn: login,
@@ -39,6 +39,9 @@ export default function Login({ navigation }: { navigation: any }) {
         type: 'success',
         text1: 'Logged in successfully.',
       });
+      if (!currentUserProfile) {
+        navigation.navigate('ProfileSetup');
+      }
       setLoading(false);
     },
     onError: (error: any) => {
@@ -106,7 +109,6 @@ export default function Login({ navigation }: { navigation: any }) {
                 label="Password"
                 control={control}
                 errorMessage={errors.password?.message}
-                secureTextEntry
                 controllerName="password"
                 autoComplete="password"
                 toggleableVisibility

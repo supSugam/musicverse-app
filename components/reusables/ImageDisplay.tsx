@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Dimension } from '@/utils/helpers/types';
+import AnimatedTouchable from './AnimatedTouchable';
 
 interface IImageDisplayProps
   extends React.ComponentProps<typeof TouchableOpacity> {
@@ -46,9 +47,7 @@ const ImageDisplay = ({
   ...rest
 }: IImageDisplayProps) => {
   const borderRadiusStyle =
-    borderRadius === 'full'
-      ? { borderRadius: Math.min(typeof width === 'number' ? width : 100, 100) }
-      : { borderRadius };
+    borderRadius === 'full' ? { borderRadius: 999 } : { borderRadius };
 
   //For the edit icon
   const editScale = useSharedValue(0);
@@ -93,7 +92,7 @@ const ImageDisplay = ({
   }, [source, onDelete, onEdit, onUndoChanges]);
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} {...rest}>
+    <AnimatedTouchable onPress={onPress} activeOpacity={0.8} {...rest}>
       <LinearGradient
         colors={[
           COLORS.neutral.black,
@@ -103,9 +102,9 @@ const ImageDisplay = ({
         style={[
           styles.container,
           { width, height },
-          borderRadiusStyle,
           bordered && styles.bordered,
           shadows && styles.shadows,
+          borderRadiusStyle,
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -141,7 +140,7 @@ const ImageDisplay = ({
           </TouchableOpacity>
         </Animated.View>
       </LinearGradient>
-    </TouchableOpacity>
+    </AnimatedTouchable>
   );
 };
 
@@ -151,6 +150,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
+    overflow: 'hidden',
   },
   bordered: {
     borderColor: COLORS.neutral.normal,

@@ -36,7 +36,8 @@ export const convertObjectToFormData = (obj: any): FormData => {
       if (val === null || val === undefined) {
         continue;
       }
-      formData.append(key, val.toString());
+
+      formData.append(key, typeof val === 'object' ? val : val.toString());
     }
   }
   return formData;

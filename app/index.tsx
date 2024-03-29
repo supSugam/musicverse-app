@@ -15,25 +15,38 @@ import BackNavigator from '@/components/reusables/BackNavigator';
 import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
 import UpdatePlaylist from '@/components/Playlist/UpdatePlaylist';
 import UpdateAlbum from '@/components/Albums/UpdateAlbum';
+import ProfileSetup from './screens/get-started/ProfileSetup';
+import { useNavigation } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
 
 export default function index() {
-  const { currentUser, initialize } = useAuthStore();
-
+  const { currentUser, initialize, currentUserProfile } = useAuthStore();
+  const navigation = useNavigation();
   useEffect(() => {
     const onInitialize = async () => {
       await initialize();
     };
 
     onInitialize();
-  }, [initialize, currentUser]);
+  }, [initialize]);
 
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUserProfile) {
+        console.log('User Profile', currentUserProfile);
+        navigation.dispatch(CommonActions.navigate('TabsLayout'));
+      } else {
+        navigation.dispatch(CommonActions.navigate('ProfileSetup'));
+      }
+    }
+  }, [currentUser, currentUserProfile, navigation]);
   return (
     <>
-      {currentUser !== null ? (
+      {currentUser !== null && currentUserProfile !== null ? (
         <>
           <Stack.Navigator
             screenOptions={{
@@ -140,6 +153,13 @@ export default function index() {
           <Stack.Screen
             name="Login"
             component={Login}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ProfileSetup"
+            component={ProfileSetup}
             options={{
               headerShown: false,
             }}

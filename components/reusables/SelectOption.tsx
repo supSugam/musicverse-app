@@ -191,6 +191,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
               keyboardShouldPersistTaps="handled"
               scrollEnabled
               showsVerticalScrollIndicator
+              contentContainerStyle={{ flexGrow: 1 }}
             >
               {filteredOptions.map((option, index) => {
                 const isSelected = tempSelected.includes(option);

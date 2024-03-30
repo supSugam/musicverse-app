@@ -10,12 +10,13 @@ import COLORS from '@/constants/Colors';
 import { toastResponseMessage } from '@/utils/toast';
 import { IUserProfile } from '@/utils/Interfaces/IUser';
 import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
-import { Link } from '@react-navigation/native';
+import { CommonActions, Link } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 
 const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
   const { setCurrentUserProfile, currentUserProfile, logout, api } =
     useAuthStore((state) => state);
+  const navigation = useNavigation();
 
   const { data: profile } = useProfileQuery().get;
 
@@ -23,10 +24,11 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
     console.log(profile?.data.result.avatar[0]);
     if (profile) {
       setCurrentUserProfile(profile.data.result as IUserProfile);
+    } else {
+      navigation.dispatch(CommonActions.navigate('ProfileSetup'));
     }
   }, [profile]);
 
-  const navigation = useNavigation();
   const currentRouteName =
     navigation.getState().routes[navigation.getState().index].name;
   return (

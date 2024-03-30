@@ -18,7 +18,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MediaType } from 'expo-media-library';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Modal, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  FlatList,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { View, Text } from 'react-native';
 
 import * as yup from 'yup';
@@ -43,6 +49,7 @@ import Switch from '@/components/reusables/StyledSwitch';
 import { ReviewStatus } from '@/utils/enums/ReviewStatus';
 import { cleanObject } from '@/utils/helpers/Object';
 import { IAlbum } from '@/utils/Interfaces/IAlbum';
+import AnimatedTouchable from '@/components/reusables/AnimatedTouchable';
 
 const schema = yup.object().shape({
   title: yup

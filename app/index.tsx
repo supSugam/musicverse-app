@@ -8,24 +8,18 @@ import TabsLayout from './(tabs)/_layout';
 import Login from './screens/Login';
 import { LogBox } from 'react-native';
 import TrackPlayer from '@/components/Player/TrackPlayer';
-import MiniPlayer from '@/components/Player/MiniPlayer';
-import AddToPlaylistStack from './screens/add-to-playlist';
 import AddToPlaylistSC1 from '@/components/Playlist/AddToPlaylistSC1';
 import BackNavigator from '@/components/reusables/BackNavigator';
 import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
 import UpdatePlaylist from '@/components/Playlist/UpdatePlaylist';
 import UpdateAlbum from '@/components/Albums/UpdateAlbum';
 import ProfileSetup from './screens/get-started/ProfileSetup';
-import { useNavigation } from 'expo-router';
-import { CommonActions } from '@react-navigation/native';
-
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
 
 export default function index() {
-  const { currentUser, initialize, currentUserProfile } = useAuthStore();
-  const navigation = useNavigation();
+  const { currentUser, initialize } = useAuthStore();
   useEffect(() => {
     const onInitialize = async () => {
       await initialize();
@@ -34,19 +28,9 @@ export default function index() {
     onInitialize();
   }, [initialize]);
 
-  useEffect(() => {
-    if (currentUser) {
-      if (currentUserProfile) {
-        console.log('User Profile', currentUserProfile);
-        navigation.dispatch(CommonActions.navigate('TabsLayout'));
-      } else {
-        navigation.dispatch(CommonActions.navigate('ProfileSetup'));
-      }
-    }
-  }, [currentUser, currentUserProfile, navigation]);
   return (
     <>
-      {currentUser !== null && currentUserProfile !== null ? (
+      {currentUser !== null ? (
         <>
           <Stack.Navigator
             screenOptions={{
@@ -54,6 +38,13 @@ export default function index() {
             }}
             initialRouteName="TabsLayout"
           >
+            <Stack.Screen
+              name="ProfileSetup"
+              component={ProfileSetup}
+              options={{
+                headerShown: false,
+              }}
+            />
             <Stack.Screen
               name="TrackPlayer"
               component={TrackPlayer}
@@ -153,13 +144,6 @@ export default function index() {
           <Stack.Screen
             name="Login"
             component={Login}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="ProfileSetup"
-            component={ProfileSetup}
             options={{
               headerShown: false,
             }}

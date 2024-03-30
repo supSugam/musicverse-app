@@ -62,8 +62,8 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   const searchTerm = watch('search');
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [tempSelected, setTempSelected] = useState<string[]>([]); // Initialize tempSelected as an empty array
-  const { SCREEN_HEIGHT } = useScreenDimensions(); // Assuming you get SCREEN_HEIGHT from your custom hook
+  const [tempSelected, setTempSelected] = useState<string[]>([]);
+  const { SCREEN_HEIGHT } = useScreenDimensions();
   const fadeAnim = useSharedValue<number>(0);
 
   const errorMessageHeight = useSharedValue<number>(0);
@@ -117,13 +117,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm?.toLowerCase() || '')
   );
-
-  const modalContainerStyle = useAnimatedStyle(() => {
-    return {
-      height: SCREEN_HEIGHT / 2,
-      opacity: fadeAnim.value,
-    };
-  });
+  const maxFlatListHeight = SCREEN_HEIGHT - 200; // Subtract padding or other components' heights
 
   return (
     <View style={styles.container}>
@@ -171,7 +165,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
         closeOnOutsideClick
       >
         <View style={styles.modalBackground}>
-          <Animated.View style={[styles.modalContainer, modalContainerStyle]}>
+          <Animated.View style={[styles.modalContainer]}>
             <View style={styles.modalHeader}>
               <View className="flex-1">
                 <StyledTextField
@@ -187,36 +181,30 @@ const SelectOption: React.FC<SelectOptionProps> = ({
                 {/* Close button */}
               </TouchableOpacity>
             </View>
-
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              scrollEnabled
-              showsVerticalScrollIndicator
-              contentContainerStyle={{ flexGrow: 1 }}
-            >
-              <FlatList
-                data={filteredOptions}
-                keyExtractor={(item, index) => item + index}
-                renderItem={({ item }) => {
-                  const isSelected = tempSelected.includes(item);
-                  return (
-                    <Pressable
-                      style={[
-                        styles.optionItem,
-                        isSelected && styles.selectedOptionItem,
-                      ]}
-                      onPress={() => handleOptionPress(item)}
-                    >
-                      <StyledText weight="normal" size="lg">
-                        {item}
-                        {isSelected && ' ✓'}
-                      </StyledText>
-                    </Pressable>
-                  );
-                }}
-              />
-            </ScrollView>
-
+            <FlatList
+              data={filteredOptions}
+              keyExtractor={(item, index) => item + index}
+              renderItem={({ item }) => {
+                const isSelected = tempSelected.includes(item);
+                return (
+                  <AnimatedTouchable
+                    style={[
+                      styles.optionItem,
+                      isSelected && styles.selectedOptionItem,
+                    ]}
+                    onPress={() => handleOptionPress(item)}
+                  >
+                    <StyledText weight="normal" size="lg">
+                      {item}
+                      {isSelected && ' ✓'}
+                    </StyledText>
+                  </AnimatedTouchable>
+                );
+              }}
+              style={{
+                maxHeight: maxFlatListHeight,
+              }}
+            />
             {!single && (
               <View style={styles.buttonContainer}>
                 <StyledTouchableOpacity
@@ -286,7 +274,6 @@ const styles = StyleSheet.create({
     marginLeft: 0,
   },
   modalBackground: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -295,6 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.neutral.dark,
     borderRadius: 10,
     padding: 20,
+    height: 400,
   },
   modalHeader: {
     flexDirection: 'row',

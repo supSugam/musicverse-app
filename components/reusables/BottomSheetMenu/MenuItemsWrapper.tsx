@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 12,
     width: '100%',
-    backgroundColor: COLORS.neutral.semidark,
+    backgroundColor: COLORS.neutral.dark,
   },
   draggableIndicator: {
     height: 4,

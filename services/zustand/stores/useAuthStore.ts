@@ -110,10 +110,16 @@ export const useAuthStore = create<AuthStore>(
           },
         });
         set(() => ({ api: axiosInstance }));
+
         if (user.exp < Date.now() / 1000) {
           await AsyncStorage.removeItem('current-user');
           set(() => ({ currentUser: null, currentUserProfile: null }));
         } else {
+          await axiosInstance.get('/profile/me').then((response) => {
+            if (response.data.result) {
+              set(() => ({ currentUserProfile: response.data.result }));
+            }
+          });
           set(() => ({
             currentUser: user as ICurrentUser,
           }));

@@ -383,6 +383,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
               type: 'success',
             });
 
+            api.post(`/tracks/download/${trackDetails.id}`);
             loadTracks();
           },
           (_, error) => {

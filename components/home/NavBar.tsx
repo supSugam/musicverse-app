@@ -24,17 +24,9 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
     if (profile) {
       setCurrentUserProfile(profile.data.result as IUserProfile);
     } else {
-      if (!currentUserProfile && !isLoading) {
-        navigation.dispatch(CommonActions.navigate('ProfileSetup'));
-      }
+      navigation.dispatch(CommonActions.navigate('ProfileSetup'));
     }
-  }, [
-    profile,
-    isLoading,
-    currentUserProfile,
-    setCurrentUserProfile,
-    navigation,
-  ]);
+  }, [profile, isLoading, currentUserProfile]);
 
   const currentRouteName =
     navigation.getState().routes[navigation.getState().index].name;

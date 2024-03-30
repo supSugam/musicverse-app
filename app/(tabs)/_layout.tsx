@@ -11,6 +11,7 @@ import MiniPlayer from '@/components/Player/MiniPlayer';
 import { useState } from 'react';
 import { TabRouteName } from '@/utils/helpers/types';
 import MyLibrary from './library';
+import SearchPage from './search';
 
 const Tab = createBottomTabNavigator();
 
@@ -131,7 +132,7 @@ export default function TabsLayout() {
         />
         <Tab.Screen
           name="Search"
-          component={Home}
+          component={SearchPage}
           options={{
             headerTitle: 'Search',
           }}

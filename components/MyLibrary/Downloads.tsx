@@ -9,7 +9,6 @@ import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { useDownloadTrack } from '@/hooks/useDownloadTrack';
 import TrackListItem from '../Tracks/TrackListItem';
-import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 
 const Downloads = () => {
   const navigation = useNavigation();
@@ -100,6 +99,7 @@ const Downloads = () => {
                   cover={track.cover}
                   duration={track.trackDuration}
                   onOptionsClick={() => {
+                    setSelectedTrack(track);
                     setIsTrackOptionsModalVisible(true);
                   }}
                 />
@@ -112,4 +112,4 @@ const Downloads = () => {
   );
 };
 
-export default memo(Downloads);
+export default Downloads;

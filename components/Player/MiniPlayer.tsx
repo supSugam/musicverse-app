@@ -22,10 +22,11 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import SliderInput from '../reusables/SliderInput';
 import { useNavigation } from 'expo-router';
 import { TabRouteName } from '@/utils/helpers/types';
+import useKeyboardListener from '@/hooks/useKeyboardListener';
 
 const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
-
+  const isKeyboardOpen = useKeyboardListener();
   // Animation when
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
@@ -51,7 +52,8 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
       activeTab &&
       currentTrack &&
       TAB_ROUTE_NAMES.includes(activeTab) &&
-      activeTab !== 'Upload';
+      activeTab !== 'Upload' &&
+      !isKeyboardOpen;
 
     if (showPlayerAboveTabBar) {
       translateY.value = withSpring(
@@ -74,7 +76,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
         restSpeedThreshold: 0.01,
       });
     }
-  }, [currentTrack, activeTab]);
+  }, [currentTrack, activeTab, isKeyboardOpen]);
 
   // API
 

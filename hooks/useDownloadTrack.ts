@@ -194,7 +194,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
         await api
           .get(`/tracks/${track}`)
           .then((res) => {
-            console.log(res.data);
+            trackDetails = res.data.result;
           })
           .catch((err) => {
             console.log(err);
@@ -202,8 +202,6 @@ export const useDownloadTrack = (searchTerm?: string) => {
       } else {
         trackDetails = track;
       }
-
-      return;
 
       if (!trackDetails) return;
 
@@ -381,10 +379,9 @@ export const useDownloadTrack = (searchTerm?: string) => {
           ],
           () => {
             toastResponseMessage({
-              content: 'Song downloaded successfully',
+              content: 'Song Downloaded',
               type: 'success',
             });
-            // console.log('Track saved successfully');
 
             loadTracks();
           },
@@ -422,7 +419,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
     return track.src;
   };
 
-  const deleteTrack = async (trackId: string) => {
+  const deleteTrack = async (trackId: string, showToast = true) => {
     const { exists } = await FileSystem.getInfoAsync(
       Downloaded_Tracks_Paths.TRACK_DIR(trackId)
     );
@@ -439,10 +436,12 @@ export const useDownloadTrack = (searchTerm?: string) => {
         'DELETE FROM tracks WHERE id = ?',
         [trackId],
         () => {
-          toastResponseMessage({
-            content: 'Song Deleted',
-            type: 'success',
-          });
+          if (showToast) {
+            toastResponseMessage({
+              content: 'Song Deleted',
+              type: 'success',
+            });
+          }
           loadTracks();
         },
         (_, error) => {
@@ -457,27 +456,37 @@ export const useDownloadTrack = (searchTerm?: string) => {
     });
   };
 
-  const deleteAllTracks = async () => {
+  const deleteAllTracks = async (batch?: string[]) => {
     // Delete all downloaded tracks
     const { exists } = await FileSystem.getInfoAsync(
       Downloaded_Tracks_Paths.TRACKS_DIR
     );
 
     if (exists) {
-      await FileSystem.deleteAsync(Downloaded_Tracks_Paths.TRACKS_DIR, {
-        idempotent: true,
-      });
-    }
-
-    // Remove all tracks from SQLite database
-    db.transaction((tx) => {
-      tx.executeSql('DELETE FROM tracks', [], () => {
-        toastResponseMessage({
-          content: 'All Songs Deleted',
-          type: 'success',
+      if (batch) {
+        batch.forEach(async (trackId) => {
+          await FileSystem.deleteAsync(
+            Downloaded_Tracks_Paths.TRACK_DIR(trackId),
+            {
+              idempotent: true,
+            }
+          );
+          deleteTrack(trackId, false);
         });
-        loadTracks();
-      });
+      } else {
+        await FileSystem.deleteAsync(Downloaded_Tracks_Paths.TRACKS_DIR, {
+          idempotent: true,
+        });
+
+        db.transaction((tx) => {
+          tx.executeSql('DELETE FROM tracks', [], () => {});
+        });
+      }
+    }
+    loadTracks();
+    toastResponseMessage({
+      content: 'All Songs Deleted',
+      type: 'success',
     });
   };
 

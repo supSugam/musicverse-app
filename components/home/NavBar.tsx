@@ -18,16 +18,23 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
     useAuthStore((state) => state);
   const navigation = useNavigation();
 
-  const { data: profile } = useProfileQuery().get;
+  const { data: profile, isLoading } = useProfileQuery().get;
 
   useEffect(() => {
-    console.log(profile?.data.result.avatar[0]);
     if (profile) {
       setCurrentUserProfile(profile.data.result as IUserProfile);
     } else {
-      navigation.dispatch(CommonActions.navigate('ProfileSetup'));
+      if (!currentUserProfile && !isLoading) {
+        navigation.dispatch(CommonActions.navigate('ProfileSetup'));
+      }
     }
-  }, [profile]);
+  }, [
+    profile,
+    isLoading,
+    currentUserProfile,
+    setCurrentUserProfile,
+    navigation,
+  ]);
 
   const currentRouteName =
     navigation.getState().routes[navigation.getState().index].name;

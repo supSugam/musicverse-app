@@ -3,6 +3,8 @@ import { Audio } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
 import { playATrack } from '@/services/api/play';
+import { useAuthStore } from './useAuthStore';
+import { AxiosInstance } from 'axios';
 
 const InitialState = {
   isPlaying: false,
@@ -72,6 +74,7 @@ interface PlayerState {
   toggleLoopStates: () => void;
 
   resetPlayer: () => void;
+  api: () => AxiosInstance;
 }
 
 // TODO : Sleep Timer
@@ -79,6 +82,7 @@ interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
   volume: 1,
+  api: () => useAuthStore.getState().api,
 
   didJustFinish: false,
 
@@ -148,6 +152,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         nextTrack,
         volume,
         playbackSpeed,
+        api,
       } = get();
 
       if (playbackInstance) {
@@ -160,7 +165,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       // Play
 
       if (!src || !id) return;
-      playATrack(id);
+
+      try {
+        api().post(`/tracks/play/${id}`);
+      } catch (error) {
+        console.log('Error playing track', error);
+      }
 
       await newPlaybackInstance.loadAsync(
         { uri: src },

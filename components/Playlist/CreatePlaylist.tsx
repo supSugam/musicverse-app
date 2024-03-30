@@ -50,10 +50,6 @@ const CreatePlaylist = () => {
     await createPlaylist
       .mutateAsync(payload, {
         onSuccess: () => {
-          toastResponseMessage({
-            content: 'Playlist Created Successfully',
-            type: 'success',
-          });
           navigation.goBack();
         },
         onError: (error) => {

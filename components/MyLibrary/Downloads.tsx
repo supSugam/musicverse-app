@@ -1,26 +1,35 @@
 import { View, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import StyledText from '../reusables/StyledText';
 import SearchField from '../reusables/SearchField';
 import { IMenuItemProps } from '../reusables/BottomSheetMenu/MenuItem';
 import { useNavigation } from 'expo-router';
-import { CommonActions } from '@react-navigation/native';
 import ReusableAlert from '../reusables/ReusableAlert';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { useDownloadTrack } from '@/hooks/useDownloadTrack';
-import ProgressBar from '../reusables/ProgressBar';
 import TrackListItem from '../Tracks/TrackListItem';
+import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 
 const Downloads = () => {
   const navigation = useNavigation();
   const [searchTerm, setSearchTerm] = useState<string | undefined>();
   const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
-  const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
-  const getTrackOptions = (trackId?: string): IMenuItemProps[] => {
-    const track = downloadedTracks.find((t) => t.id === trackId);
+  const [selectedTrack, setSelectedTrack] = useState<Partial<ITrackDetails>>();
 
-    if (!track || !trackId) return [];
+  const [isTrackOptionsModalVisible, setIsTrackOptionsModalVisible] =
+    useState<boolean>(false);
+
+  const { updateTracks, playATrackById } = usePlayerStore();
+  const { tracks: downloadedTracks, deleteTrack } =
+    useDownloadTrack(searchTerm);
+
+  useEffect(() => {
+    console.log(downloadedTracks.map((track) => track.title));
+  }, [downloadedTracks]);
+
+  const trackOptions = useMemo(() => {
+    if (!selectedTrack) return [];
     let options: IMenuItemProps[] = [
       {
         label: 'Share',
@@ -31,7 +40,7 @@ const Downloads = () => {
         label: 'Delete from Downloads',
         onPress: () => {
           setIsTrackOptionsModalVisible(false);
-          setSelectedTrackId(trackId);
+          setSelectedTrack(selectedTrack);
           setShowDeleteAlert(true);
         },
         icon: 'delete',
@@ -39,19 +48,7 @@ const Downloads = () => {
     ];
 
     return options;
-  };
-
-  const [isTrackOptionsModalVisible, setIsTrackOptionsModalVisible] =
-    useState<boolean>(false);
-
-  const { updateTracks, playATrackById } = usePlayerStore();
-  const {
-    downloadAndSaveTrack,
-    progressPercentage,
-    tracks: downloadedTracks,
-    isTrackDownloaded,
-    deleteTrack,
-  } = useDownloadTrack(searchTerm);
+  }, [selectedTrack, downloadedTracks]);
 
   return (
     <>
@@ -61,7 +58,9 @@ const Downloads = () => {
         visible={showDeleteAlert}
         onClose={() => setShowDeleteAlert(false)}
         onConfirm={() => {
-          if (selectedTrackId) deleteTrack(selectedTrackId);
+          if (selectedTrack?.id) {
+            deleteTrack(selectedTrack.id);
+          }
           setShowDeleteAlert(false);
         }}
         type="alert"
@@ -71,15 +70,8 @@ const Downloads = () => {
           Are you sure you want to delete this track?
         </StyledText>
       </ReusableAlert>
-      {/* <MenuModal
-            visible={isTrackOptionsModalVisible}
-            onClose={() => setIsTrackOptionsModalVisible(false)}
-            items={getTrackOptions(selectedTrack?.track.id)}
-            header={selectedTrack?.track.title}
-          /> */}
 
       <ScrollView className="flex flex-1 p-5">
-        <ProgressBar progress={progressPercentage} className="w-full" />
         <SearchField
           onSearch={(text) => {
             setSearchTerm(text);
@@ -100,7 +92,7 @@ const Downloads = () => {
                   id={track.id}
                   title={track.title}
                   artistName={track.creator?.username}
-                  options={getTrackOptions(track.id)}
+                  options={trackOptions}
                   onPlayClick={() => {
                     updateTracks(downloadedTracks);
                     playATrackById(track.id);
@@ -120,4 +112,4 @@ const Downloads = () => {
   );
 };
 
-export default Downloads;
+export default memo(Downloads);

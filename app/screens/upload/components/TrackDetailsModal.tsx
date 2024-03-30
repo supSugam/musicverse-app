@@ -443,6 +443,9 @@ const TrackDetailsModal = ({
                 borderColor={COLORS.neutral.normal}
                 backgroundColor="transparent"
                 autoCapitalize="sentences"
+                style={{
+                  maxHeight: 200,
+                }}
               />
             )}
             {USER_PERMISSIONS.canPublicUpload(

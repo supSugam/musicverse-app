@@ -76,12 +76,26 @@ const Tracks = () => {
     refetchLikedTracks();
   };
 
-  const getTrackOptions = (trackId?: string): IMenuItemProps[] => {
-    const track = [...ownedTracks, ...likedTracks].find(
-      (track) => track.id === trackId
-    );
+  const [selectedTrack, setSelectedTrack] = useState<{
+    track: ITrackDetails;
+    type: 'owned' | 'liked';
+  }>();
 
-    if (!track || !trackId) return [];
+  const [isTrackOptionsModalVisible, setIsTrackOptionsModalVisible] =
+    useState<boolean>(false);
+
+  const { updateTracks, playATrackById } = usePlayerStore();
+  const {
+    downloadAndSaveTrack,
+    progressPercentage,
+    tracks: downloadedTracks,
+    isTrackDownloaded,
+    deleteTrack,
+  } = useDownloadTrack();
+
+  const trackOptions = useMemo(() => {
+    if (!selectedTrack) return [];
+    const trackId = selectedTrack?.track.id;
     let options: IMenuItemProps[] = [
       {
         label: 'Share',
@@ -96,7 +110,7 @@ const Tracks = () => {
         label: 'Delete from Downloads',
         onPress: () => {
           setIsTrackOptionsModalVisible(false);
-          deleteTrack(trackId);
+          setShowDeleteAlert(true);
         },
         icon: 'delete',
       });
@@ -104,8 +118,8 @@ const Tracks = () => {
       options.push({
         label: 'Download',
         onPress: () => {
-          downloadAndSaveTrack(track);
           setIsTrackOptionsModalVisible(false);
+          downloadAndSaveTrack(trackId);
         },
         icon: 'download',
       });
@@ -145,30 +159,7 @@ const Tracks = () => {
     }
 
     return options;
-  };
-
-  const [selectedTrack, setSelectedTrack] = useState<{
-    track: ITrackDetails;
-    type: 'owned' | 'liked';
-  }>();
-  const [isTrackOptionsModalVisible, setIsTrackOptionsModalVisible] =
-    useState<boolean>(false);
-
-  const { updateTracks, playATrackById } = usePlayerStore();
-  const {
-    downloadAndSaveTrack,
-    progressPercentage,
-    tracks: downloadedTracks,
-    isTrackDownloaded,
-    deleteTrack,
-  } = useDownloadTrack();
-
-  useEffect(() => {
-    console.log(
-      'downloadedTracks',
-      downloadedTracks.map((track) => track.src)
-    );
-  }, [downloadedTracks]);
+  }, [selectedTrack, isTrackDownloaded, downloadedTracks]);
 
   return (
     <>
@@ -178,9 +169,9 @@ const Tracks = () => {
         visible={showDeleteAlert}
         onClose={() => setShowDeleteAlert(false)}
         onConfirm={() => {
+          setShowDeleteAlert(false);
           const id = selectedTrack?.track.id;
           if (id) deleteTrackById.mutate(id);
-          setShowDeleteAlert(false);
         }}
         type="alert"
         header="Delete Track"
@@ -189,12 +180,6 @@ const Tracks = () => {
           Are you sure you want to delete this track?
         </StyledText>
       </ReusableAlert>
-      {/* <MenuModal
-          visible={isTrackOptionsModalVisible}
-          onClose={() => setIsTrackOptionsModalVisible(false)}
-          items={getTrackOptions(selectedTrack?.track.id)}
-          header={selectedTrack?.track.title}
-        /> */}
 
       <ScrollView
         className="flex flex-1 p-5"
@@ -222,8 +207,10 @@ const Tracks = () => {
                   key={`${track.id}owned`}
                   id={track.id}
                   title={track.title}
-                  artistName={track.creator?.username}
-                  options={getTrackOptions(track.id)}
+                  artistName={
+                    track.creator?.profile.name || track?.creator?.username
+                  }
+                  options={trackOptions}
                   onPlayClick={() => {
                     updateTracks(ownedTracks);
                     playATrackById(track.id);
@@ -236,14 +223,19 @@ const Tracks = () => {
                   }}
                 />
               ))}
+              <StyledText size="xl" weight="semibold" className="my-3">
+                Liked Tracks
+              </StyledText>
               {likedTracks.map((track, i) => (
                 <TrackListItem
                   label={i + 1}
                   key={`${track.id}liked`}
                   id={track.id}
                   title={track.title}
-                  artistName={track.creator?.username}
-                  options={getTrackOptions(track.id)}
+                  artistName={
+                    track.creator?.profile.name || track?.creator?.username
+                  }
+                  options={trackOptions}
                   onPlayClick={() => {
                     updateTracks(likedTracks);
                     playATrackById(track.id);

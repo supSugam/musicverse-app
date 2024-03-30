@@ -136,7 +136,7 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
         queryKey: [PLAYLIST_QUERY_KEY],
       });
       toastResponseMessage({
-        content: 'Playlist created',
+        content: 'Playlist Created',
         type: 'success',
       });
     },

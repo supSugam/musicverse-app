@@ -19,6 +19,7 @@ import HorizontalMarquee from '../reusables/HorizontalMarquee';
 import { CommonActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { IMenuItemProps } from '../reusables/BottomSheetMenu/MenuItem';
+import { useDownloadTrack } from '@/hooks/useDownloadTrack';
 
 interface ITrackListItemProps {
   id: string;
@@ -101,6 +102,9 @@ const TrackListItem = ({
     toggleLike: { mutate: toggleLikeMutate, isPending },
   } = useTracksQuery({ id });
 
+  const { isTrackDownloaded, deleteTrack, downloadAndSaveTrack } =
+    useDownloadTrack();
+
   const navigation = useNavigation();
   return (
     <>
@@ -151,6 +155,25 @@ const TrackListItem = ({
               label: 'See Artist Profile',
               onPress: () => {},
               icon: 'person',
+            },
+            {
+              label: 'Share',
+              onPress: () => {},
+              icon: 'share',
+            },
+            {
+              label: isTrackDownloaded(id)
+                ? 'Delete from Downloads'
+                : 'Download',
+              onPress: async () => {
+                if (isTrackDownloaded(id)) {
+                  await deleteTrack(id);
+                } else {
+                  await downloadAndSaveTrack(id);
+                }
+                setOptionsMenuVisible(false);
+              },
+              icon: isTrackDownloaded(id) ? 'delete' : 'download',
             },
           ]
         }

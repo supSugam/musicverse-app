@@ -17,7 +17,7 @@ interface IUploadStore {
   setTrack: (track: ITrack) => ISimpleResponse;
   removeTrack: () => boolean;
   album: Partial<IAlbum> | null;
-  setAlbum: (album: Partial<IAlbum>) => boolean;
+  setAlbum: (album: Partial<IAlbum> | null) => boolean;
   addTrackToAlbum: (track: ITrack) => ISimpleResponse;
   removeTrackFromAlbum: (trackId: string) => void;
   updateTrackById: (track: ITrack, type: 'single' | 'album') => ISimpleResponse;
@@ -47,7 +47,7 @@ export const useUploadStore = create<IUploadStore>(
       return response;
     },
     removeTrack: () => {
-      set(() => ({ track: null }));
+      set(() => ({ track: null, album: null }));
       return true;
     },
 
@@ -58,7 +58,7 @@ export const useUploadStore = create<IUploadStore>(
     },
     addTrackToAlbum: (track: ITrack) => {
       let response = {
-        content: 'Track added successfully',
+        content: 'Track Added',
         type: 'success',
       } as ISimpleResponse;
 

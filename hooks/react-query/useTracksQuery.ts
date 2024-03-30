@@ -29,7 +29,6 @@ export interface ITracksPaginationQueryParams extends IBasePaginationParams {
 
 type TracksQuery<T extends string | undefined = undefined> = {
   getAllTracks: UseQueryResult<AxiosResponse<GetAllTracksResponse, any>, Error>;
-  getTrackById: UseQueryResult<AxiosResponse<any, any>, Error>;
   deleteTrackById: UseMutationResult<
     AxiosResponse<any, any>,
     Error,
@@ -42,6 +41,7 @@ type TracksQuery<T extends string | undefined = undefined> = {
     string,
     unknown
   >;
+  getTrackById: UseQueryResult<AxiosResponse<any, any>, Error>;
 };
 
 export const useTracksQuery = ({

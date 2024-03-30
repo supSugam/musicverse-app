@@ -35,14 +35,8 @@ import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { currentUser } = useAuthStore((state) => state);
-  const {
-    album,
-    setAlbum,
-    uploadType,
-    track,
-    removeTrack,
-    removeTrackFromAlbum,
-  } = useUploadStore((state) => state);
+  const { album, uploadType, track, removeTrack, removeTrackFromAlbum } =
+    useUploadStore((state) => state);
   const [createTrackModalVisible, setCreateTrackModalVisible] =
     useState<boolean>(false);
   const [editTrackModalVisible, setEditTrackModalVisible] =
@@ -69,10 +63,11 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
       });
       setLoading(false);
     },
-    onUploadSuccess(data) {
-      console.log('Tracks uploaded successfully', data);
+    onUploadSuccess() {
+      removeTrack();
+      const msg = isUploadTypeSingle ? 'Track' : 'Tracks';
       toastResponseMessage({
-        content: 'Tracks uploaded successfully',
+        content: `${msg} Uploaded!`,
         type: 'success',
       });
       setLoading(false);
@@ -155,7 +150,11 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           });
           return;
         }
-        await uploadTracks();
+        setLoading(true);
+        console.log('Uploading single track', track);
+        await uploadTracks([track]).finally(() => {
+          setLoading(false);
+        });
     }
   };
 

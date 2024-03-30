@@ -244,7 +244,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (tracks.length === 0) return;
     const shouldPause = isPlaying && currentTrack()?.id === id;
     if (shouldPause) {
-      await playPause(false);
+      playPause(false);
       return;
     }
     const index = tracks.findIndex((track) => track.id === id);

@@ -64,7 +64,6 @@ export default function index() {
               screenOptions={{
                 presentation: 'modal',
                 headerShown: false,
-
                 contentStyle: {
                   backgroundColor: `rgba(0,0,0,0.5)`,
                   justifyContent: 'flex-end',

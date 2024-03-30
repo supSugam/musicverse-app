@@ -8,13 +8,26 @@ import { UserRole } from '@/utils/Interfaces/IUser';
 import { Downloaded_Tracks_Paths } from '@/utils/constants';
 import { blobToBase64 } from '@/utils/helpers/string';
 import { toastResponseMessage } from '@/utils/toast';
+import { useTracksQuery } from './react-query/useTracksQuery';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 
 const db = SQLite.openDatabase('musicverse.db');
 
-export const useDownloadTrack = () => {
+export const useDownloadTrack = (searchTerm?: string) => {
   const [tracks, setTracks] = useState<ITrackDetails[]>([]);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
+  const { api } = useAuthStore();
+  useEffect(() => {
+    if (searchTerm) {
+      const filteredTracks = tracks.filter((track) =>
+        track.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setTracks(filteredTracks);
+    } else {
+      loadTracks();
+    }
+  }, [searchTerm]);
 
   useEffect(() => {
     const createTables = () => {
@@ -171,12 +184,33 @@ export const useDownloadTrack = () => {
     });
   };
 
-  const downloadAndSaveTrack = async (trackDetails: Partial<ITrackDetails>) => {
+  const downloadAndSaveTrack = async (
+    track: Partial<ITrackDetails> | string
+  ) => {
     try {
       setIsDownloading(true);
+      let trackDetails: Partial<ITrackDetails> = {};
+      if (typeof track === 'string') {
+        await api
+          .get(`/tracks/${track}`)
+          .then((res) => {
+            console.log(res.data);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        trackDetails = track;
+      }
 
-      if (!trackDetails.id || !trackDetails.src || !trackDetails.creator)
+      return;
+
+      if (!trackDetails) return;
+
+      if (!trackDetails.id || !trackDetails.src || !trackDetails.creator) {
+        setIsDownloading(false);
         return;
+      }
 
       // Request necessary permissions
       const { status } = await MediaLibrary.getPermissionsAsync();

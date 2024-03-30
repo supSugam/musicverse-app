@@ -59,29 +59,24 @@ const HomeScreen: React.FC = () => {
   const { setIsLoading } = useAppState();
 
   useEffect(() => {
-    if (data) {
-      const { items: tracks } = data.data.result;
-      setTracksOfSelectedGenre(tracks);
-    }
-  }, [data]);
-
-  useEffect(() => {
     setIsLoading(isGenresLoading || isTracksLoading);
   }, [isGenresLoading, isTracksLoading]);
 
   const {
     updateTracks,
-    playPause,
-    loadTrack,
     currentTrack,
     isPlaying,
     tracks: playerTracks,
-    enableSingleLooping,
-    enableQueueLooping,
     playATrackById,
-    resetPlayer,
     isBuffering,
-  } = usePlayerStore((state) => state);
+  } = usePlayerStore();
+
+  useEffect(() => {
+    if (data) {
+      const { items: tracks } = data.data.result;
+      setTracksOfSelectedGenre(tracks);
+    }
+  }, [data, playerTracks]);
 
   return (
     <Container includeNavBar navbarTitle="Home">
@@ -121,7 +116,9 @@ const HomeScreen: React.FC = () => {
                 await playATrackById(track.id);
               }}
               isPlaying={currentTrack()?.id === track.id && isPlaying}
-              artistName={track?.creator?.username}
+              artistName={
+                track?.creator?.profile.name || track?.creator?.username
+              }
               artistId={track?.creator?.id}
               cover={track.cover}
               duration={track.trackDuration}

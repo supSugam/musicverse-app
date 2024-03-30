@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ParamListBase, TabNavigationState } from '@react-navigation/native';
 import Albums from '@/components/MyLibrary/Albums';
 import Tracks from '@/components/Tracks/Tracks';
+import Downloads from '@/components/MyLibrary/Downloads';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -214,7 +215,7 @@ const MyLibrary = () => {
         <Tab.Screen name="Playlists" component={Playlists} />
         <Tab.Screen name="Albums" component={Albums} />
         <Tab.Screen name="Tracks" component={Tracks} />
-        <Tab.Screen name="Uploads" component={Playlists} />
+        <Tab.Screen name="Uploads" component={Downloads} />
       </Tab.Navigator>
     </Container>
   );

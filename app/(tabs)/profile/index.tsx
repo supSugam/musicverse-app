@@ -15,7 +15,6 @@ import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 const ProfilePage: React.FC = () => {
   const { params } = useRoute();
-  console.log(params);
 
   return (
     <Container includeNavBar navbarTitle="Profile">

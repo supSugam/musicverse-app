@@ -88,7 +88,6 @@ export const useAlbumsQuery = <T extends string | undefined = undefined>({
       });
     },
     onSuccess: (data) => {
-      console.log('hook success');
       queryClient.invalidateQueries({
         queryKey: albumKeyFactory.createAlbum(),
       });

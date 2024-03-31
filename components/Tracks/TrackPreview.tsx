@@ -17,7 +17,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 
-interface ITrackPreviewProps extends React.ComponentProps<typeof View> {
+interface ITrackPreviewProps
+  extends React.ComponentProps<typeof AnimatedTouchable> {
   id?: string;
   title?: string;
   artistName?: string;
@@ -56,7 +57,7 @@ const TrackPreview = ({
   }, []);
 
   return (
-    <AnimatedTouchable onPress={onPress}>
+    <AnimatedTouchable onPress={onPress} {...props}>
       <Animated.View
         style={[
           translateStyle,
@@ -67,7 +68,6 @@ const TrackPreview = ({
           style,
         ]}
         className={`flex flex-row items-center my-1 w-full ${className}`}
-        {...props}
       >
         <View className="flex flex-row items-center flex-1 px-2">
           <View

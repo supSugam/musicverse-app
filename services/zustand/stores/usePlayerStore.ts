@@ -261,7 +261,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
     if (!isNextTrackAvailable(true) || currentTrackIndex === null) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
-    console.log('nextTrack', nextIndex);
     await loadTrack(nextIndex);
   },
 

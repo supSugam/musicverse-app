@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
 import Animated, {
+  AnimatedStyle,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -18,6 +19,7 @@ interface IAnimatedTouchableProps
     scale: number;
     duration: number;
   };
+  wrapperStyles?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
 }
 
 const AnimatedTouchable = ({
@@ -31,6 +33,7 @@ const AnimatedTouchable = ({
     scale: 1,
     duration: 250,
   },
+  wrapperStyles = {},
   ...rest
 }: IAnimatedTouchableProps) => {
   const translateX = useSharedValue(50); // Start position outside the screen
@@ -63,7 +66,7 @@ const AnimatedTouchable = ({
       onPressOut={leaveAnimation}
       {...rest}
     >
-      <Animated.View style={[scaleStyle, translateStyle]}>
+      <Animated.View style={[scaleStyle, translateStyle, wrapperStyles]}>
         {children}
       </Animated.View>
     </TouchableOpacity>

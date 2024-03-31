@@ -1,4 +1,4 @@
-import { View, Text, Pressable, useWindowDimensions } from 'react-native';
+import { View, Pressable } from 'react-native';
 import React, { useEffect } from 'react';
 import LogoWithName from '../reusables/LogoWithName';
 import StyledText from '../reusables/StyledText';
@@ -20,8 +20,6 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
     }
   }, [currentUserProfile]);
 
-  const currentRouteName =
-    navigation.getState().routes[navigation.getState().index].name;
   return (
     <View
       style={{

@@ -135,7 +135,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           },
 
           onError: (e) => {
-            console.log('Error creating album', e);
+            console.error('Error creating album', e);
             setLoading(false);
           },
         });
@@ -151,7 +151,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           return;
         }
         setLoading(true);
-        console.log('Uploading single track', track);
         await uploadTracks([track]).finally(() => {
           setLoading(false);
         });

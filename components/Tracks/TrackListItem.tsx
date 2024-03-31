@@ -35,6 +35,7 @@ interface ITrackListItemProps {
   isBuffering?: boolean;
   options?: IMenuItemProps[];
   onOptionsClick?: () => void;
+  optionsVisible?: boolean;
 }
 
 const TrackListItem = ({
@@ -51,6 +52,7 @@ const TrackListItem = ({
   isBuffering = false,
   options,
   onOptionsClick,
+  optionsVisible,
 }: ITrackListItemProps) => {
   const translateX = useSharedValue(400); // Start position outside the screen
 
@@ -95,6 +97,11 @@ const TrackListItem = ({
   // Options Menu
 
   const [optionsMenuVisible, setOptionsMenuVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof optionsVisible === 'boolean')
+      setOptionsMenuVisible(optionsVisible);
+  }, [optionsVisible]);
 
   // API
 

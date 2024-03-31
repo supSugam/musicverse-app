@@ -60,7 +60,6 @@ const SliderInput = ({
     .onChange((event) => {
       setIsSeeking(true);
       const change = event.changeX;
-      console.log('change', change);
       const percentage = calculatePercentage(change, containerWidth);
       progressValue.value += percentage;
       sliderDotPositionValue.value += percentage;

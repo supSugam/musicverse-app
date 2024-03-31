@@ -18,7 +18,10 @@ export const useDownloadTrack = (searchTerm?: string) => {
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
   const { api } = useAuthStore();
   useEffect(() => {
-    loadTracks();
+    if (!searchTerm) {
+      loadTracks();
+      return;
+    }
     if (searchTerm) {
       const filteredTracks = tracks.filter((track) =>
         track.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -66,9 +69,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
             FOREIGN KEY(countsId) REFERENCES counts(id)
           )`,
           [],
-          () => {
-            console.log('Tracks table created');
-          },
+          () => {},
           (_, error) => {
             console.error('Failed to create tracks table: ', error);
             return false;
@@ -85,9 +86,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
             isVerified INTEGER
           )`,
           [],
-          () => {
-            // console.log('Users table created');
-          },
+          () => {},
           (_, error) => {
             console.error('Failed to create users table: ', error);
             return false;
@@ -127,9 +126,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
             )
             `,
           [],
-          () => {
-            console.log('Counts table created');
-          },
+          () => {},
           (_, error) => {
             console.error('Failed to create counts table: ', error);
             return false;
@@ -267,9 +264,10 @@ export const useDownloadTrack = (searchTerm?: string) => {
         const { status: newStatus } =
           await MediaLibrary.requestPermissionsAsync();
         if (newStatus !== 'granted') {
-          console.log(
-            'Permission denied for media library and external storage'
-          );
+          toastResponseMessage({
+            content: 'Permission required to download song',
+            type: 'error',
+          });
           return;
         }
       }
@@ -395,9 +393,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
               trackDetails.creator!.profile!.avatar || null,
               trackDetails.creator!.profile!.createdAt,
             ],
-            () => {
-              console.log('User profile inserted or updated successfully');
-            },
+            () => {},
             (_, error) => {
               console.error('Failed to insert or update user profile: ', error);
               return false;
@@ -421,9 +417,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
             trackDetails._count?.likedBy || 0,
             trackDetails._count?.downloads || 0,
           ],
-          () => {
-            console.log('Counts inserted or updated successfully');
-          },
+          () => {},
           (_, error) => {
             console.error('Failed to insert or update counts: ', error);
             return false;

@@ -75,7 +75,6 @@ export default function ProfileSetup({ navigation }: { navigation: any }) {
     setLoading(true);
     const avatar = imageAssetToFile(profileAvatar?.[0]);
     const cover = imageAssetToFile(profileCover?.[0]);
-    console.log(avatar, cover);
     const payload = {
       name: data.name,
       bio: data.bio,
@@ -89,7 +88,6 @@ export default function ProfileSetup({ navigation }: { navigation: any }) {
     }
     const formPayload = convertObjectToFormData(payload) as FormData;
 
-    console.log(formPayload);
     await create.mutateAsync(formPayload, {
       onSuccess: () => {
         // toastResponseMessage({

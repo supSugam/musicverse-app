@@ -54,3 +54,13 @@ export const getObjectAsFormData = <T extends Object>(data: T): FormData => {
   }
   return formData;
 };
+
+export type GenericPaginationResponse<T> = {
+  items: T[];
+  totalCount: number;
+};
+
+export type RecentSearchUtility<T extends { id: string }, K = string> = {
+  type: K;
+  data: T;
+};

@@ -135,9 +135,6 @@ const Downloads = () => {
             >
               {downloadedTracks.map((track, i) => (
                 <TrackPreview
-                  onLayout={(e) => {
-                    console.log(e.nativeEvent.layout);
-                  }}
                   onPress={() => {
                     if (selectedTracks.length > 0) {
                       if (selectedTracks.includes(track.id)) {

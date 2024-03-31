@@ -31,6 +31,7 @@ import { cleanObject } from '@/utils/helpers/Object';
 import { ITrack } from '@/utils/Interfaces/ITrack';
 import { ActionsEnum } from '@/utils/enums/Action';
 import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
+import EmptyGhost from '@/components/reusables/Lottie/EmptyGhost';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -266,29 +267,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         horizontal={false}
       >
         {!track && !album?.tracks?.length && (
-          <View className="flex justify-between items-center w-full">
-            <LottieView
-              source={EmptyGhostLA}
-              autoPlay
-              loop
-              speed={0.5}
-              style={{
-                width: '100%',
-                height: 140,
-                transform: [
-                  {
-                    scale: 1.5,
-                  },
-                  {
-                    translateY: -5,
-                  },
-                ],
-              }}
-            />
-            <StyledText weight="bold" size="xl" className="text-center mt-2">
-              Waiting for tracks...
-            </StyledText>
-          </View>
+          <EmptyGhost caption="Waiting for tracks..." />
         )}
 
         {!isUploadTypeSingle &&

@@ -8,11 +8,11 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type RecentSearch =
-  | RecentSearchUtility<ITrackDetails, 'track'>
-  | RecentSearchUtility<IAlbumDetails, 'album'>
-  | RecentSearchUtility<IPlaylistDetails, 'playlist'>
-  | RecentSearchUtility<IUserWithProfile, 'artist'>
-  | RecentSearchUtility<IUserWithProfile, 'user'>;
+  | RecentSearchUtility<ITrackDetails, 'Track'>
+  | RecentSearchUtility<IAlbumDetails, 'Album'>
+  | RecentSearchUtility<IPlaylistDetails, 'Playlist'>
+  | RecentSearchUtility<IUserWithProfile, 'Artist'>
+  | RecentSearchUtility<IUserWithProfile, 'User'>;
 
 interface IAppGlobalState {
   isLoading: boolean;

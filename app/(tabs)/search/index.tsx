@@ -1,4 +1,5 @@
 import Container from '@/components/Container';
+import RecentSearchCard from '@/components/Search/RecentSearchCard';
 import TrackListItem from '@/components/Tracks/TrackListItem';
 import TrackPreview from '@/components/Tracks/TrackPreview';
 import EmptyGhost from '@/components/reusables/Lottie/EmptyGhost';
@@ -19,6 +20,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 interface SearchPaginationParams extends IBasePaginationParams {
   type?: SearchType;
@@ -70,6 +72,11 @@ const SearchPage = () => {
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
       >
         <SearchField
           onSearch={(search: string) => {
@@ -80,32 +87,69 @@ const SearchPage = () => {
           triggerMode="debounce"
         />
 
-        {recentSearches.length === 0 && (
+        {searchParams.search?.length === 0 && recentSearches.length === 0 ? (
           <EmptyGhost
-            caption="Search for your favorite music"
+            caption="Search for tracks, albums, artists, playlists or users"
+            gradient={0.1}
             wrapperStyles={{
-              flexGrow: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              alignSelf: 'center',
+              backgroundColor: 'transparent',
+              height: '100%',
+              flexShrink: 1,
+            }}
+            lottieProps={{
+              style: {
+                width: '100%',
+                height: 100,
+
+                transform: [
+                  {
+                    scale: 2.2,
+                  },
+                  {
+                    translateY: -15,
+                  },
+                ],
+              },
             }}
           />
+        ) : (
+          <></>
         )}
 
-        <ScrollView>
+        <ScrollView className="w-full">
+          {recentSearches.map((recent) => {
+            return (
+              <RecentSearchCard
+                key={recent.data.id + recent.data.createdAt}
+                recentSearch={recent}
+              />
+            );
+          })}
           {allData?.tracks &&
             allData?.tracks?.items?.map((track) => (
-              <TrackListItem
-                key={`${track.id}search`}
-                id={track.id}
-                title={track.title}
-                artistName={track.creator?.username}
-                cover={track.cover}
-                duration={track.trackDuration}
-                onPlayClick={() => {
-                  if (allData.tracks) {
-                    updateTracks(allData.tracks.items);
-                    playATrackById(track.id);
-                  }
-                }}
-              />
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => addRecentSearch({ type: 'Track', data: track })}
+                className="w-full"
+              >
+                <TrackListItem
+                  key={`${track.id}search`}
+                  id={track.id}
+                  title={track.title}
+                  artistName={track.creator?.username}
+                  cover={track.cover}
+                  duration={track.trackDuration}
+                  onPlayClick={() => {
+                    if (allData.tracks) {
+                      updateTracks(allData.tracks.items);
+                      playATrackById(track.id);
+                    }
+                  }}
+                />
+              </TouchableOpacity>
             ))}
         </ScrollView>
       </ScrollView>

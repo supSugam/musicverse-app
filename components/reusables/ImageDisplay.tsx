@@ -20,7 +20,7 @@ import AnimatedTouchable from './AnimatedTouchable';
 interface IImageDisplayProps
   extends React.ComponentProps<typeof TouchableOpacity> {
   source?: ImageSourcePropType | null;
-  placeholder: string | React.ReactNode;
+  placeholder?: string | React.ReactNode;
   width?: Dimension;
   height?: Dimension;
   borderRadius?: 'full' | number;
@@ -34,7 +34,7 @@ interface IImageDisplayProps
 
 const ImageDisplay = ({
   source,
-  placeholder,
+  placeholder = '',
   width = 100,
   height = 100,
   borderRadius = 4,

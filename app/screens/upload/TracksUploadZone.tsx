@@ -267,7 +267,23 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         horizontal={false}
       >
         {!track && !album?.tracks?.length && (
-          <EmptyGhost caption="Waiting for tracks..." />
+          <EmptyGhost
+            caption="Waiting for tracks..."
+            lottieProps={{
+              style: {
+                width: '100%',
+                height: 140,
+                transform: [
+                  {
+                    scale: 1.5,
+                  },
+                  {
+                    translateY: -5,
+                  },
+                ],
+              },
+            }}
+          />
         )}
 
         {!isUploadTypeSingle &&

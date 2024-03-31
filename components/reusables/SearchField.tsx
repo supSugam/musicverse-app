@@ -13,7 +13,7 @@ const searchSchema = yup.object().shape({
   search: yup.string().nullable(),
 });
 
-interface ISearchFieldProps {
+interface ISearchFieldProps extends React.ComponentProps<typeof View> {
   triggerMode?: 'debounce' | 'throttle';
   onSearch: (search: string) => void;
   delay?: number;
@@ -27,6 +27,7 @@ export default function SearchField({
   delay = 500,
   placeholder,
   label,
+  ...rest
 }: ISearchFieldProps) {
   const {
     control,
@@ -68,7 +69,7 @@ export default function SearchField({
   }, [watchSearch, triggerMode, debouncedSearch, throttledSearch, onSearch]);
 
   return (
-    <View className="w-full relative">
+    <View className="w-full relative" {...rest}>
       <StyledTextField
         control={control}
         rules={{

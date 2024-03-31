@@ -159,7 +159,14 @@ const Tracks = () => {
     }
 
     return options;
-  }, [selectedTrack, isTrackDownloaded, downloadedTracks]);
+  }, [
+    selectedTrack,
+    isTrackDownloaded,
+    downloadedTracks,
+    downloadAndSaveTrack,
+    deleteTrack,
+    navigation,
+  ]);
 
   return (
     <>
@@ -223,31 +230,35 @@ const Tracks = () => {
                   }}
                 />
               ))}
-              <StyledText size="xl" weight="semibold" className="my-3">
-                Liked Tracks
-              </StyledText>
-              {likedTracks.map((track, i) => (
-                <TrackListItem
-                  label={i + 1}
-                  key={`${track.id}liked`}
-                  id={track.id}
-                  title={track.title}
-                  artistName={
-                    track.creator?.profile.name || track?.creator?.username
-                  }
-                  options={trackOptions}
-                  onPlayClick={() => {
-                    updateTracks(likedTracks);
-                    playATrackById(track.id);
-                  }}
-                  cover={track.cover}
-                  duration={track.trackDuration}
-                  onOptionsClick={() => {
-                    setSelectedTrack({ track, type: 'liked' });
-                    setIsTrackOptionsModalVisible(true);
-                  }}
-                />
-              ))}
+              {likedTracks.length > 0 && (
+                <>
+                  <StyledText size="xl" weight="semibold" className="my-3">
+                    Liked Tracks
+                  </StyledText>
+                  {likedTracks.map((track, i) => (
+                    <TrackListItem
+                      label={i + 1}
+                      key={`${track.id}liked`}
+                      id={track.id}
+                      title={track.title}
+                      artistName={
+                        track.creator?.profile.name || track?.creator?.username
+                      }
+                      options={trackOptions}
+                      onPlayClick={() => {
+                        updateTracks(likedTracks);
+                        playATrackById(track.id);
+                      }}
+                      cover={track.cover}
+                      duration={track.trackDuration}
+                      onOptionsClick={() => {
+                        setSelectedTrack({ track, type: 'liked' });
+                        setIsTrackOptionsModalVisible(true);
+                      }}
+                    />
+                  ))}
+                </>
+              )}
             </ScrollView>
           </View>
         )}

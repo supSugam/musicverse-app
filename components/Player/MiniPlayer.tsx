@@ -23,6 +23,7 @@ import SliderInput from '../reusables/SliderInput';
 import { useNavigation } from 'expo-router';
 import { TabRouteName } from '@/utils/helpers/types';
 import useKeyboardListener from '@/hooks/useKeyboardListener';
+import { CommonActions } from '@react-navigation/native';
 
 const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
@@ -42,7 +43,6 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
     nextTrack,
     playbackPosition,
     seek,
-    setPlayerExpanded,
     isAsyncOperationPending,
     currentTrack: currTrack,
   } = usePlayerStore();
@@ -121,8 +121,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
     >
       <Pressable
         onPress={() => {
-          setPlayerExpanded(true);
-          navigation.navigate('TrackPlayer' as never);
+          navigation.dispatch(CommonActions.navigate('TrackPlayer'));
         }}
         style={styles.wrapper}
         {...changeTrackGesture}

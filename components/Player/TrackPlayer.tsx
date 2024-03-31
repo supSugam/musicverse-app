@@ -39,8 +39,6 @@ const TrackPlayer = () => {
   // Player Store
   const {
     currentTrack,
-    setPlayerExpanded,
-    isPlayerExpanded,
     playbackPosition,
     isAsyncOperationPending,
     playPause,
@@ -66,7 +64,6 @@ const TrackPlayer = () => {
   const track = currentTrack();
 
   const onPlayerClose = () => {
-    setPlayerExpanded(false);
     navigation.goBack();
   };
 
@@ -79,10 +76,6 @@ const TrackPlayer = () => {
 
   // Stuffs
   const navigation = useNavigation();
-
-  const onPlayPause = () => {
-    playPause();
-  };
 
   const onAddToPlaylistClick = () => {
     const trackToAdd = track;
@@ -274,7 +267,10 @@ const TrackPlayer = () => {
                     />
                   </TouchableOpacity>
 
-                  <TouchableOpacity activeOpacity={0.7} onPress={onPlayPause}>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => playPause()}
+                  >
                     <MaterialIcons
                       name={
                         isPlaying ? 'pause-circle-filled' : 'play-circle-filled'
@@ -434,7 +430,7 @@ const TrackPlayer = () => {
                       opacity="medium"
                       className="leading-none"
                     >
-                      {getFormattedCount(track?.plays)} plays
+                      {getFormattedCount(track?._count?.plays)} plays
                     </StyledText>
                   </View>
                 </View>
@@ -483,14 +479,22 @@ const TrackPlayer = () => {
                     >
                       Lyrics
                     </StyledText>
-                    <StyledText
-                      size="xl"
-                      weight="light"
-                      opacity="high"
-                      className="mt-6 text-center leading-9"
+
+                    <ScrollView
+                      style={{
+                        maxHeight: 200,
+                      }}
+                      showsVerticalScrollIndicator
                     >
-                      {track?.lyrics || 'No Lyrics Available for this track.'}
-                    </StyledText>
+                      <StyledText
+                        size="lg"
+                        weight="light"
+                        opacity="high"
+                        className="mt-6 text-center leading-9"
+                      >
+                        {track?.lyrics || 'No Lyrics Available for this song.'}
+                      </StyledText>
+                    </ScrollView>
                   </View>
                 </View>
               </View>

@@ -117,6 +117,8 @@ const getIconName = (
       return 'album';
     case 'Tracks':
       return 'favorite';
+    case 'Downloads':
+      return 'offline-pin';
     default:
       return 'library-music';
   }
@@ -215,7 +217,7 @@ const MyLibrary = () => {
         <Tab.Screen name="Playlists" component={Playlists} />
         <Tab.Screen name="Albums" component={Albums} />
         <Tab.Screen name="Tracks" component={Tracks} />
-        <Tab.Screen name="Uploads" component={Downloads} />
+        <Tab.Screen name="Downloads" component={Downloads} />
       </Tab.Navigator>
     </Container>
   );

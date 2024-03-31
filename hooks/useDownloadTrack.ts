@@ -5,10 +5,9 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { UserRole } from '@/utils/Interfaces/IUser';
-import { Downloaded_Tracks_Paths } from '@/utils/constants';
+import { Downloaded_Tracks_Paths, uuid } from '@/utils/constants';
 import { blobToBase64 } from '@/utils/helpers/string';
 import { toastResponseMessage } from '@/utils/toast';
-import { useTracksQuery } from './react-query/useTracksQuery';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 
 const db = SQLite.openDatabase('musicverse.db');
@@ -19,15 +18,28 @@ export const useDownloadTrack = (searchTerm?: string) => {
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
   const { api } = useAuthStore();
   useEffect(() => {
+    loadTracks();
     if (searchTerm) {
       const filteredTracks = tracks.filter((track) =>
         track.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setTracks(filteredTracks);
-    } else {
-      loadTracks();
     }
   }, [searchTerm]);
+
+  const deleteEverything = () => {
+    //delete directories
+    FileSystem.deleteAsync(Downloaded_Tracks_Paths.TRACKS_DIR, {
+      idempotent: true,
+    });
+    //delete tables
+    db.transaction((tx) => {
+      tx.executeSql('DROP TABLE IF EXISTS tracks');
+      tx.executeSql('DROP TABLE IF EXISTS users');
+      tx.executeSql('DROP TABLE IF EXISTS userProfiles');
+      tx.executeSql('DROP TABLE IF EXISTS counts');
+    });
+  };
 
   useEffect(() => {
     const createTables = () => {
@@ -45,15 +57,17 @@ export const useDownloadTrack = (searchTerm?: string) => {
             trackDuration INTEGER,
             trackSize INTEGER,
             creatorId TEXT,
+            countsId TEXT,
             plays INTEGER,
             createdAt TEXT,
             downloaded INTEGER DEFAULT 0,
             downloadedAt TEXT,
-            FOREIGN KEY(creatorId) REFERENCES users(id)
+            FOREIGN KEY(creatorId) REFERENCES users(id),
+            FOREIGN KEY(countsId) REFERENCES counts(id)
           )`,
           [],
           () => {
-            // console.log('Tracks table created');
+            console.log('Tracks table created');
           },
           (_, error) => {
             console.error('Failed to create tracks table: ', error);
@@ -92,11 +106,32 @@ export const useDownloadTrack = (searchTerm?: string) => {
             FOREIGN KEY(userId) REFERENCES users(id)
           )`,
           [],
-          () => {
-            loadTracks();
-          },
+          () => {},
           (_, error) => {
             console.error('Failed to create user profiles table: ', error);
+            return false;
+          }
+        );
+
+        tx.executeSql(
+          `CREATE TABLE IF NOT EXISTS counts (
+            id TEXT PRIMARY KEY,
+            trackId TEXT,
+            plays INTEGER,
+            playlists INTEGER,
+            albums INTEGER,
+            tags INTEGER,
+            likedBy INTEGER,
+            downloads INTEGER,
+            FOREIGN KEY(trackId) REFERENCES tracks(id)
+            )
+            `,
+          [],
+          () => {
+            console.log('Counts table created');
+          },
+          (_, error) => {
+            console.error('Failed to create counts table: ', error);
             return false;
           }
         );
@@ -104,6 +139,8 @@ export const useDownloadTrack = (searchTerm?: string) => {
     };
 
     createTables();
+    loadTracks();
+    // deleteEverything();
   }, []);
 
   const loadTracks = () => {
@@ -132,10 +169,17 @@ export const useDownloadTrack = (searchTerm?: string) => {
             p.name AS profileName,
             p.avatar AS profileAvatar,
             p.cover AS profileCover,
-            p.createdAt AS profileCreatedAt
+            p.createdAt AS profileCreatedAt,
+            c.plays AS plays,
+            c.playlists AS playlists,
+            c.albums AS albums,
+            c.tags AS tags,
+            c.likedBy AS likedBy,
+            c.downloads AS downloads
             FROM tracks t
             INNER JOIN users u ON t.creatorId = u.id
             LEFT JOIN userProfiles p ON u.id = p.userId
+            LEFT JOIN counts c ON t.id = c.trackId
             `,
         [],
         (_, { rows }) => {
@@ -167,10 +211,17 @@ export const useDownloadTrack = (searchTerm?: string) => {
                     }
                   : null,
               },
-              plays: row.plays || 0,
               createdAt: row.createdAt,
               downloaded: !!row.downloaded,
               downloadedAt: row.downloadedAt || null,
+              _count: {
+                plays: row.plays,
+                playlists: row.playlists,
+                albums: row.albums,
+                tags: row.tags,
+                likedBy: row.likedBy,
+                downloads: row.downloads,
+              },
             })
           ) as ITrackDetails[];
 
@@ -332,11 +383,8 @@ export const useDownloadTrack = (searchTerm?: string) => {
             return false;
           }
         );
-      });
-
-      // Insert or update creator profile in the userProfiles table
-      if (trackDetails.creator!.profile) {
-        db.transaction((tx) => {
+        // Insert or update creator profile in the userProfiles table
+        if (trackDetails.creator!.profile) {
           tx.executeSql(
             'INSERT OR REPLACE INTO userProfiles (id, userId, name, avatar, createdAt) VALUES (?, ?, ?, ?, ?)',
             [
@@ -355,13 +403,36 @@ export const useDownloadTrack = (searchTerm?: string) => {
               return false;
             }
           );
-        });
-      }
+        }
 
-      // Save track details and file paths to SQLite database
-      db.transaction((tx) => {
+        // counts
+
+        const countsId = uuid();
+
         tx.executeSql(
-          'INSERT INTO tracks (id, title, description, src, cover, lyrics, publicStatus, trackDuration, trackSize, creatorId, plays, createdAt, downloaded, downloadedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)',
+          'INSERT OR REPLACE INTO counts (id, trackId, plays, playlists, albums, tags, likedBy, downloads) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [
+            countsId,
+            trackDetails.id as string,
+            trackDetails._count?.plays || 0,
+            trackDetails._count?.playlists || 0,
+            trackDetails._count?.albums || 0,
+            trackDetails._count?.tags || 0,
+            trackDetails._count?.likedBy || 0,
+            trackDetails._count?.downloads || 0,
+          ],
+          () => {
+            console.log('Counts inserted or updated successfully');
+          },
+          (_, error) => {
+            console.error('Failed to insert or update counts: ', error);
+            return false;
+          }
+        );
+
+        // Save track details and file paths to SQLite database
+        tx.executeSql(
+          'INSERT INTO tracks (id, title, description, src, cover, lyrics, publicStatus, trackDuration, trackSize, creatorId, createdAt, downloaded, downloadedAt, countsId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)',
           [
             trackDetails.id as string,
             trackDetails.title as string,
@@ -373,9 +444,9 @@ export const useDownloadTrack = (searchTerm?: string) => {
             trackDetails.trackDuration as number,
             trackDetails.trackSize as number,
             trackDetails.creator!.id,
-            trackDetails.plays || 0,
             trackDetails.createdAt as string,
             new Date().toISOString(),
+            countsId,
           ],
           () => {
             toastResponseMessage({
@@ -384,7 +455,6 @@ export const useDownloadTrack = (searchTerm?: string) => {
             });
 
             api.post(`/tracks/download/${trackDetails.id}`);
-            loadTracks();
           },
           (_, error) => {
             console.error('Failed to save track: ', error);
@@ -399,6 +469,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
     } catch (error) {
       console.error('Error downloading and saving track:', error);
     } finally {
+      loadTracks();
       setIsDownloading(false);
       setProgressPercentage(0);
     }
@@ -443,7 +514,6 @@ export const useDownloadTrack = (searchTerm?: string) => {
               type: 'success',
             });
           }
-          loadTracks();
         },
         (_, error) => {
           toastResponseMessage({
@@ -455,6 +525,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
         }
       );
     });
+    loadTracks();
   };
 
   const deleteAllTracks = async (batch?: string[]) => {

@@ -55,8 +55,6 @@ export interface ITrackDetails {
   tags?: ITag[];
   creator?: IUserWithProfile;
   isLiked?: boolean;
-  plays?: number;
-  downloads?: number;
   downloaded?: boolean;
   downloadedAt?: string;
   _count?: {

@@ -7,26 +7,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { Image } from 'expo-image';
 import COLORS from '@/constants/Colors';
-import { toastResponseMessage } from '@/utils/toast';
-import { IUserProfile } from '@/utils/Interfaces/IUser';
-import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 import { CommonActions, Link } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 
 const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
-  const { setCurrentUserProfile, currentUserProfile, logout, api } =
-    useAuthStore((state) => state);
+  const { currentUserProfile, logout } = useAuthStore((state) => state);
   const navigation = useNavigation();
 
-  const { data: profile, isLoading } = useProfileQuery().get;
-
   useEffect(() => {
-    if (profile) {
-      setCurrentUserProfile(profile.data.result as IUserProfile);
-    } else {
+    if (!currentUserProfile) {
       navigation.dispatch(CommonActions.navigate('ProfileSetup'));
     }
-  }, [profile, isLoading, currentUserProfile]);
+  }, [currentUserProfile]);
 
   const currentRouteName =
     navigation.getState().routes[navigation.getState().index].name;

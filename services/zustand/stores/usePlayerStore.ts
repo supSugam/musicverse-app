@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { Audio } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
-import { playATrack } from '@/services/api/play';
 import { useAuthStore } from './useAuthStore';
 import { AxiosInstance } from 'axios';
 
@@ -22,7 +21,6 @@ const InitialState = {
   playUntilLastTrack: true,
   stopAfterCurrentTrack: false,
   playbackError: null,
-  isPlayerExpanded: false,
   queueId: null,
 };
 
@@ -46,9 +44,7 @@ interface PlayerState {
   stopAfterCurrentTrack: boolean;
   playbackError: string | null;
   didJustFinish: boolean;
-  isPlayerExpanded: boolean;
-  setPlayerExpanded: (isPlayerExpanded: boolean) => void;
-  togglePlayerExpanded: () => void;
+
   setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => void;
   setQueueId: (queueId: string) => void;
   loadTrack: (index: number) => Promise<void>;
@@ -86,7 +82,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   didJustFinish: false,
 
-  isPlayerExpanded: false,
   isAsyncOperationPending: false,
 
   setQueueId: (queueId: string) => {
@@ -95,14 +90,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   setIsAsyncOperationPending: (isAsyncOperationPending: boolean) => {
     set({ isAsyncOperationPending });
-  },
-
-  setPlayerExpanded: (isPlayerExpanded: boolean) => {
-    set({ isPlayerExpanded });
-  },
-
-  togglePlayerExpanded: () => {
-    set((state) => ({ isPlayerExpanded: !state.isPlayerExpanded }));
   },
 
   currentTrack: () => {
@@ -184,8 +171,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         false
       );
 
-      newPlaybackInstance.setOnPlaybackStatusUpdate(async (status) => {
+      newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
+          console.log('durationMillis', status.durationMillis);
           set({
             playbackPosition: status.positionMillis,
             playbackDuration: status.durationMillis ?? 0,
@@ -210,11 +198,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
               return;
             }
             if (isLoopingQueue) {
-              await nextTrack();
+              nextTrack();
               return;
             }
             if (playUntilLastTrack && index !== tracks.length - 1) {
-              await nextTrack();
+              nextTrack();
               return;
             }
           }
@@ -236,8 +224,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (!playbackInstance) return;
 
     if (isPlaying && !play) {
-      playbackInstance.setStatusAsync({ shouldPlay: false });
       playbackInstance.pauseAsync();
+      playbackInstance.setStatusAsync({ shouldPlay: false });
     } else {
       if (didJustFinish) {
         playbackInstance.replayAsync();

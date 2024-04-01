@@ -1,5 +1,5 @@
 import { View, Pressable } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import LogoWithName from '../reusables/LogoWithName';
 import StyledText from '../reusables/StyledText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,9 +9,11 @@ import { Image } from 'expo-image';
 import COLORS from '@/constants/Colors';
 import { CommonActions, Link } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
+import AnimatedTouchable from '../reusables/AnimatedTouchable';
+import { useAppSidebar } from '../Profile/ProfileSidebar';
 
 const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
-  const { currentUserProfile, logout } = useAuthStore((state) => state);
+  const { currentUserProfile } = useAuthStore((state) => state);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -20,6 +22,7 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
     }
   }, [currentUserProfile]);
 
+  const { toggleAppSidebar } = useAppSidebar();
   return (
     <View
       style={{
@@ -61,15 +64,23 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
             style={{ marginRight: 12 }}
           />
 
-          <Pressable onPress={logout}>
+          <AnimatedTouchable
+            onPress={toggleAppSidebar}
+            wrapperStyles={{
+              borderColor: COLORS.neutral.normal,
+              borderWidth: 1,
+              borderRadius: 20,
+              overflow: 'hidden',
+            }}
+          >
             <Image
               source={
                 currentUserProfile?.avatar ||
                 require('@/assets/images/avatar.jpeg')
               }
-              style={{ width: 34, height: 34, borderRadius: 20 }}
+              style={{ width: 34, height: 34 }}
             />
-          </Pressable>
+          </AnimatedTouchable>
         </View>
       </View>
       <LinearGradient

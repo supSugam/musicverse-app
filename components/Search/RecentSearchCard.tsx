@@ -84,7 +84,10 @@ const RecentSearchCard = ({ recentSearch }: IRecentSearchProps) => {
 
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => removeRecentSearch(recentSearch.data.id)}
+          onPress={() => {
+            console.log('removeRecentSearch');
+            removeRecentSearch(recentSearch.data.id);
+          }}
           containerStyle={{
             display: 'flex',
             justifyContent: 'center',

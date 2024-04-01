@@ -173,7 +173,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
-          console.log('durationMillis', status.durationMillis);
           set({
             playbackPosition: status.positionMillis,
             playbackDuration: status.durationMillis ?? 0,

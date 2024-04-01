@@ -38,10 +38,10 @@ const Container = ({
     >
       <LinearGradient
         colors={[
-          COLORS.background.dense,
-          `${COLORS.background.dense}40`,
-          `${COLORS.background.dense}80`,
           `${COLORS.background.dense}90`,
+          `${COLORS.background.dense}80`,
+          `${COLORS.background.dense}40`,
+          COLORS.background.dense,
         ]}
         style={styles.gradient}
       >

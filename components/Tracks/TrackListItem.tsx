@@ -191,33 +191,12 @@ const TrackListItem = ({
           {
             zIndex: 1,
             height: 65,
-            // backgroundColor: 'red',
+            backgroundColor: `${COLORS.neutral.dark}80`,
           },
         ]}
-        className="flex flex-row items-center my-1 flex-1"
+        className="flex w-full flex-row items-center justify-between p-2 mb-2 rounded-lg"
       >
-        <LinearGradient
-          colors={[
-            COLORS.primary.light,
-            ...COLORS.gradient.primary,
-            COLORS.primary.dark,
-          ]}
-          style={{
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            zIndex: -1,
-            opacity: 0.1,
-            padding: 4,
-            flex: 1,
-            top: 0,
-            left: 0,
-            borderRadius: 8,
-          }}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 1 }}
-        />
-        <View className="flex flex-row items-center flex-1 px-2">
+        <View className="flex flex-row items-center flex-1">
           {label !== undefined && (
             <StyledText
               size="sm"
@@ -225,7 +204,7 @@ const TrackListItem = ({
               style={{
                 color: COLORS.neutral.normal,
               }}
-              className="mx-2"
+              className="mr-4"
             >
               {label}
             </StyledText>
@@ -233,21 +212,20 @@ const TrackListItem = ({
           <ImageDisplay
             source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
             placeholder={''}
-            width={45}
-            height={45}
+            width={50}
+            height={50}
             borderRadius={4}
             style={{
               borderColor: COLORS.neutral.semidark,
               borderWidth: 1,
             }}
-            className="ml-2"
           />
 
           <View className="flex flex-col mx-3 mr-5 flex-1">
             <HorizontalMarquee speed={5000} pauseDuration={2000}>
               <StyledText
-                size="lg"
-                weight="semibold"
+                size="base"
+                weight="medium"
                 numberOfLines={1}
                 ellipsizeMode="clip"
               >

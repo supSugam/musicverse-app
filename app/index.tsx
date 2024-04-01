@@ -14,7 +14,6 @@ import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
 import UpdatePlaylist from '@/components/Playlist/UpdatePlaylist';
 import UpdateAlbum from '@/components/Albums/UpdateAlbum';
 import ProfileSetup from './screens/get-started/ProfileSetup';
-import { AppSidebarDrawer } from '@/components/Profile/ProfileSidebar';
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
@@ -30,7 +29,7 @@ export default function index() {
   }, [initialize]);
 
   return (
-    <AppSidebarDrawer>
+    <>
       {currentUser !== null ? (
         <>
           <Stack.Navigator
@@ -58,6 +57,14 @@ export default function index() {
             <Stack.Screen
               name="TabsLayout"
               component={TabsLayout}
+              options={{
+                headerShown: false,
+              }}
+            />
+
+            <Stack.Screen
+              name="Settings"
+              component={() => <></>}
               options={{
                 headerShown: false,
               }}
@@ -152,6 +159,6 @@ export default function index() {
           />
         </Stack.Navigator>
       )}
-    </AppSidebarDrawer>
+    </>
   );
 }

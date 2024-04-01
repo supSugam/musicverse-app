@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
-
+import { AppSidebarDrawer } from '@/components/Sidebar/ProfileSidebar';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import ToastInstance from '@/components/ToastInstance';
 import LoadingModal from '@/components/global/LoadingModal';
@@ -61,20 +61,22 @@ export default function RootLayout() {
 function RootLayoutNav() {
   return (
     <ThemeProvider value={DarkTheme}>
-      <LoadingModal />
-      <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              gestureEnabled: true,
-            }}
-          />
-        </GestureHandlerRootView>
+      <AppSidebarDrawer>
+        <LoadingModal />
+        <QueryClientProvider client={queryClient}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                gestureEnabled: true,
+              }}
+            />
+          </GestureHandlerRootView>
 
-        <StatusBar style="light" />
-      </QueryClientProvider>
-      <ToastInstance />
+          <StatusBar style="light" />
+        </QueryClientProvider>
+        <ToastInstance />
+      </AppSidebarDrawer>
     </ThemeProvider>
   );
 }

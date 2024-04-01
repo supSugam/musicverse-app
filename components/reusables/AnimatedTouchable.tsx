@@ -20,6 +20,7 @@ interface IAnimatedTouchableProps
     duration: number;
   };
   wrapperStyles?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
+  wrapperClassName?: string;
 }
 
 const AnimatedTouchable = ({
@@ -34,6 +35,7 @@ const AnimatedTouchable = ({
     duration: 250,
   },
   wrapperStyles = {},
+  wrapperClassName = '',
   ...rest
 }: IAnimatedTouchableProps) => {
   const translateX = useSharedValue(50); // Start position outside the screen
@@ -66,7 +68,10 @@ const AnimatedTouchable = ({
       onPressOut={leaveAnimation}
       {...rest}
     >
-      <Animated.View style={[scaleStyle, translateStyle, wrapperStyles]}>
+      <Animated.View
+        style={[scaleStyle, translateStyle, wrapperStyles]}
+        className={wrapperClassName}
+      >
         {children}
       </Animated.View>
     </TouchableOpacity>

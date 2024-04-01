@@ -10,7 +10,7 @@ import COLORS from '@/constants/Colors';
 import { CommonActions, Link } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
-import { useAppSidebar } from '../Profile/ProfileSidebar';
+import { useAppSidebar } from '../Sidebar/ProfileSidebar';
 
 const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
   const { currentUserProfile } = useAuthStore((state) => state);

@@ -13,8 +13,12 @@ import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
-const ProfilePage: React.FC = () => {
+const DynamicProfilePage: React.FC = () => {
   const { params } = useRoute();
+
+  useEffect(() => {
+    console.log('params', params);
+  }, [params]);
 
   return (
     <Container includeNavBar navbarTitle="Profile">
@@ -27,7 +31,7 @@ const ProfilePage: React.FC = () => {
   );
 };
 
-export default ProfilePage;
+export default DynamicProfilePage;
 
 const styles = StyleSheet.create({
   scrollView: {

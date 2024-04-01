@@ -8,7 +8,7 @@ const COLORS = {
     white: '#ffffff',
     black: '#000000',
     gray: '#525252',
-    light: '#a3a3a3',
+    light: '#d4d4d4',
     normal: '#737373',
     dark: '#171717',
     dense: '#0a0a0a',

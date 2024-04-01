@@ -28,6 +28,7 @@ interface IAppGlobalState {
   addRecentSearch: (search: RecentSearch) => void;
   removeRecentSearch: (id: string) => void;
   clearAllRecentSearches: () => void;
+  updateRecentSearches: () => void;
 }
 
 export const useAppState = create<IAppGlobalState>((set, get) => ({
@@ -43,15 +44,15 @@ export const useAppState = create<IAppGlobalState>((set, get) => ({
   // For recent searches
   recentSearches: [],
   addRecentSearch: (search: RecentSearch) => {
-    set((state) => ({
-      recentSearches: [search, ...state.recentSearches],
-    }));
-    const { recentSearches } = get();
-
+    const { recentSearches, updateRecentSearches } = get();
     AsyncStorage.setItem(
       'recentSearches',
-      JSON.stringify([search, ...recentSearches])
+      JSON.stringify([
+        search,
+        ...recentSearches.filter((s) => s.data.id !== search.data.id),
+      ])
     );
+    updateRecentSearches();
   },
   removeRecentSearch: (id: string) => {
     set((state) => ({
@@ -59,11 +60,22 @@ export const useAppState = create<IAppGlobalState>((set, get) => ({
         (search) => search.data.id !== id
       ),
     }));
-    const { recentSearches } = get();
+    const { recentSearches, updateRecentSearches } = get();
     AsyncStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    updateRecentSearches();
   },
   clearAllRecentSearches: () => {
-    set({ recentSearches: [] });
+    const { updateRecentSearches } = get();
     AsyncStorage.removeItem('recentSearches');
+    updateRecentSearches();
+  },
+
+  updateRecentSearches: async () => {
+    const recentSearches = await AsyncStorage.getItem('recentSearches');
+    if (recentSearches) {
+      set({ recentSearches: JSON.parse(recentSearches) });
+    } else {
+      set({ recentSearches: [] });
+    }
   },
 }));

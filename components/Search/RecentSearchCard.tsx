@@ -11,6 +11,7 @@ import StyledText from '../reusables/StyledText';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '@/constants/Colors';
+import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 
 interface IRecentSearchProps {
   recentSearch: RecentSearch;
@@ -46,36 +47,36 @@ const RecentSearchCard = ({ recentSearch }: IRecentSearchProps) => {
 
   return (
     <AnimatedTouchable
-      className="flex flex-row items-center my-1 px-2 py-3 w-full"
-      style={{
-        borderRadius: 5,
-        borderColor: COLORS.neutral.semidark,
-        backgroundColor: 'red',
+      wrapperStyles={{
+        borderRadius: 10,
+        borderWidth: 1,
         flexDirection: 'row',
+        display: 'flex',
+        alignItems: 'center',
+        marginVertical: 2,
+        height: 75,
+        position: 'relative',
+        maxWidth: '100%',
       }}
     >
+      <PrimaryGradient opacity={0.1} />
       <ImageDisplay
         source={{ uri: details.image || TRACK_PLACEHOLDER_IMAGE }}
-        height={60}
-        width={60}
+        height={56}
+        width={56}
         borderRadius={details.roundedImage ? 'full' : 8}
+        className="ml-3"
       />
-      <View
-        className="flex flex-row w-full"
-        style={{
-          backgroundColor: 'green',
-        }}
-      >
-        <View className="flex flex-col flex-1">
+      <View className="flex flex-row ml-4 justify-between flex-1">
+        <View className="flex flex-col">
           <StyledText weight="semibold" numberOfLines={1} ellipsizeMode="tail">
             {details.title}
           </StyledText>
           <StyledText
             weight="medium"
-            opacity="high"
             numberOfLines={1}
             ellipsizeMode="tail"
-            className="mt-1"
+            color={COLORS.neutral.light}
           >
             {details.subtitle}
           </StyledText>
@@ -84,8 +85,14 @@ const RecentSearchCard = ({ recentSearch }: IRecentSearchProps) => {
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => removeRecentSearch(recentSearch.data.id)}
+          containerStyle={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+          }}
         >
-          <MaterialIcons size={24} name="close" color={COLORS.neutral.light} />
+          <MaterialIcons size={28} name="close" color={COLORS.neutral.light} />
         </TouchableOpacity>
       </View>
     </AnimatedTouchable>

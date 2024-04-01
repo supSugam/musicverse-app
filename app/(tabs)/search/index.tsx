@@ -4,6 +4,7 @@ import TrackListItem from '@/components/Tracks/TrackListItem';
 import TrackPreview from '@/components/Tracks/TrackPreview';
 import EmptyGhost from '@/components/reusables/Lottie/EmptyGhost';
 import SearchField from '@/components/reusables/SearchField';
+import StyledText from '@/components/reusables/StyledText';
 import COLORS from '@/constants/Colors';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
@@ -18,6 +19,7 @@ import { SearchType } from '@/utils/enums/SearchType';
 import { GenericPaginationResponse } from '@/utils/helpers/ts-utilities';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
+import { UIImagePickerPreferredAssetRepresentationMode } from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -45,7 +47,8 @@ const SearchPage = () => {
   const [allData, setAllData] = useState<SearchResults>({});
 
   const { api } = useAuthStore();
-  const { recentSearches, addRecentSearch } = useAppState();
+  const { recentSearches, addRecentSearch, updateRecentSearches } =
+    useAppState();
   const { data, isRefetching, refetch } = useQuery<
     AxiosResponse<SuccessResponse<SearchResults>>
   >({
@@ -63,6 +66,10 @@ const SearchPage = () => {
       setAllData(data.data.result);
     }
   }, [data]);
+
+  useEffect(() => {
+    updateRecentSearches();
+  }, []);
 
   const { updateTracks, playATrackById } = usePlayerStore();
   return (
@@ -87,47 +94,54 @@ const SearchPage = () => {
           triggerMode="debounce"
         />
 
-        {searchParams.search?.length === 0 && recentSearches.length === 0 ? (
-          <EmptyGhost
-            caption="Search for tracks, albums, artists, playlists or users"
-            gradient={0.1}
-            wrapperStyles={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              alignSelf: 'center',
-              backgroundColor: 'transparent',
-              height: '100%',
-              flexShrink: 1,
-            }}
-            lottieProps={{
-              style: {
-                width: '100%',
-                height: 100,
+        {!searchParams.search && (
+          <>
+            {recentSearches.length === 0 ? (
+              <EmptyGhost
+                caption="Search for tracks, albums, artists, playlists or users"
+                wrapperStyles={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  alignSelf: 'center',
+                  backgroundColor: 'transparent',
+                  height: '100%',
+                  flexShrink: 1,
+                }}
+                lottieProps={{
+                  style: {
+                    width: '100%',
+                    height: 100,
 
-                transform: [
-                  {
-                    scale: 2.2,
+                    transform: [
+                      {
+                        scale: 2.2,
+                      },
+                      {
+                        translateY: -15,
+                      },
+                    ],
                   },
-                  {
-                    translateY: -15,
-                  },
-                ],
-              },
-            }}
-          />
-        ) : (
-          <></>
+                }}
+              />
+            ) : (
+              <View className="w-full">
+                <StyledText weight="bold" size="lg" className="mt-4 mb-2">
+                  Recent Searches
+                </StyledText>
+                {recentSearches.map((recent, i) => {
+                  return (
+                    <RecentSearchCard
+                      key={recent.data.id + recent.data.createdAt + i}
+                      recentSearch={recent}
+                    />
+                  );
+                })}
+              </View>
+            )}
+          </>
         )}
 
         <ScrollView className="w-full">
-          {recentSearches.map((recent) => {
-            return (
-              <RecentSearchCard
-                key={recent.data.id + recent.data.createdAt}
-                recentSearch={recent}
-              />
-            );
-          })}
           {allData?.tracks &&
             allData?.tracks?.items?.map((track) => (
               <TouchableOpacity

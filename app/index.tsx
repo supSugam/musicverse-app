@@ -43,6 +43,7 @@ export default function index() {
               component={ProfileSetup}
               options={{
                 headerShown: false,
+                animation: 'slide_from_right',
               }}
             />
             <Stack.Screen

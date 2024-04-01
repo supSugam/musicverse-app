@@ -18,3 +18,9 @@ export type fontWeights =
   | undefined;
 
 export type TabRouteName = (typeof TAB_ROUTE_NAMES)[number];
+
+export type ColorString =
+  | `#${string}`
+  | `rgb(${number}, ${number}, ${number})`
+  | `rgba(${number}, ${number}, ${number}, ${number})`
+  | string;

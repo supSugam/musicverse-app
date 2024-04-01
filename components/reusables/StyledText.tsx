@@ -1,5 +1,5 @@
 import { joinClassNames } from '@/utils/helpers/string';
-import { fontWeights } from '@/utils/helpers/types';
+import { ColorString, fontWeights } from '@/utils/helpers/types';
 import { Text as DefaultText, TextProps } from 'react-native';
 
 export type TextSizeOptions =
@@ -40,6 +40,7 @@ interface ITextProps extends TextProps {
   opacity?: TextOpacityOptions;
   uppercase?: boolean;
   children: React.ReactNode;
+  color?: ColorString;
 }
 
 const StyledText = (props: ITextProps) => {
@@ -51,6 +52,7 @@ const StyledText = (props: ITextProps) => {
     opacity,
     uppercase = false,
     style,
+    color = 'white',
     ...otherProps
   } = props;
 
@@ -149,6 +151,7 @@ const StyledText = (props: ITextProps) => {
         fontOpacityStyle,
         {
           fontWeight: fontWeightStyle.fontWeight as fontWeights,
+          color,
         },
         style,
       ]}

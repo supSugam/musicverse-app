@@ -18,6 +18,13 @@ export interface ICurrentUser {
   accessToken: string;
 }
 
+export interface IUserCountStats {
+  albums: number;
+  tracks: number;
+  playlists: number;
+  followers: number;
+  following: number;
+}
 export interface IUser {
   id: string;
   email: string;
@@ -27,6 +34,7 @@ export interface IUser {
   updatedAt: string;
   isVerified: boolean;
   artistStatus: ReviewStatus;
+  _count?: IUserCountStats;
 }
 
 export interface IUserProfile {

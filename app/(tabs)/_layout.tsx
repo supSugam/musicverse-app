@@ -6,12 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
 import { GLOBAL_STYLES, TAB_ROUTE_NAMES } from '@/utils/constants';
-import { useAppState } from '@/services/zustand/stores/useAppStore';
 import MiniPlayer from '@/components/Player/MiniPlayer';
 import { useState } from 'react';
 import { TabRouteName } from '@/utils/helpers/types';
 import MyLibrary from './library';
 import SearchPage from './search';
+import ProfilePage from './profile';
+import HomeStackScreen from './home';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,6 +67,9 @@ export default function TabsLayout() {
         initialRouteName="Home"
         screenListeners={({ navigation, route }) => ({
           tabPress: (e) => {
+            if (route.name === 'Home') {
+              navigation.navigate('HomeScreen');
+            }
             setActiveTab(route.name as TabRouteName);
           },
           blur: () => {
@@ -125,7 +129,7 @@ export default function TabsLayout() {
       >
         <Tab.Screen
           name="Home"
-          component={Home}
+          component={HomeStackScreen}
           options={{
             headerTitle: 'Home',
           }}

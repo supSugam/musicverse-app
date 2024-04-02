@@ -62,13 +62,13 @@ export default function index() {
               }}
             />
 
-            <Stack.Screen
+            {/* <Stack.Screen
               name="Settings"
               component={() => <></>}
               options={{
                 headerShown: false,
               }}
-            />
+            /> */}
 
             <Stack.Group
               screenOptions={{

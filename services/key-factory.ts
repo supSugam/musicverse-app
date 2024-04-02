@@ -23,11 +23,15 @@
 // };
 
 export const USER_QUERY_KEY = 'user';
-export const PROFILE_QUERY_KEY = (...args: string[]) => [
+export const PROFILE_QUERY_KEY = (...args: (string | undefined)[]) => [
   USER_QUERY_KEY,
   'profile',
   ...args,
 ];
+
+export const profileKeyFactory = {
+  getProfileByUsername: (username?: string) => PROFILE_QUERY_KEY(username),
+};
 export const GENRES_QUERY_KEY = 'genres';
 export const TAGS_QUERY_KEY = 'tags';
 export const ALBUM_QUERY_KEY = 'albums';

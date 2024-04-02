@@ -19,7 +19,7 @@ import AnimatedTouchable from './AnimatedTouchable';
 
 interface IImageDisplayProps
   extends React.ComponentProps<typeof TouchableOpacity> {
-  source?: ImageSourcePropType | null;
+  source?: ImageSourcePropType | null | string;
   placeholder?: string | React.ReactNode;
   width?: Dimension;
   height?: Dimension;
@@ -111,7 +111,7 @@ const ImageDisplay = ({
       >
         {source ? (
           <Image
-            source={source}
+            source={typeof source === 'string' ? { uri: source } : source}
             style={[styles.image, borderRadiusStyle]}
             resizeMode="cover"
           />

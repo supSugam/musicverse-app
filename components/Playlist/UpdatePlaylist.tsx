@@ -102,7 +102,6 @@ const UpdatePlaylist = () => {
   // useEffect(() => {
   //   const playlist = playlistData?.data;
   //   if (playlist) {
-  //     consoleLogFormattedObject({ playlist });
   //     setPlaylist(playlist);
   //   }
   // }, [playlistData]);

@@ -1,3 +1,5 @@
+import { IUserCountStats, UserRole } from '../Interfaces/IUser';
+
 export function splitStringFromLastDot(
   inputString: string
 ): [string, string | undefined] {
@@ -112,3 +114,33 @@ export const capitalizeFirstLetter = (
   }
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
+
+export const formatNumber = (num?: number, mode: 'k' | 'comma' = 'k') => {
+  if (num === undefined) return '-';
+  switch (mode) {
+    case 'k':
+      return num > 999 ? (num / 1000).toFixed(1) + 'k' : num;
+    case 'comma':
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    default:
+      return num;
+  }
+};
+
+// if user then show followers and following
+// // if artist then show followers,
+// export const getProfilePageCaption = (counts:IUserCountStats,role:UserRole)=>{
+//   switch(role){
+//     case UserRole.USER:
+//       return `${counts.albums} Albums • ${counts.tracks} Tracks • ${counts.playlists} Playlists`;
+//     case UserRole.ARTIST:
+//       return `${counts.albums} Albums • ${counts.tracks} Tracks • ${counts.playlists} Playlists`;
+//     case UserRole.ADMIN:
+//       return `${counts.albums} Albums • ${counts.tracks} Tracks • ${counts.playlists} Playlists`;
+//     case UserRole.MEMBER:
+//       return `${counts.albums} Albums • ${counts.tracks} Tracks • ${counts.playlists} Playlists`;
+//     default:
+//       return `${counts.albums} Albums • ${counts.tracks} Tracks • ${counts.playlists} Playlists`;
+//   }
+
+// }

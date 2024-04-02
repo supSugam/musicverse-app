@@ -12,9 +12,19 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import React, { useEffect, useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  Platform,
+} from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import ProfilePage from '../profile';
 
-const HomeScreen: React.FC = () => {
+const Stack = createNativeStackNavigator();
+
+const Home: React.FC = () => {
   const { currentUser, currentUserProfile } = useAuthStore();
 
   // Genres
@@ -133,11 +143,37 @@ const HomeScreen: React.FC = () => {
   );
 };
 
-export default HomeScreen;
-
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     padding: 15,
   },
 });
+
+export default function HomeStackScreen() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTransparent: true,
+        headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
+      }}
+      initialRouteName="HomeScreen"
+    >
+      <Stack.Screen
+        name="HomeScreen"
+        component={Home}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ProfilePage"
+        component={ProfilePage}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      />
+    </Stack.Navigator>
+  );
+}

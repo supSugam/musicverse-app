@@ -10,9 +10,9 @@ import COLORS from '@/constants/Colors';
 import { CommonActions, Link } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
-import { useAppSidebar } from '../Sidebar/ProfileSidebar';
+import { useAppSidebar } from '../Sidebar/AppSidebar';
 
-const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
+const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
   const { currentUserProfile } = useAuthStore((state) => state);
   const navigation = useNavigation();
 
@@ -51,9 +51,13 @@ const NavBar = ({ title = 'NavBar' }: { title?: string }) => {
           width={44}
           height={44}
           title={
-            <StyledText weight="extrabold" tracking="tight" size="2xl">
-              {title}
-            </StyledText>
+            typeof title === 'string' ? (
+              <StyledText weight="extrabold" tracking="tight" size="2xl">
+                {title}
+              </StyledText>
+            ) : (
+              title
+            )
           }
         />
         <View className="flex flex-row items-center">

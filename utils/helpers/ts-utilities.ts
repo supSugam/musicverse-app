@@ -64,3 +64,11 @@ export type RecentSearchUtility<T extends { id: string }, K = string> = {
   type: K;
   data: T;
 };
+
+type IsAllOptional<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? true : false;
+};
+
+export type OptionalObject<T> = IsAllOptional<T>[keyof T] extends true
+  ? T | undefined
+  : T;

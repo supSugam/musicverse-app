@@ -25,6 +25,8 @@ export interface ITracksPaginationQueryParams extends IBasePaginationParams {
   selectedTag?: string;
   owned?: boolean;
   liked?: boolean;
+  creatorId?: string;
+  public?: boolean;
 }
 
 type TracksQuery<T extends string | undefined = undefined> = {

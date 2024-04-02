@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
-import { AppSidebarDrawer } from '@/components/Sidebar/ProfileSidebar';
+import { AppSidebarDrawer } from '@/components/Sidebar/AppSidebar';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import ToastInstance from '@/components/ToastInstance';
 import LoadingModal from '@/components/global/LoadingModal';
@@ -73,7 +73,7 @@ function RootLayoutNav() {
             />
           </GestureHandlerRootView>
 
-          <StatusBar style="light" />
+          <StatusBar style="light" translucent />
         </QueryClientProvider>
         <ToastInstance />
       </AppSidebarDrawer>

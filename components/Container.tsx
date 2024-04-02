@@ -9,12 +9,12 @@ interface IContainerProps {
   children: React.ReactNode;
   style?: ViewProps['style'];
   includeNavBar?: boolean;
-  navbarTitle?: string;
+  statusBarPadding?: boolean;
 }
 
 type ContainerPropsWithNavbar = IContainerProps & {
   includeNavBar: true;
-  navbarTitle: string;
+  navbarTitle?: string | React.ReactNode;
 };
 
 type ContainerPropsWithoutNavbar = IContainerProps & {
@@ -29,6 +29,7 @@ const Container = ({
   style,
   includeNavBar = false,
   navbarTitle,
+  statusBarPadding = true,
   ...rest
 }: ContainerProps) => {
   return (
@@ -45,7 +46,14 @@ const Container = ({
         ]}
         style={styles.gradient}
       >
-        <SafeAreaView style={[styles.container, style]} {...rest}>
+        <SafeAreaView
+          style={[
+            styles.container,
+            statusBarPadding && styles.statusBarPadding,
+            style,
+          ]}
+          {...rest}
+        >
           {includeNavBar && <NavBar title={navbarTitle} />}
           {children}
         </SafeAreaView>
@@ -60,6 +68,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  statusBarPadding: {
     paddingTop: Platform.OS === 'android' ? StatusBar?.currentHeight || 0 : 0,
   },
 });

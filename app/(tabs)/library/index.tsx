@@ -6,7 +6,6 @@ import {
 } from '@react-navigation/material-top-tabs';
 import Playlists from '@/components/MyLibrary/Playlists';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { consoleLogFormattedObject } from '@/utils/helpers/Object';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import StyledText from '@/components/reusables/StyledText';
 import Animated, {

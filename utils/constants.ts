@@ -56,6 +56,7 @@ export const TAB_ROUTE_NAMES = [
   'Feed',
   'MyLibrary',
   'Upload',
+  'ProfilePage',
 ] as const;
 
 // Player
@@ -105,4 +106,19 @@ export const Downloaded_Tracks_Paths = {
     `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
   TRACK_ARTIST_AVATAR: (id: string, fileName: string) =>
     `${FileSystem.documentDirectory}Music/${id}/${fileName}`,
+};
+
+export const getRoleLabel = (role: UserRole) => {
+  switch (role) {
+    case UserRole.USER:
+      return 'Listener';
+    case UserRole.ARTIST:
+      return 'Artist';
+    case UserRole.MEMBER:
+      return 'Listener';
+    case UserRole.ADMIN:
+      return 'Admin';
+    default:
+      return 'User';
+  }
 };

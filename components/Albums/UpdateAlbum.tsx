@@ -87,7 +87,6 @@ const UpdateAlbum = () => {
   // useEffect(() => {
   //   const album = albumData?.data;
   //   if (album) {
-  //     consoleLogFormattedObject({ album });
   //     setAlbum(album);
   //   }
   // }, [albumData]);

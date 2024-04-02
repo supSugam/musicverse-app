@@ -43,10 +43,14 @@ export const convertObjectToFormData = (obj: any): FormData => {
   return formData;
 };
 
-export const consoleLogFormattedObject = (obj: any, name?: string) => {
-  console.log(`\n------------------ ${name} ------------------\n`);
-  console.log(JSON.stringify(obj, null, 2));
-  console.log(`\n------------------ ${name} ------------------\n`);
+export const clo = (...args: any[]) => {
+  console.log(
+    args
+      .map((arg) =>
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg
+      )
+      .join(' ')
+  );
 };
 
 export const cleanArray = <T extends unknown>(

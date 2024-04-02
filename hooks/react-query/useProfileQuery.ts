@@ -5,10 +5,12 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { PROFILE_QUERY_KEY } from '@/services/key-factory';
+import { PROFILE_QUERY_KEY, profileKeyFactory } from '@/services/key-factory';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { AxiosResponse } from 'axios';
+import { Axios, AxiosResponse } from 'axios';
+import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
+import { IUserWithProfile } from '@/utils/Interfaces/IUser';
 
 export interface ICreateUserProfileDTO {
   name: string;
@@ -28,9 +30,19 @@ interface IProfileQuery {
     IUpdateUserProfileDTO,
     unknown
   >;
+  getProfileByUsername: UseQueryResult<
+    AxiosResponse<SuccessResponse<IUserWithProfile>, Error>,
+    Error
+  >;
 }
 
-export const useProfileQuery = (): IProfileQuery => {
+interface IProfileQueryProps {
+  username?: string;
+}
+
+export const useProfileQuery = ({
+  username,
+}: IProfileQueryProps = {}): IProfileQuery => {
   const { api, currentUserProfile } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -88,9 +100,17 @@ export const useProfileQuery = (): IProfileQuery => {
     },
   });
 
+  const getProfileByUsername = useQuery({
+    queryKey: profileKeyFactory.getProfileByUsername(username),
+    queryFn: async () => await api.get(`/users/${username}`),
+    refetchOnWindowFocus: true,
+    enabled: username !== null,
+  });
+
   return {
     get,
     create,
     update,
+    getProfileByUsername,
   };
 };

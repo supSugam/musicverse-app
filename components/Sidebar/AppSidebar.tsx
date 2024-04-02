@@ -9,29 +9,34 @@ import { DEFAULT_AVATAR } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import { capitalizeFirstLetter } from '@/utils/helpers/string';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
-import SidebarNavlink, { HrefType } from './SidebarNavLink';
+import SidebarNavlink from './SidebarNavLink';
 import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
 
 interface IAppSidebarLink {
-  href: HrefType;
   title: string;
   icon: keyof (typeof FontAwesome)['glyphMap'];
   onPress?: () => void;
 }
 
-const ProfileSidebar = () => {
+const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
   const { currentUserProfile, currentUser } = useAuthStore();
+  const navigation = useNavigation();
   // profile,settings, notifications, logout,
   const appSidebarLinks: IAppSidebarLink[] = [
     {
-      href: {
-        pathname: '/profile/[username]',
-        params: {
-          username: currentUser?.username || '',
-        },
-      },
       title: 'Profile',
       icon: 'user',
+      onPress: () => {
+        toggleAppSidebar();
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'ProfilePage',
+            params: { username: currentUser?.username || '' },
+          })
+        );
+      },
     },
     // {
     //   href: '',
@@ -100,16 +105,22 @@ const ProfileSidebar = () => {
           const { onPress, ...rest } = link;
           return (
             <AnimatedTouchable
-              // !remindMe 55x55
               key={link.title + index}
               duration={100 * index}
-              wrapperClassName="w-full"
               wrapperStyles={{
+                width: '100%',
+              }}
+              style={{
                 width: '100%',
               }}
               onPress={onPress}
             >
-              <SidebarNavlink {...rest} borderTop={index === 0} borderBottom />
+              <SidebarNavlink
+                {...rest}
+                borderTop={index === 0}
+                borderBottom
+                key={link.title + index}
+              />
             </AnimatedTouchable>
           );
         })}
@@ -131,7 +142,7 @@ const AppSiderbarContext = createContext<AppSidebarContextType | undefined>(
 const AppSidebarDrawer: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [appSidebarOpen, setAppSidebarOpen] = useState<boolean>(true);
+  const [appSidebarOpen, setAppSidebarOpen] = useState<boolean>(false);
 
   const value = useMemo(
     () => ({
@@ -148,7 +159,7 @@ const AppSidebarDrawer: React.FC<{ children: React.ReactNode }> = ({
       onOpen={() => setAppSidebarOpen(true)}
       onClose={() => setAppSidebarOpen(false)}
       drawerPosition="left"
-      renderDrawerContent={() => <ProfileSidebar />}
+      renderDrawerContent={() => <AppSidebar {...value} />}
       drawerType="slide"
     >
       <AppSiderbarContext.Provider value={value}>
@@ -166,4 +177,4 @@ const useAppSidebar = (): AppSidebarContextType => {
   return context;
 };
 
-export { ProfileSidebar, AppSidebarDrawer, useAppSidebar };
+export { AppSidebar, AppSidebarDrawer, useAppSidebar };

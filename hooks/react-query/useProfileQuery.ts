@@ -101,10 +101,10 @@ export const useProfileQuery = ({
   });
 
   const getProfileByUsername = useQuery({
-    queryKey: profileKeyFactory.getProfileByUsername(username),
+    queryKey: [username],
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
-    enabled: username !== null,
+    enabled: typeof username === 'string',
   });
 
   return {

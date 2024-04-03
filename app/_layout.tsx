@@ -76,6 +76,7 @@ export default function RootLayout() {
   useEffect(() => {
     const setupNotifications = async () => {
       const permission = await requestUserPermission();
+      console.log(permission, 'PERMISSION');
 
       if (!permission) {
         toastResponseMessage({
@@ -86,7 +87,7 @@ export default function RootLayout() {
       }
       try {
         const token = await messaging().getToken();
-        console.log(token);
+        console.log(token, 'TOKENNNNNN');
       } catch (e) {
         console.log('error', e);
       }

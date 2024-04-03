@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { Image } from 'expo-image';
 import COLORS from '@/constants/Colors';
-import { CommonActions, Link } from '@react-navigation/native';
+import { CommonActions, Link, useRoute } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import { useAppSidebar } from '../Sidebar/AppSidebar';
@@ -15,10 +15,16 @@ import { useAppSidebar } from '../Sidebar/AppSidebar';
 const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
   const { currentUserProfile } = useAuthStore((state) => state);
   const navigation = useNavigation();
+  const route = useRoute();
 
   useEffect(() => {
+    console.log('currentUserProfile', !currentUserProfile);
     if (!currentUserProfile) {
       navigation.dispatch(CommonActions.navigate('ProfileSetup'));
+    } else {
+      if (route.name === 'ProfileSetup') {
+        navigation.dispatch(CommonActions.navigate('Home'));
+      }
     }
   }, [currentUserProfile]);
 

@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfilePage from '../profile';
+import ProfileSetup from '@/app/screens/get-started/ProfileSetup';
 
 const Stack = createNativeStackNavigator();
 
@@ -69,7 +70,7 @@ const Home: React.FC = () => {
   const { setIsLoading } = useAppState();
 
   useEffect(() => {
-    setIsLoading(isGenresLoading || isTracksLoading);
+    // setIsLoading(isGenresLoading || isTracksLoading);
   }, [isGenresLoading, isTracksLoading]);
 
   const {
@@ -169,6 +170,15 @@ export default function HomeStackScreen() {
       <Stack.Screen
         name="ProfilePage"
         component={ProfilePage}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      />
+
+      <Stack.Screen
+        name="ProfileSetup"
+        component={ProfileSetup}
         options={{
           headerShown: false,
           animation: 'slide_from_right',

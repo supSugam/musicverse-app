@@ -14,6 +14,7 @@ import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
 import UpdatePlaylist from '@/components/Playlist/UpdatePlaylist';
 import UpdateAlbum from '@/components/Albums/UpdateAlbum';
 import ProfileSetup from './screens/get-started/ProfileSetup';
+
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
@@ -38,14 +39,6 @@ export default function index() {
             }}
             initialRouteName="TabsLayout"
           >
-            <Stack.Screen
-              name="ProfileSetup"
-              component={ProfileSetup}
-              options={{
-                headerShown: false,
-                animation: 'slide_from_right',
-              }}
-            />
             <Stack.Screen
               name="TrackPlayer"
               component={TrackPlayer}

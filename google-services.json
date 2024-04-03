@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "121405744168",
+    "project_id": "musicverse-fyp",
+    "storage_bucket": "musicverse-fyp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121405744168:android:f03b41c7721c79dd72c11d",
+        "android_client_info": {
+          "package_name": "com.musicverse.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCieY8i5Qyqg2Q9iE8VoAUf8KnrGoj4r-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -19,6 +19,7 @@ import { jwtDecode } from 'jwt-decode';
 import { ICurrentUser } from '@/utils/Interfaces/IUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'core-js/stable/atob';
+import { CommonActions } from '@react-navigation/native';
 const schema = yup.object().shape({
   usernameOrEmail: yup.string().required('Enter your username or email.'),
   password: yup.string().required('Password cannot be empty.'),
@@ -30,7 +31,7 @@ export default function Login({ navigation }: { navigation: any }) {
   };
 
   const [loading, setLoading] = useState<boolean>(false);
-  const { login, setCurrentUser, currentUserProfile } = useAuthStore();
+  const { login, currentUserProfile } = useAuthStore();
 
   const loginUserMutation = useMutation({
     mutationFn: login,
@@ -39,9 +40,7 @@ export default function Login({ navigation }: { navigation: any }) {
         type: 'success',
         text1: 'Logged in successfully.',
       });
-      if (!currentUserProfile) {
-        navigation.navigate('ProfileSetup');
-      }
+
       setLoading(false);
     },
     onError: (error: any) => {

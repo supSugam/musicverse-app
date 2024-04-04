@@ -109,6 +109,7 @@ export const useAuthStore = create<AuthStore>(
       return await resendOtp(email);
     },
     initialize: async (): Promise<boolean> => {
+      const { setCurrentUser } = get();
       const userJson = await AsyncStorage.getItem('current-user');
       if (userJson) {
         const user = JSON.parse(userJson) as ICurrentUser;
@@ -121,14 +122,12 @@ export const useAuthStore = create<AuthStore>(
         set(() => ({ api: axiosInstance }));
         if (user.exp < Date.now() / 1000) {
           await AsyncStorage.removeItem('current-user');
-          set(() => ({ currentUser: null }));
+          setCurrentUser(null);
         } else {
-          set(() => ({
-            currentUser: user as ICurrentUser,
-          }));
+          setCurrentUser(user);
         }
       } else {
-        set(() => ({ currentUser: null }));
+        setCurrentUser(null);
       }
       return true;
     },

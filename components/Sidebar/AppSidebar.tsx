@@ -90,7 +90,7 @@ const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
     >
       <ReusableAlert
         cancelText="Cancel"
-        confirmText="Delete"
+        confirmText="Sign Out"
         visible={logOutAlert}
         onClose={() => setLogOutAlert(false)}
         onConfirm={logout}

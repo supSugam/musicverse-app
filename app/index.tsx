@@ -120,15 +120,8 @@ export default function index() {
           screenOptions={{
             headerTransparent: true,
           }}
+          initialRouteName="Welcome"
         >
-          <Stack.Screen
-            name="ProfileSetup"
-            component={ProfileSetup}
-            options={{
-              headerShown: false,
-              animation: 'slide_from_right',
-            }}
-          />
           <Stack.Screen
             name="Welcome"
             component={Welcome}
@@ -156,6 +149,14 @@ export default function index() {
             component={Login}
             options={{
               headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ProfileSetup"
+            component={ProfileSetup}
+            options={{
+              headerShown: false,
+              animation: 'slide_from_right',
             }}
           />
         </Stack.Navigator>

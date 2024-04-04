@@ -17,8 +17,10 @@ import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 interface AuthStore {
   currentUser: ICurrentUser | null;
   currentUserProfile: IUserProfile | null;
+  currentUserOnHold: ICurrentUser | null;
   api: AxiosInstance;
   setCurrentUserProfile: (user: IUserProfile) => void;
+  setCurrentUserOnHold: (user: ICurrentUser | null) => void;
   setApi: (api: AxiosInstance) => void;
   setCurrentUser: (user: ICurrentUser | null) => void;
   login: (payload: ILoginDTO) => Promise<AxiosResponse<any>>;
@@ -33,9 +35,13 @@ export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
     currentUser: null,
     currentUserProfile: null,
+    currentUserOnHold: null,
     api: api,
     setApi: (api) => {
       set(() => ({ api }));
+    },
+    setCurrentUserOnHold: (currentUserOnHold) => {
+      set(() => ({ currentUserOnHold }));
     },
     setCurrentUser: async (currentUser) => {
       set(() => ({ currentUser }));
@@ -45,8 +51,9 @@ export const useAuthStore = create<AuthStore>(
       set(() => ({ currentUserProfile }));
     },
     login: async (payload: ILoginDTO) => {
+      const { setCurrentUser, setCurrentUserOnHold } = get();
       const response = await api.post('/auth/login', payload);
-      const accessToken = response.data.result.access_token;
+      const { hasCompletedProfile, accessToken } = response.data.result;
 
       try {
         const decodedToken = jwtDecode(accessToken);
@@ -66,11 +73,13 @@ export const useAuthStore = create<AuthStore>(
             accessToken,
           } as ICurrentUser;
 
-          await AsyncStorage.setItem(
-            'current-user',
-            JSON.stringify(currentUser)
-          );
-          set(() => ({ currentUser }));
+          if (!hasCompletedProfile) {
+            setCurrentUserOnHold(currentUser);
+            setCurrentUser(null);
+          } else {
+            setCurrentUser(currentUser);
+            setCurrentUserOnHold(null);
+          }
         }
       } catch (e) {
         toastResponseMessage({
@@ -88,7 +97,7 @@ export const useAuthStore = create<AuthStore>(
     logout: async () => {
       try {
         await AsyncStorage.removeItem('current-user');
-        set(() => ({ currentUser: null }));
+        set(() => ({ currentUser: null, currentUserProfile: null }));
       } catch (error) {
         throw error;
       }
@@ -110,22 +119,16 @@ export const useAuthStore = create<AuthStore>(
           },
         });
         set(() => ({ api: axiosInstance }));
-
         if (user.exp < Date.now() / 1000) {
           await AsyncStorage.removeItem('current-user');
-          set(() => ({ currentUser: null, currentUserProfile: null }));
+          set(() => ({ currentUser: null }));
         } else {
-          await axiosInstance.get('/profile/me').then((response) => {
-            if (response.data.result) {
-              set(() => ({ currentUserProfile: response.data.result }));
-            }
-          });
           set(() => ({
             currentUser: user as ICurrentUser,
           }));
         }
       } else {
-        set(() => ({ currentUser: null, currentUserProfile: null }));
+        set(() => ({ currentUser: null }));
       }
       return true;
     },

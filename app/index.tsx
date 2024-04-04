@@ -122,6 +122,14 @@ export default function index() {
           }}
         >
           <Stack.Screen
+            name="ProfileSetup"
+            component={ProfileSetup}
+            options={{
+              headerShown: false,
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
             name="Welcome"
             component={Welcome}
             options={{

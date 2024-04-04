@@ -13,6 +13,7 @@ import SidebarNavlink from './SidebarNavLink';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
+import ReusableAlert from '../reusables/ReusableAlert';
 
 interface IAppSidebarLink {
   title: string;
@@ -21,8 +22,10 @@ interface IAppSidebarLink {
 }
 
 const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
-  const { currentUserProfile, currentUser } = useAuthStore();
+  const { currentUserProfile, currentUser, logout } = useAuthStore();
   const navigation = useNavigation();
+
+  const [logOutAlert, setLogOutAlert] = useState<boolean>(false);
   // profile,settings, notifications, logout,
   const appSidebarLinks: IAppSidebarLink[] = [
     {
@@ -38,21 +41,37 @@ const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
         );
       },
     },
-    // {
-    //   href: '',
-    //   title: 'Settings',
-    //   icon:<MaterialIcons name="settings" size={28} color={COLORS.neutral.normal} style={{ marginRight: 10 }} />,
-    // },
-    // {
-    //   href: 'x',
-    //   title: 'Notifications',
-    //   icon:<MaterialIcons name="notifications" size={28} color={COLORS.neutral.normal} style={{ marginRight: 10 }} />,
-    // },
-    // {
-    //   href: '',
-    //   title: 'Logout',
-    //   icon:<MaterialIcons name="logout" size={28} color={COLORS.neutral.normal} style={{ marginRight: 10 }} />,
-    // },
+    {
+      title: 'Settings',
+      icon: 'cog',
+      onPress: () => {
+        toggleAppSidebar();
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'SettingsPage',
+          })
+        );
+      },
+    },
+    {
+      title: 'Notifications',
+      icon: 'bell',
+      onPress: () => {
+        toggleAppSidebar();
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'NotificationsPage',
+          })
+        );
+      },
+    },
+    {
+      title: 'Sign Out',
+      icon: 'sign-out',
+      onPress: () => {
+        setLogOutAlert(true);
+      },
+    },
   ];
   return (
     <View
@@ -69,6 +88,17 @@ const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
         // nice drop shadow
       }}
     >
+      <ReusableAlert
+        cancelText="Cancel"
+        confirmText="Delete"
+        visible={logOutAlert}
+        onClose={() => setLogOutAlert(false)}
+        onConfirm={logout}
+        type="alert"
+        header="Sign Out"
+      >
+        <StyledText size="base">Are you sure you want to sign out?</StyledText>
+      </ReusableAlert>
       <PrimaryGradient opacity={0.05} />
       <View className="flex flex-col w-full h-full px-4 py-20">
         <AnimatedTouchable

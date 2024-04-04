@@ -43,7 +43,13 @@ interface IProfileQueryProps {
 export const useProfileQuery = ({
   username,
 }: IProfileQueryProps = {}): IProfileQuery => {
-  const { api, currentUserProfile } = useAuthStore();
+  const {
+    api,
+    currentUserProfile,
+    setCurrentUser,
+    currentUserOnHold,
+    setCurrentUserOnHold,
+  } = useAuthStore();
   const queryClient = useQueryClient();
 
   const create = useMutation({
@@ -59,8 +65,10 @@ export const useProfileQuery = ({
       queryClient.invalidateQueries({
         queryKey: PROFILE_QUERY_KEY(),
       });
+      setCurrentUser(currentUserOnHold);
+      setCurrentUserOnHold(null);
       toastResponseMessage({
-        content: 'Profile created successfully',
+        content: 'Welcome to MusicVerse! ',
         type: 'success',
       });
     },
@@ -76,7 +84,6 @@ export const useProfileQuery = ({
     queryKey: PROFILE_QUERY_KEY(),
     queryFn: async () => await api.get('/profile/me'),
     refetchOnWindowFocus: true,
-    enabled: currentUserProfile === null,
   });
 
   const update = useMutation({

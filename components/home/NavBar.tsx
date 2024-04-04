@@ -11,22 +11,25 @@ import { CommonActions, Link, useRoute } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import { useAppSidebar } from '../Sidebar/AppSidebar';
+import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 
 const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
-  const { currentUserProfile } = useAuthStore((state) => state);
+  const { currentUserProfile, setCurrentUserProfile } = useAuthStore(
+    (state) => state
+  );
   const navigation = useNavigation();
   const route = useRoute();
 
+  const {
+    get: { data: profileData },
+  } = useProfileQuery();
+
   useEffect(() => {
-    console.log('currentUserProfile', !currentUserProfile);
-    if (!currentUserProfile) {
-      navigation.dispatch(CommonActions.navigate('ProfileSetup'));
-    } else {
-      if (route.name === 'ProfileSetup') {
-        navigation.dispatch(CommonActions.navigate('Home'));
-      }
-    }
-  }, [currentUserProfile]);
+    console.log('profileData', profileData);
+    // if(profileData){
+    //   setCurrentUserProfile(profileData?.data?.result);
+    // }
+  }, [profileData]);
 
   const { toggleAppSidebar } = useAppSidebar();
   return (

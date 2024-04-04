@@ -11,7 +11,6 @@ import { useState } from 'react';
 import { TabRouteName } from '@/utils/helpers/types';
 import MyLibrary from './library';
 import SearchPage from './search';
-import ProfilePage from './profile';
 import HomeStackScreen from './home';
 
 const Tab = createBottomTabNavigator();

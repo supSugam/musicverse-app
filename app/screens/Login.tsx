@@ -31,15 +31,19 @@ export default function Login({ navigation }: { navigation: any }) {
   };
 
   const [loading, setLoading] = useState<boolean>(false);
-  const { login, currentUserProfile } = useAuthStore();
+  const { login, currentUserProfile, currentUserOnHold } = useAuthStore();
 
   const loginUserMutation = useMutation({
     mutationFn: login,
     onSuccess: (data: any) => {
-      Toast.show({
-        type: 'success',
-        text1: 'Logged in successfully.',
-      });
+      if (!data.data.result.hasCompletedProfile) {
+        navigation.dispatch(CommonActions.navigate('ProfileSetup'));
+      } else {
+        toastResponseMessage({
+          type: 'success',
+          content: 'Logged In.',
+        });
+      }
 
       setLoading(false);
     },

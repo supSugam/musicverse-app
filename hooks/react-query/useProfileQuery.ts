@@ -46,6 +46,7 @@ export const useProfileQuery = ({
   const {
     api,
     currentUserProfile,
+    currentUser,
     setCurrentUser,
     currentUserOnHold,
     setCurrentUserOnHold,
@@ -84,6 +85,7 @@ export const useProfileQuery = ({
     queryKey: PROFILE_QUERY_KEY(),
     queryFn: async () => await api.get('/profile/me'),
     refetchOnWindowFocus: true,
+    retry: currentUser !== null,
   });
 
   const update = useMutation({

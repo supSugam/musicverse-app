@@ -187,7 +187,7 @@ const Albums = () => {
         type="alert"
         header="Delete Album"
       >
-        <StyledText size="base">
+        <StyledText size="lg" weight="semibold" className="text-left">
           Are you sure you want to delete this album?
         </StyledText>
       </ReusableAlert>

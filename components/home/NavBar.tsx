@@ -14,9 +14,8 @@ import { useAppSidebar } from '../Sidebar/AppSidebar';
 import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 
 const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
-  const { currentUserProfile, setCurrentUserProfile } = useAuthStore(
-    (state) => state
-  );
+  const { currentUserProfile, setCurrentUserProfile, currentUser } =
+    useAuthStore((state) => state);
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -25,10 +24,7 @@ const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
   } = useProfileQuery();
 
   useEffect(() => {
-    console.log('profileData', profileData);
-    // if(profileData){
-    //   setCurrentUserProfile(profileData?.data?.result);
-    // }
+    setCurrentUserProfile(profileData?.data?.result || null);
   }, [profileData]);
 
   const { toggleAppSidebar } = useAppSidebar();

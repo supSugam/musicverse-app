@@ -15,6 +15,7 @@ import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { toastResponseMessage } from '@/utils/toast';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -55,6 +56,8 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
+  const { fcmDeviceToken, setFcmDeviceToken } = useAppState();
+
   // Notifications
 
   const requestUserPermission = async (): Promise<boolean> => {
@@ -87,8 +90,9 @@ export default function RootLayout() {
       }
       try {
         const token = await messaging().getToken();
-        console.log(token, 'TOKENNNNNN');
+        setFcmDeviceToken(token);
       } catch (e) {
+        setFcmDeviceToken(null);
         console.log('error', e);
       }
 

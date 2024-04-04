@@ -16,6 +16,8 @@ export type RecentSearch =
 
 interface IAppGlobalState {
   isLoading: boolean;
+  fcmDeviceToken: string | null;
+  setFcmDeviceToken: (fcmDeviceToken: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
   rootNavigation?: NavigationContainerRef<ReactNavigation.RootParamList> | null;
   setRootNavigation: (
@@ -33,6 +35,9 @@ interface IAppGlobalState {
 
 export const useAppState = create<IAppGlobalState>((set, get) => ({
   isLoading: false,
+  fcmDeviceToken: null,
+  setFcmDeviceToken: (fcmDeviceToken: string | null) => set({ fcmDeviceToken }),
+
   setIsLoading: (isLoading: boolean) => set({ isLoading }),
   rootNavigation: null,
   setRootNavigation: (

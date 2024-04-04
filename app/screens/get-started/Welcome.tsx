@@ -7,6 +7,8 @@ import { GirlListeningLA } from '@/assets/lottie';
 import useScreenDimensions from '@/hooks/useScreenDimensions';
 import Container from '@/components/Container';
 import { StyledButton } from '@/components/reusables/StyledButton';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
+import * as Clipboard from 'expo-clipboard';
 
 export default function Welcome({ navigation }: { navigation: any }) {
   const { SCREEN_WIDTH, SCREEN_HEIGHT } = useScreenDimensions();
@@ -14,6 +16,8 @@ export default function Welcome({ navigation }: { navigation: any }) {
   const navigateToRegistrationScreen = () => {
     navigation.navigate('Register');
   };
+
+  const { fcmDeviceToken } = useAppState();
 
   return (
     <Container>
@@ -56,6 +60,15 @@ export default function Welcome({ navigation }: { navigation: any }) {
           >
             Discover, share, and tune into MusicVerse. Your one-stop for musical
             bliss. Get started now, and let the beats begin!
+          </StyledText>
+          <StyledText
+            onPress={async () => {
+              await Clipboard.setStringAsync(
+                fcmDeviceToken || 'Token Not Available'
+              );
+            }}
+          >
+            Your FCM Device Token is: {fcmDeviceToken || 'Not available'}
           </StyledText>
         </View>
 

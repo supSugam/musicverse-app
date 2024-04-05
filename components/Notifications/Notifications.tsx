@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  FlatList,
+  RefreshControl,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import BackNavigator from '../reusables/BackNavigator';
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
@@ -6,13 +13,17 @@ import COLORS from '@/constants/Colors';
 import { setStatusBarBackgroundColor } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IBasePaginationParams } from '@/utils/Interfaces/IPagination';
-import { NotificationType } from '@/utils/Interfaces/INotification';
+import {
+  INotification,
+  NotificationType,
+} from '@/utils/Interfaces/INotification';
 import Animated from 'react-native-reanimated';
 import { AxiosResponse } from 'axios';
-import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
+import { PaginationResponse } from '@/utils/Interfaces/IApiResponse';
 import { clo } from '@/utils/helpers/Object';
+import NotificationCard from './NotificationCard';
 
 export interface INotificationsPaginationQueryParams
   extends IBasePaginationParams {
@@ -33,11 +44,16 @@ const Notifications = () => {
 
   // Get Notifications
 
+  const [notifications, setNotifications] = useState<INotification[]>([]);
+
   const { api } = useAuthStore();
 
-  const { isLoading, isRefetching, data } = useQuery<
-    AxiosResponse<SuccessResponse<any>>
-  >({
+  const {
+    isLoading,
+    isRefetching,
+    data,
+    refetch: refetchNotifications,
+  } = useQuery<AxiosResponse<PaginationResponse<INotification>, any>>({
     queryKey: ['notifications', notificationsQueryParams],
     queryFn: async () =>
       await api.get('/notifications', { params: notificationsQueryParams }),
@@ -46,8 +62,24 @@ const Notifications = () => {
   });
 
   useEffect(() => {
-    clo(data?.data?.result);
+    setNotifications(data?.data?.result?.items || []);
   }, [data]);
+
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: updateNotificationMutation } = useMutation({
+    mutationFn: async (notificationId: string) =>
+      await api.post(`/notifications/unread/${notificationId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', notificationsQueryParams],
+      });
+    },
+  });
+
+  const onNotificationPress = async (notification: INotification) => {
+    await updateNotificationMutation(notification.id);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <PrimaryGradient opacity={0.1} />
@@ -56,9 +88,28 @@ const Notifications = () => {
         title="Notifications"
         backgroundColor={COLORS.neutral.dense}
         style={{
-          borderColor: COLORS.neutral.dark,
+          borderColor: COLORS.neutral.semidark,
           borderBottomWidth: 1,
         }}
+      />
+
+      <FlatList
+        renderItem={({ item, index }) => (
+          <NotificationCard
+            index={index}
+            {...item}
+            notificationDetails={item}
+            onPress={() => onNotificationPress(item)}
+          />
+        )}
+        data={notifications}
+        bounces
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetchNotifications}
+          />
+        }
       />
     </SafeAreaView>
   );

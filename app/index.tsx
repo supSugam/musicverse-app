@@ -53,6 +53,7 @@ export default function index() {
               options={{
                 headerShown: false,
                 animation: 'slide_from_right',
+                animationDuration: 100,
               }}
             />
 

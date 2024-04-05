@@ -19,7 +19,7 @@ const DarkGradient = ({
           height: '100%',
           position: 'absolute',
           zIndex: -1,
-          opacity: opacity,
+          opacity,
           flex: 1,
           top: 0,
           left: 0,

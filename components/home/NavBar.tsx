@@ -1,5 +1,5 @@
 import { View, Pressable } from 'react-native';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import LogoWithName from '../reusables/LogoWithName';
 import StyledText from '../reusables/StyledText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +28,10 @@ const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
   }, [profileData]);
 
   const { toggleAppSidebar } = useAppSidebar();
+
+  const [notificationIcon, setNotificationIcon] = useState<
+    'notifications-outline' | 'notifications'
+  >('notifications-outline');
   return (
     <View
       style={{
@@ -66,12 +70,20 @@ const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
           }
         />
         <View className="flex flex-row items-center">
-          <Ionicons
-            name="notifications"
-            size={24}
-            color="white"
-            style={{ marginRight: 12 }}
-          />
+          <AnimatedTouchable
+            onPress={() =>
+              navigation.dispatch(CommonActions.navigate('Notifications'))
+            }
+            onPressIn={() => setNotificationIcon('notifications')}
+            onPressOut={() => setNotificationIcon('notifications-outline')}
+          >
+            <Ionicons
+              name={notificationIcon}
+              size={28}
+              color="white"
+              style={{ marginRight: 12 }}
+            />
+          </AnimatedTouchable>
 
           <AnimatedTouchable
             onPress={toggleAppSidebar}

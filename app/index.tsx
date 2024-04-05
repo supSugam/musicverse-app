@@ -14,6 +14,7 @@ import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
 import UpdatePlaylist from '@/components/Playlist/UpdatePlaylist';
 import UpdateAlbum from '@/components/Albums/UpdateAlbum';
 import ProfileSetup from './screens/get-started/ProfileSetup';
+import Notifications from '@/components/Notifications/Notifications';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -25,7 +26,6 @@ export default function index() {
     const onInitialize = async () => {
       await initialize();
     };
-
     onInitialize();
   }, [initialize]);
 
@@ -40,18 +40,19 @@ export default function index() {
             initialRouteName="TabsLayout"
           >
             <Stack.Screen
-              name="TrackPlayer"
-              component={TrackPlayer}
-              options={{
-                headerShown: false,
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
               name="TabsLayout"
               component={TabsLayout}
               options={{
                 headerShown: false,
+              }}
+            />
+
+            <Stack.Screen
+              name="Notifications"
+              component={Notifications}
+              options={{
+                headerShown: false,
+                animation: 'slide_from_right',
               }}
             />
 
@@ -65,7 +66,6 @@ export default function index() {
 
             <Stack.Group
               screenOptions={{
-                presentation: 'modal',
                 headerShown: false,
                 contentStyle: {
                   backgroundColor: `rgba(0,0,0,0.5)`,
@@ -73,6 +73,14 @@ export default function index() {
                 },
               }}
             >
+              <Stack.Screen
+                name="TrackPlayer"
+                component={TrackPlayer}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_bottom',
+                }}
+              />
               <Stack.Screen
                 name="AddToPlaylist"
                 component={AddToPlaylistSC1}

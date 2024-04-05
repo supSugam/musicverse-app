@@ -1,42 +1,62 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import StyledText from './StyledText';
 import { TouchableOpacity, View } from 'react-native';
 import { useNavigation } from 'expo-router';
-export interface IBackNavigatorProps {
+import AnimatedTouchable from './AnimatedTouchable';
+import BackButton from './BackButton';
+import COLORS from '@/constants/Colors';
+export interface IBackNavigatorProps extends React.ComponentProps<typeof View> {
   showBackText?: boolean;
   title?: string;
-  transparent?: boolean;
+  backgroundColor?: string;
+  iconSize?: number;
+  rightComponent?: React.ReactNode;
 }
 const BackNavigator = ({
   showBackText = false,
   title = '',
-  transparent = false,
+  backgroundColor,
+  iconSize = 36,
+  rightComponent,
+  ...props
 }: IBackNavigatorProps) => {
+  const { style, ...rest } = props;
   const navigation = useNavigation();
   return (
     <TouchableOpacity
       activeOpacity={0.8}
-      className="flex flex-row items-center justify-between w-full"
-      style={{
-        backgroundColor: transparent ? 'transparent' : '#000',
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-      }}
+      className="flex flex-row items-center w-full relative"
+      style={[
+        {
+          paddingHorizontal: 8,
+          paddingVertical: 8,
+          ...(backgroundColor && { backgroundColor }),
+        },
+        style,
+      ]}
       onPress={() => navigation.goBack()}
     >
-      <View className="flex flex-row items-center">
-        <MaterialIcons name="chevron-left" size={36} color={'#fff'} />
-        {showBackText && (
-          <StyledText weight="bold" size="lg">
-            Back
-          </StyledText>
-        )}
+      <AnimatedTouchable
+      // i want this component to be in the left not centered
+      >
+        <BackButton iconSize={iconSize} showBackText={showBackText} />
+      </AnimatedTouchable>
+
+      <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginLeft: 10,
+        }}
+      >
+        <StyledText weight="bold" size="lg" color={COLORS.neutral.light}>
+          {title}
+        </StyledText>
       </View>
 
-      <StyledText weight="bold" size="lg" className="mx-auto">
-        {title}
-      </StyledText>
-      <View className="w-12" />
+      <View style={{ position: 'absolute', right: 0 }}>{rightComponent}</View>
     </TouchableOpacity>
   );
 };

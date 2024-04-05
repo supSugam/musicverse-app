@@ -51,9 +51,10 @@ export const useAuthStore = create<AuthStore>(
       set(() => ({ currentUserProfile }));
     },
     login: async (payload: ILoginDTO) => {
-      const { setCurrentUser, setCurrentUserOnHold } = get();
+      const { setCurrentUser, setCurrentUserOnHold, currentUserOnHold } = get();
       const response = await api.post('/auth/login', payload);
-      const { hasCompletedProfile, accessToken } = response.data.result;
+      const { hasCompletedProfile, access_token: accessToken } =
+        response.data.result;
 
       try {
         const decodedToken = jwtDecode(accessToken);
@@ -73,12 +74,12 @@ export const useAuthStore = create<AuthStore>(
             accessToken,
           } as ICurrentUser;
 
-          if (!hasCompletedProfile) {
-            setCurrentUserOnHold(currentUser);
-            setCurrentUser(null);
-          } else {
+          if (hasCompletedProfile) {
             setCurrentUser(currentUser);
             setCurrentUserOnHold(null);
+          } else {
+            setCurrentUserOnHold(currentUser);
+            setCurrentUser(null);
           }
         }
       } catch (e) {
@@ -97,8 +98,14 @@ export const useAuthStore = create<AuthStore>(
     logout: async () => {
       try {
         await AsyncStorage.removeItem('current-user');
-        set(() => ({ currentUser: null, currentUserProfile: null }));
+        set(() => ({
+          currentUser: null,
+          currentUserProfile: null,
+          currentUserOnHold: null,
+        }));
+        console.log('logged out');
       } catch (error) {
+        console.error('error', error);
         throw error;
       }
     },

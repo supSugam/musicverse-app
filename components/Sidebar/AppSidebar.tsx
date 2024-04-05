@@ -97,7 +97,7 @@ const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
         type="alert"
         header="Sign Out"
       >
-        <StyledText size="lg" weight="semibold">
+        <StyledText size="lg" weight="semibold" className="text-left">
           Are you sure you want to sign out?
         </StyledText>
       </ReusableAlert>

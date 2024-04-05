@@ -109,7 +109,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
       nextTrack();
     },
     onSwipeRight: () => prevTrack(),
-    onSwipeUp: () => navigation.navigate('TrackPlayer' as never),
+    onSwipeUp: () => navigation.dispatch(CommonActions.navigate('TrackPlayer')),
     onSwipeDown: () => console.log('Swiped down'),
   });
 

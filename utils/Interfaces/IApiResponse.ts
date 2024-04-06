@@ -5,7 +5,7 @@ export type BaseResponse = {
   message?: string;
 };
 
-export type SuccessResponse<T extends Object> = {
+export type SuccessResponse<T> = {
   result: T;
 } & BaseResponse;
 

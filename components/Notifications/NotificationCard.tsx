@@ -1,12 +1,16 @@
 import { View, StyleSheet } from 'react-native';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   INotification,
   NotificationType,
 } from '@/utils/Interfaces/INotification';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import COLORS from '@/constants/Colors';
-import Animated from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import ImageDisplay from '../reusables/ImageDisplay';
 import {
   ALBUM_PLACEHOLDER_IMAGE,
@@ -81,9 +85,34 @@ const NotificationCard = ({
 
   const onNotificationPress = () => {};
 
+  const [expandNotificationCardText, setExpandNotificationCardText] =
+    useState<boolean>(false);
+  const notificationCardTextMaxHeight = useSharedValue(30);
+
+  const notificationCardTextAnimatedStyles = useAnimatedStyle(() => {
+    return {
+      height: notificationCardTextMaxHeight.value,
+    };
+  });
+
+  useEffect(() => {
+    notificationCardTextMaxHeight.value = withTiming(
+      expandNotificationCardText ? 50 : 30
+    );
+    // if (expandNotificationCardText) {
+    //   notificationCardTextMaxHeight.value = withTiming(0);
+    //   notificationCardTextMaxHeight.value = withTiming(1);
+    // }
+  }, [expandNotificationCardText]);
+
   return (
-    <AnimatedTouchable duration={index * 200} className="w-full" {...rest}>
-      <Animated.View style={styles.wrapper}>
+    <AnimatedTouchable
+      duration={index * 200}
+      className="w-full"
+      {...rest}
+      onLayout={(e) => console.log(e.nativeEvent.layout.height)}
+    >
+      <View style={styles.wrapper}>
         <View
           style={[
             styles.imageContainer,
@@ -112,7 +141,9 @@ const NotificationCard = ({
           </View>
         </View>
 
-        <View style={styles.contentWrapper}>
+        <Animated.View
+          style={[styles.contentWrapper, notificationCardTextAnimatedStyles]}
+        >
           <StyledText
             color={COLORS.neutral.light}
             size="base"
@@ -126,20 +157,21 @@ const NotificationCard = ({
             opacity="high"
             size="sm"
             weight="light"
-            numberOfLines={2}
+            className="mt-1"
+            onPress={() => setExpandNotificationCardText((prev) => !prev)}
             ellipsizeMode="tail"
           >
-            {body}
+            {new Array(5).fill(body).join(', ')}
           </StyledText>
-        </View>
+        </Animated.View>
 
         <View
           style={[
             styles.dot,
-            !read && { backgroundColor: COLORS.primary.light },
+            read && { backgroundColor: COLORS.primary.light },
           ]}
         />
-      </Animated.View>
+      </View>
     </AnimatedTouchable>
   );
 };
@@ -148,13 +180,13 @@ const styles = StyleSheet.create({
   wrapper: {
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: COLORS.neutral.dense,
     borderColor: COLORS.neutral.semidark,
     borderBottomWidth: 1,
+    overflow: 'visible',
   },
   imageContainer: {
     height: 50,

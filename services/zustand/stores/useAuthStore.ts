@@ -13,8 +13,11 @@ import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob'; // <- polyfill here
 import { BASE_URL } from '@env';
 import { toastResponseMessage } from '@/utils/toast';
-import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 interface AuthStore {
+  fcmDeviceToken: string | null;
+  setFcmDeviceToken: (fcmDeviceToken: string | null) => void;
+  registerFcmToken: () => Promise<void>;
+  deregisterFcmToken: () => Promise<void>;
   currentUser: ICurrentUser | null;
   currentUserProfile: IUserProfile | null;
   currentUserOnHold: ICurrentUser | null;
@@ -33,12 +36,26 @@ interface AuthStore {
 
 export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
+    fcmDeviceToken: null,
+    setFcmDeviceToken: (fcmDeviceToken: string | null) =>
+      set({ fcmDeviceToken }),
+
     currentUser: null,
     currentUserProfile: null,
     currentUserOnHold: null,
     api: api,
     setApi: (api) => {
       set(() => ({ api }));
+    },
+    registerFcmToken: async () => {
+      const { currentUser, fcmDeviceToken } = get();
+      if (!currentUser || !fcmDeviceToken) return;
+      await api.post(`/users/register-device/${fcmDeviceToken}`);
+    },
+    deregisterFcmToken: async () => {
+      const { currentUser, fcmDeviceToken } = get();
+      if (!currentUser || !fcmDeviceToken) return;
+      await api.post(`/users/deregister-device/${fcmDeviceToken}`);
     },
     setCurrentUserOnHold: (currentUserOnHold) => {
       set(() => ({ currentUserOnHold }));
@@ -51,8 +68,9 @@ export const useAuthStore = create<AuthStore>(
       set(() => ({ currentUserProfile }));
     },
     login: async (payload: ILoginDTO) => {
-      const { setCurrentUser, setCurrentUserOnHold, currentUserOnHold } = get();
+      const { setCurrentUser, setCurrentUserOnHold, registerFcmToken } = get();
       const response = await api.post('/auth/login', payload);
+      // Register device token
       const { hasCompletedProfile, access_token: accessToken } =
         response.data.result;
 
@@ -77,6 +95,7 @@ export const useAuthStore = create<AuthStore>(
           if (hasCompletedProfile) {
             setCurrentUser(currentUser);
             setCurrentUserOnHold(null);
+            registerFcmToken();
           } else {
             setCurrentUserOnHold(currentUser);
             setCurrentUser(null);
@@ -96,6 +115,7 @@ export const useAuthStore = create<AuthStore>(
       return await registerUser(payload);
     },
     logout: async () => {
+      const { deregisterFcmToken } = get();
       try {
         await AsyncStorage.removeItem('current-user');
         set(() => ({
@@ -103,7 +123,7 @@ export const useAuthStore = create<AuthStore>(
           currentUserProfile: null,
           currentUserOnHold: null,
         }));
-        console.log('logged out');
+        deregisterFcmToken();
       } catch (error) {
         console.error('error', error);
         throw error;
@@ -116,7 +136,7 @@ export const useAuthStore = create<AuthStore>(
       return await resendOtp(email);
     },
     initialize: async (): Promise<boolean> => {
-      const { setCurrentUser } = get();
+      const { setCurrentUser, deregisterFcmToken } = get();
       const userJson = await AsyncStorage.getItem('current-user');
       if (userJson) {
         const user = JSON.parse(userJson) as ICurrentUser;
@@ -130,6 +150,7 @@ export const useAuthStore = create<AuthStore>(
         if (user.exp < Date.now() / 1000) {
           await AsyncStorage.removeItem('current-user');
           setCurrentUser(null);
+          deregisterFcmToken();
         } else {
           setCurrentUser(user);
         }

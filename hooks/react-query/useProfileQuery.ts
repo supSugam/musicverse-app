@@ -45,7 +45,7 @@ export const useProfileQuery = ({
 }: IProfileQueryProps = {}): IProfileQuery => {
   const {
     api,
-    currentUserProfile,
+    registerFcmToken,
     currentUser,
     setCurrentUser,
     currentUserOnHold,
@@ -68,6 +68,8 @@ export const useProfileQuery = ({
       });
       setCurrentUser(currentUserOnHold);
       setCurrentUserOnHold(null);
+      registerFcmToken();
+
       toastResponseMessage({
         content: 'Welcome to MusicVerse! ',
         type: 'success',

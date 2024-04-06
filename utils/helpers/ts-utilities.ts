@@ -72,3 +72,10 @@ type IsAllOptional<T> = {
 export type OptionalObject<T> = IsAllOptional<T>[keyof T] extends true
   ? T | undefined
   : T;
+
+// export type Transparency<T,Opacity extends number> = T extends string ?
+// T extends `#${infer C}` ?
+// `#${C}${number}`:never
+// :never;
+
+// type Color = Transparency<"#fff",1>

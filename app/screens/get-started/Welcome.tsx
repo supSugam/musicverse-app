@@ -17,8 +17,6 @@ export default function Welcome({ navigation }: { navigation: any }) {
     navigation.navigate('Register');
   };
 
-  const { fcmDeviceToken } = useAppState();
-
   return (
     <Container>
       <View className="flex-1 flex-col justify-center items-center p-8 pb-16">
@@ -61,7 +59,7 @@ export default function Welcome({ navigation }: { navigation: any }) {
             Discover, share, and tune into MusicVerse. Your one-stop for musical
             bliss. Get started now, and let the beats begin!
           </StyledText>
-          <StyledText
+          {/* <StyledText
             onPress={async () => {
               await Clipboard.setStringAsync(
                 fcmDeviceToken || 'Token Not Available'
@@ -69,7 +67,7 @@ export default function Welcome({ navigation }: { navigation: any }) {
             }}
           >
             Your FCM Device Token is: {fcmDeviceToken || 'Not available'}
-          </StyledText>
+          </StyledText> */}
         </View>
 
         {/* Add a button to navigate to the Explore screen */}

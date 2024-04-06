@@ -5,6 +5,7 @@ import {
   Platform,
   FlatList,
   RefreshControl,
+  Pressable,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import BackNavigator from '../reusables/BackNavigator';
@@ -24,6 +25,10 @@ import { AxiosResponse } from 'axios';
 import { PaginationResponse } from '@/utils/Interfaces/IApiResponse';
 import { clo } from '@/utils/helpers/Object';
 import NotificationCard from './NotificationCard';
+import { ScrollView } from 'react-native-gesture-handler';
+import StyledText from '../reusables/StyledText';
+import { capitalizeFirstLetter } from '@/utils/helpers/string';
+import Capsule from '../reusables/Capsule';
 
 export interface INotificationsPaginationQueryParams
   extends IBasePaginationParams {
@@ -67,9 +72,9 @@ const Notifications = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: updateNotificationMutation } = useMutation({
-    mutationFn: async (notificationId: string) =>
-      await api.post(`/notifications/unread/${notificationId}`),
+  const { mutate: updateNotificationMutation } = useMutation({
+    mutationFn: (notificationId: string) =>
+      api.post(`/notifications/read/${notificationId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['notifications', notificationsQueryParams],
@@ -77,8 +82,8 @@ const Notifications = () => {
     },
   });
 
-  const onNotificationPress = async (notification: INotification) => {
-    await updateNotificationMutation(notification.id);
+  const onNotificationPress = (notification: INotification) => {
+    updateNotificationMutation(notification.id);
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -92,8 +97,36 @@ const Notifications = () => {
           borderBottomWidth: 1,
         }}
       />
+      <View>
+        <FlatList
+          horizontal
+          renderItem={({ item: type, index }) => {
+            const isSelected = type === notificationsQueryParams.type;
+            return (
+              <Capsule
+                key={type + index}
+                text={capitalizeFirstLetter(type, true, '_')}
+                selected={isSelected}
+                onPress={() =>
+                  setNotificationsQueryParams((prev) => ({
+                    ...prev,
+                    type: isSelected ? undefined : type,
+                  }))
+                }
+              />
+            );
+          }}
+          data={Object.values(NotificationType)}
+          bounces
+          alwaysBounceHorizontal
+          contentContainerStyle={{
+            marginVertical: 8,
+          }}
+        />
+      </View>
 
       <FlatList
+        alwaysBounceVertical
         renderItem={({ item, index }) => (
           <NotificationCard
             index={index}

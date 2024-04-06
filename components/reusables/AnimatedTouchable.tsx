@@ -46,7 +46,7 @@ const AnimatedTouchable = ({
   });
   useEffect(() => {
     translateX.value = withTiming(0, { duration });
-  }, []);
+  }, [duration]);
   const scale = useSharedValue(1);
   const scaleStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

@@ -24,7 +24,6 @@ import * as Notifications from 'expo-notifications';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,

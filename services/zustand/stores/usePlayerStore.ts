@@ -4,6 +4,7 @@ import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from './useAuthStore';
 import { AxiosInstance } from 'axios';
+import TrackPlayer from 'react-native-track-player';
 
 const InitialState = {
   isPlaying: false,
@@ -118,6 +119,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   updateTracks: (tracks: ITrackDetails[]) => {
+    const tracksToAdd = tracks.map((track) => ({
+      url: track.src,
+      title: track.title,
+      artwork: track.cover || undefined,
+      artist: track.creator?.profile?.name || track.creator?.username,
+      duration: track.trackDuration,
+      id: track.id,
+    }));
+    TrackPlayer.setQueue(tracksToAdd);
     set({ tracks, queueId: tracks[0].id });
     const { playbackInstance, currentTrack } = get();
     tracks.forEach((track) => {
@@ -147,7 +157,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       }
       const newPlaybackInstance = new Audio.Sound();
 
-      const { src, id } = tracks[index];
+      const { src, id, ...rest } = tracks[index];
+      const {
+        title,
+        creator,
+        albums,
+        genre,
+        trackDuration,
+        description,
+        createdAt,
+        cover,
+        _count,
+      } = rest;
 
       // Play
 
@@ -173,6 +194,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
+          TrackPlayer.updateNowPlayingMetadata({
+            title,
+            artist:
+              creator?.profile?.name || creator?.username || 'Unknown Artist',
+            album: albums?.[0]?.title || 'Unknown Album',
+            genre: genre?.name || 'Unknown Genre',
+            duration: trackDuration,
+            description: 'Description',
+            date: createdAt,
+            artwork: cover || undefined,
+            elapsedTime: status.positionMillis / 1000,
+          });
+
           set({
             playbackPosition: status.positionMillis,
             playbackDuration: status.durationMillis ?? 0,
@@ -192,16 +226,26 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             didJustFinish: status.didJustFinish,
           });
 
+          if (status.isPlaying) {
+            TrackPlayer.play();
+          } else {
+            TrackPlayer.pause();
+          }
+
           if (status.didJustFinish) {
             if (isLoopingSingle || stopAfterCurrentTrack) {
+              TrackPlayer.skipToNext();
+              TrackPlayer.pause();
               return;
             }
             if (isLoopingQueue) {
               nextTrack();
+              TrackPlayer.skipToNext();
               return;
             }
             if (playUntilLastTrack && index !== tracks.length - 1) {
               nextTrack();
+              TrackPlayer.skipToNext();
               return;
             }
           }
@@ -219,7 +263,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   playPause: (play = false) => {
-    const { isPlaying, playbackInstance, didJustFinish } = get();
+    const { isPlaying, playbackInstance, didJustFinish, playbackPosition } =
+      get();
     if (!playbackInstance) return;
 
     if (isPlaying && !play) {
@@ -228,6 +273,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     } else {
       if (didJustFinish) {
         playbackInstance.replayAsync();
+        playbackInstance.playAsync();
         return;
       }
 

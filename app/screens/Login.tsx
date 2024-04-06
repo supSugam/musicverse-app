@@ -43,6 +43,7 @@ export default function Login({ navigation }: { navigation: any }) {
           type: 'success',
           content: 'Logged In.',
         });
+        navigation.dispatch(CommonActions.navigate('TabsLayout'));
       }
 
       setLoading(false);

@@ -86,8 +86,10 @@ export const useProfileQuery = ({
   const get = useQuery({
     queryKey: PROFILE_QUERY_KEY(),
     queryFn: async () => await api.get('/profile/me'),
-    refetchOnWindowFocus: true,
     retry: currentUser !== null,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
   });
 
   const update = useMutation({
@@ -116,6 +118,7 @@ export const useProfileQuery = ({
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
     enabled: typeof username === 'string',
+    retry: 3,
   });
 
   return {

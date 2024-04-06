@@ -124,7 +124,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       title: track.title,
       artwork: track.cover || undefined,
       artist: track.creator?.profile?.name || track.creator?.username,
-      duration: track.trackDuration,
+      duration: track.trackDuration / 1000, //track.trackDuration is in milliseconds
       id: track.id,
     }));
     TrackPlayer.setQueue(tracksToAdd);
@@ -132,7 +132,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const { playbackInstance, currentTrack } = get();
     tracks.forEach((track) => {
       if (track.id === currentTrack()?.id) {
-        playbackInstance?.loadAsync({ uri: track.src }, {}, false);
+        playbackInstance?.loadAsync({ uri: track.src }, {}, true);
       }
     });
   },
@@ -200,13 +200,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
               creator?.profile?.name || creator?.username || 'Unknown Artist',
             album: albums?.[0]?.title || 'Unknown Album',
             genre: genre?.name || 'Unknown Genre',
-            duration: trackDuration,
-            description: 'Description',
             date: createdAt,
             artwork: cover || undefined,
-            elapsedTime: status.positionMillis / 1000,
           });
-
           set({
             playbackPosition: status.positionMillis,
             playbackDuration: status.durationMillis ?? 0,

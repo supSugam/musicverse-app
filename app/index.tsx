@@ -28,9 +28,11 @@ import RNTrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
   Event,
+  useProgress,
 } from 'react-native-track-player';
 import COLORS from '@/constants/Colors';
 import ProfilePage from './(tabs)/profile';
+import { clo } from '@/utils/helpers/Object';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -173,22 +175,18 @@ export default function index() {
     return () => {};
   }, [navigation, queryClient, setFcmDeviceToken]);
 
+  const {
+    playPause,
+    resetPlayer,
+    nextTrack,
+    prevTrack,
+    seek,
+    seekForward,
+    seekBackward,
+  } = usePlayerStore();
+
   useEffect(() => {
     const setupPlayer = async () => {
-      await RNTrackPlayer.setupPlayer({
-        androidAudioContentType: AndroidAudioContentType.Music,
-        maxCacheSize: 1024 * 5, // 5 gb
-        playBuffer: 2.5,
-      });
-      const {
-        playPause,
-        resetPlayer,
-        nextTrack,
-        prevTrack,
-        seek,
-        seekForward,
-        seekBackward,
-      } = usePlayerStore();
       RNTrackPlayer.addEventListener(Event.RemotePlay, () => playPause(true));
       RNTrackPlayer.addEventListener(Event.RemotePause, () => playPause(false));
       RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
@@ -203,6 +201,8 @@ export default function index() {
       RNTrackPlayer.addEventListener(Event.RemoteJumpBackward, () =>
         seekBackward(10)
       );
+      await RNTrackPlayer.setupPlayer();
+
       await RNTrackPlayer.updateOptions({
         android: {
           appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
@@ -222,7 +222,7 @@ export default function index() {
           Capability.Pause,
           Capability.Stop,
         ],
-        progressUpdateEventInterval: 1000,
+        progressUpdateEventInterval: 2,
         notificationCapabilities: [
           Capability.Play,
           Capability.Pause,
@@ -239,13 +239,12 @@ export default function index() {
     setupPlayer();
   }, []);
 
-  useEffect(() => {}, []);
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName={currentUser ? 'Home' : 'Welcome'}
+      initialRouteName={currentUser ? 'TabsLayout' : 'Welcome'}
     >
       <Stack.Screen
         name="TabsLayout"

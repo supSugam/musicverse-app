@@ -60,7 +60,7 @@ const Home: React.FC = () => {
       params: InitialTracksParams,
       queryOptions: {
         enabled: !isGenresLoading,
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: true,
         staleTime: 0,
       },
     },

@@ -12,7 +12,7 @@ import { useNavigation } from 'expo-router';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import { useAppSidebar } from '../Sidebar/AppSidebar';
 import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 import Animated, {
@@ -25,9 +25,8 @@ import Animated, {
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 
 const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
-  const { currentUserProfile, setCurrentUserProfile, api } = useAuthStore(
-    (state) => state
-  );
+  const { currentUserProfile, setCurrentUserProfile, api, isApiAuthorized } =
+    useAuthStore((state) => state);
   const navigation = useNavigation();
 
   const {
@@ -44,14 +43,17 @@ const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
     'notifications-outline' | 'notifications'
   >('notifications-outline');
 
-  const { data: notificationsCountData } = useQuery<
-    AxiosResponse<SuccessResponse<number>>
-  >({
+  const {
+    data: notificationsCountData,
+    isLoading,
+    isRefetching,
+  } = useQuery<AxiosResponse<SuccessResponse<number>>>({
     queryFn: async () => await api.get('/notifications/unread-count'),
     queryKey: ['notificationsCount'],
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
+    enabled: isApiAuthorized(),
   });
 
   const notificationCountWrapperRotation = useSharedValue(0);
@@ -88,7 +90,7 @@ const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
       damping: 20,
       stiffness: 100,
     });
-  }, [notificationsCountData]);
+  }, [notificationsCountData, isLoading, isRefetching]);
   return (
     <View
       style={{
@@ -166,7 +168,7 @@ const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
                         scale: unreadNotificationsCount > 9 ? 1 : 0.8,
                       },
                       {
-                        translateX: unreadNotificationsCount > 9 ? 3 : 0,
+                        translateX: unreadNotificationsCount > 9 ? 2 : 0,
                       },
                     ],
                   }}

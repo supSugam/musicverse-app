@@ -77,10 +77,10 @@ export default function index() {
       navigation.dispatch(CommonActions.navigate('TabsLayout'));
     }
   }, [currentUser]);
-
   useEffect(() => {
     const setupNotifications = async () => {
       const permission = await requestUserPermission();
+
       if (!permission) {
         toastResponseMessage({
           type: 'info',
@@ -89,13 +89,13 @@ export default function index() {
         return;
       }
 
-      // try {
-      //   const token = await messaging().getToken();
-      //   setFcmDeviceToken(token);
-      // } catch (e) {
-      //   setFcmDeviceToken(null);
-      //   console.log('error', e);
-      // }
+      try {
+        const token = await messaging().getToken();
+        setFcmDeviceToken(token);
+      } catch (e) {
+        setFcmDeviceToken(null);
+        console.log('error', e);
+      }
 
       ExpoNotifications.setNotificationHandler({
         handleNotification: async () => ({
@@ -105,68 +105,21 @@ export default function index() {
         }),
       });
 
-      const handleNotificationClick = async (response: any) => {
-        navigation.dispatch(CommonActions.navigate('Notifications', {}));
-        queryClient.invalidateQueries({ queryKey: ['notificationsCount'] });
-        // const screen = response?.notification?.request?.content?.data?.screen;
-        // if (screen !== null) {
-        //   // Assuming navigation is properly set up
-        //   // navigation.navigate(screen);
-        // }
-      };
-
-      const notificationClickSubscription =
-        ExpoNotifications.addNotificationResponseReceivedListener(
-          handleNotificationClick
-        );
-
-      messaging().onNotificationOpenedApp((remoteMessage) => {
-        if (remoteMessage?.data?.screen) {
-          // navigation.navigate(`${remoteMessage.data.screen}`);
-        }
-        navigation.dispatch(CommonActions.navigate('Notifications', {}));
+      const messageSubscription = messaging().onMessage(async (message) => {
+        console.log(message);
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        queryClient.refetchQueries({
+          queryKey: ['notificationsCount'],
+        });
       });
 
-      messaging()
-        .getInitialNotification()
-        .then((remoteMessage) => {
-          if (remoteMessage && remoteMessage?.data?.screen) {
-            // navigation.navigate(`${remoteMessage.data.screen}`);
-          }
-        });
-
-      // messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      //   const notification = {
-      //     title: remoteMessage.notification?.title,
-      //     body: remoteMessage.notification?.body,
-      //     data: remoteMessage.data, // optional data payload
-      //   };
-
-      //   await ExpoNotifications.scheduleNotificationAsync({
-      //     content: notification,
-      //     trigger: null,
-      //   });
-      // });
-
-      const handlePushNotification = async (remoteMessage: any) => {
-        const notification = {
-          title: remoteMessage.notification?.title,
-          body: remoteMessage.notification?.body,
-          data: remoteMessage.data, // optional data payload
-        };
-
-        await ExpoNotifications.scheduleNotificationAsync({
-          content: notification,
-          trigger: null,
-        });
-      };
-
-      const unsubscribe = messaging().onMessage(handlePushNotification);
-
-      return () => {
-        unsubscribe();
-        notificationClickSubscription.remove();
-      };
+      const notificationSubscription = messaging().onNotificationOpenedApp(
+        async (notification) => {
+          console.log(notification);
+          // Redirect to the notification page
+          navigation.dispatch(CommonActions.navigate('Notifications'));
+        }
+      );
     };
 
     setupNotifications();
@@ -201,37 +154,44 @@ export default function index() {
       RNTrackPlayer.addEventListener(Event.RemoteJumpBackward, () =>
         seekBackward(10)
       );
-      await RNTrackPlayer.setupPlayer();
+      RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
+      await RNTrackPlayer.setupPlayer({
+        maxCacheSize: 1024 * 5, // 5 mb
+      });
 
       await RNTrackPlayer.updateOptions({
         android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
+          appKilledPlaybackBehavior:
+            AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
         },
         backwardJumpInterval: 10,
         forwardJumpInterval: 10,
-        capabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.Stop,
-          Capability.SeekTo,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-        ],
-        compactCapabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.Stop,
-        ],
         progressUpdateEventInterval: 2,
         notificationCapabilities: [
           Capability.Play,
           Capability.Pause,
-          Capability.Stop,
           Capability.SeekTo,
           Capability.SkipToNext,
           Capability.SkipToPrevious,
           Capability.JumpForward,
           Capability.JumpBackward,
+          Capability.Stop,
+        ],
+        capabilities: [
+          Capability.SeekTo,
+          Capability.SkipToNext,
+          Capability.SkipToPrevious,
+          Capability.JumpForward,
+          Capability.JumpBackward,
+          Capability.Stop,
+        ],
+        compactCapabilities: [
+          Capability.SeekTo,
+          Capability.SkipToNext,
+          Capability.SkipToPrevious,
+          Capability.JumpForward,
+          Capability.JumpBackward,
+          Capability.Stop,
         ],
       });
     };

@@ -36,7 +36,7 @@ const ReusableAlert = ({
       onClose={onClose}
       header={header}
     >
-      <View className="flex justify-center items-center w-full">
+      <View className="flex items-center w-full">
         {children}
         <View
           style={{

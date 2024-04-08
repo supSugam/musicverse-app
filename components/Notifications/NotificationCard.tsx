@@ -22,6 +22,7 @@ import DarkGradient from '../Playlist/DarkGradient';
 import StyledText from '../reusables/StyledText';
 import { TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { getFormattedTime } from '@/utils/helpers/date';
 
 interface INotifCardProps
   extends React.ComponentProps<typeof TouchableOpacity> {
@@ -174,12 +175,22 @@ const NotificationCard = ({
           </Animated.View>
         </View>
 
-        <View
-          style={[
-            styles.dot,
-            read && { backgroundColor: COLORS.primary.light },
-          ]}
-        />
+        <View className="flex flex-col items-center justify-between">
+          <View
+            style={[
+              styles.dot,
+              !read && { backgroundColor: COLORS.neutral.gray },
+            ]}
+          />
+          <StyledText
+            size="xs"
+            weight="light"
+            color={COLORS.neutral.normal}
+            className="text-center mb-2"
+          >
+            {getFormattedTime(notificationDetails.time)}
+          </StyledText>
+        </View>
       </View>
     </AnimatedTouchable>
   );
@@ -230,7 +241,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     position: 'relative',
     backgroundColor: COLORS.neutral.gray,
-    marginRight: 6,
     overflow: 'hidden',
   },
 });

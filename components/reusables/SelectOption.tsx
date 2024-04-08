@@ -38,6 +38,7 @@ interface SelectOptionProps {
   maxSelection?: number;
   minSelection?: number;
   errorMessage?: string | null;
+  disabled?: boolean;
 }
 
 const SelectOption: React.FC<SelectOptionProps> = ({
@@ -49,6 +50,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   maxSelection = options.length,
   single = false,
   errorMessage,
+  disabled = false,
 }) => {
   if (minSelection > maxSelection) {
     throw new Error(
@@ -79,6 +81,7 @@ const SelectOption: React.FC<SelectOptionProps> = ({
   }, [errorMessage]);
 
   const toggleModal = () => {
+    if (disabled) return;
     if (!modalVisible) {
       setTempSelected([...selected]); // Set tempSelected to selected when opening modal
       fadeAnim.value = withTiming(1, { duration: 300 });

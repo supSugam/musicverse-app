@@ -15,6 +15,7 @@ interface SwitchProps extends React.ComponentProps<typeof View> {
   onToggle: (value: boolean) => void;
   position?: 'left' | 'center' | 'right';
   label?: string | React.ReactNode;
+  disabled?: boolean;
 }
 
 const Switch: React.FC<SwitchProps> = ({
@@ -22,6 +23,7 @@ const Switch: React.FC<SwitchProps> = ({
   onToggle,
   position = 'end',
   label,
+  disabled,
   ...rest
 }) => {
   const translateX = useSharedValue(value ? 30 : 0);
@@ -60,6 +62,7 @@ const Switch: React.FC<SwitchProps> = ({
       onPress={toggleSwitch}
       onPressIn={() => (scale.value = withTiming(0.95, { duration: 500 }))}
       onPressOut={leaveAnimation}
+      disabled={disabled}
     >
       <Animated.View
         {...rest}

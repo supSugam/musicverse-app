@@ -102,20 +102,6 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
       </View>
 
       <View className="flex flex-col px-4 mt-6 w-full">
-        {/* <StyledText
-          weight="bold"
-          size="lg"
-          className="border-b w-full text-center my-3 pb-2"
-          onPress={showDatePicker}
-          style={{
-            borderColor: '#ffffff60',
-          }}
-        >
-          {`Date of Release: ${formattedDate}`}
-        </StyledText> */}
-
-        {/* {renderDatePicker()} */}
-
         <SelectOption
           options={genres.map((genre) => genre.name)}
           placeholder="Select Genre"
@@ -135,10 +121,16 @@ const AlbumDetailsSC2 = ({ navigation }: { navigation: any }) => {
           maxSelection={3}
         />
         <Switch
-          value={requestPublicUpload}
-          onToggle={setRequestPublicUpload}
+          value={true}
+          onToggle={() =>
+            toastResponseMessage({
+              type: 'info',
+              content: 'Albums are always public',
+            })
+          }
           label="Request Public Upload"
           className="mt-2"
+          disabled
         />
       </View>
 

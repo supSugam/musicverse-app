@@ -94,6 +94,9 @@ const TrackDetailsModal = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedGenre, setSelectedGenre] = useState<string[]>([]);
   const onSelectedGenreChange = (genre: string[]) => {
+    if (uploadType === 'album' && album?.genreId) {
+      return;
+    }
     setSelectedGenre([...genre]);
   };
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -304,7 +307,14 @@ const TrackDetailsModal = ({
         trackToUpdate.publicStatus === ReviewStatus.REQUESTED
       );
     }
-  }, [trackToUpdate, action]);
+
+    if (uploadType === 'album' && album?.genreId) {
+      const selectedGenre = genres.find(
+        (genre) => genre.id === album.genreId
+      )?.name;
+      setSelectedGenre(selectedGenre ? [selectedGenre] : []);
+    }
+  }, [trackToUpdate, action, uploadType, album, genres, tags]);
   return (
     <ModalWrapper
       transparent
@@ -518,6 +528,7 @@ const TrackDetailsModal = ({
               single
               minSelection={1}
               maxSelection={1}
+              disabled={uploadType === 'album' && !!album?.genreId}
             />
           </>
         )}

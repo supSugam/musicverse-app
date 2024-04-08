@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from './useAuthStore';
@@ -155,6 +155,16 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       if (playbackInstance) {
         await playbackInstance.unloadAsync();
       }
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: true,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: false,
+      });
+
       const newPlaybackInstance = new Audio.Sound();
 
       const { src, id, ...rest } = tracks[index];
@@ -194,7 +204,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
+          TrackPlayer.setVolume(0);
           TrackPlayer.seekTo(status.positionMillis / 1000);
+          TrackPlayer.play();
           TrackPlayer.updateNowPlayingMetadata({
             title,
             artist:
@@ -320,7 +332,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   seek: async (position: number) => {
     const { playbackInstance, setIsAsyncOperationPending } = get();
-
     if (playbackInstance) {
       setIsAsyncOperationPending(true);
       const start = Date.now();

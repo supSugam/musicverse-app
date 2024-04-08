@@ -1,12 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-  FlatList,
-  RefreshControl,
-  Pressable,
-} from 'react-native';
+import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import BackNavigator from '../reusables/BackNavigator';
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
@@ -20,15 +12,18 @@ import {
   INotification,
   NotificationType,
 } from '@/utils/Interfaces/INotification';
-import Animated from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { AxiosResponse } from 'axios';
 import { PaginationResponse } from '@/utils/Interfaces/IApiResponse';
-import { clo } from '@/utils/helpers/Object';
 import NotificationCard from './NotificationCard';
-import { ScrollView } from 'react-native-gesture-handler';
 import StyledText from '../reusables/StyledText';
 import { capitalizeFirstLetter } from '@/utils/helpers/string';
 import Capsule from '../reusables/Capsule';
+import AnimatedTouchable from '../reusables/AnimatedTouchable';
+import FadingDarkGradient from '../Playlist/FadingDarkGradient';
 
 export interface INotificationsPaginationQueryParams
   extends IBasePaginationParams {
@@ -79,12 +74,36 @@ const Notifications = () => {
       queryClient.invalidateQueries({
         queryKey: ['notifications', notificationsQueryParams],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['notificationsCount'],
+      });
     },
   });
 
   const onNotificationPress = (notification: INotification) => {
     updateNotificationMutation(notification.id);
   };
+
+  const markAllasReadPositionY = useSharedValue(0);
+  const markAllasReadAnimatedStyle = useAnimatedStyle(
+    () => ({
+      transform: [{ translateY: markAllasReadPositionY.value }],
+    }),
+    [markAllasReadPositionY]
+  );
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => await api.post('/notifications/read'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', notificationsQueryParams],
+      });
+      queryClient.refetchQueries({
+        queryKey: ['notificationsCount'],
+      });
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <PrimaryGradient opacity={0.1} />
@@ -144,7 +163,33 @@ const Notifications = () => {
             onRefresh={refetchNotifications}
           />
         }
+        onScroll={(e) => {
+          markAllasReadPositionY.value = e.nativeEvent.contentOffset.y;
+        }}
       />
+
+      {/* Mark All as read */}
+      <Animated.View
+        className="absolute bottom-0 w-full h-16 flex"
+        style={[
+          markAllasReadAnimatedStyle,
+          {
+            backgroundColor: COLORS.neutral.semidark,
+            borderTopWidth: 1,
+            borderTopColor: COLORS.neutral.gray,
+          },
+        ]}
+      >
+        <AnimatedTouchable
+          wrapperClassName="relative w-full h-full justify-center items-center"
+          onPress={() => markAllAsReadMutation.mutate()}
+        >
+          <FadingDarkGradient opacity={0.5} />
+          <StyledText size="xl" weight="bold">
+            Mark all as read
+          </StyledText>
+        </AnimatedTouchable>
+      </Animated.View>
     </SafeAreaView>
   );
 };

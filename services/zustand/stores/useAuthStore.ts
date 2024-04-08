@@ -32,10 +32,12 @@ interface AuthStore {
   verifyOtp: (payload: IVerifyOtpDTO) => Promise<AxiosResponse<any>>;
   resendOtp: (email: string) => Promise<AxiosResponse<any>>;
   initialize: () => Promise<boolean>;
+  isApiAuthorized: () => boolean;
 }
 
 export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
+    isApiAuthorized: () => !!get().api.defaults.headers?.['Authorization'],
     fcmDeviceToken: null,
     setFcmDeviceToken: (fcmDeviceToken: string | null) =>
       set({ fcmDeviceToken }),

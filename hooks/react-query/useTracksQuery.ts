@@ -13,6 +13,7 @@ import { TRACK_QUERY_KEY, trackKeyFactory } from '@/services/key-factory';
 import { IBasePaginationParams } from '@/utils/Interfaces/IPagination';
 import { GetAllTracksResponse } from '@/utils/Interfaces/ITrack';
 import { cleanObject } from '@/utils/helpers/Object';
+import { ReviewStatus } from '@/utils/enums/ReviewStatus';
 
 export interface ITracksPaginationQueryParams extends IBasePaginationParams {
   creator?: boolean;
@@ -26,7 +27,7 @@ export interface ITracksPaginationQueryParams extends IBasePaginationParams {
   owned?: boolean;
   liked?: boolean;
   creatorId?: string;
-  public?: boolean;
+  public?: ReviewStatus;
 }
 
 type TracksQuery<T extends string | undefined = undefined> = {

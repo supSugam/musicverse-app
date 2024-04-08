@@ -194,6 +194,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
+          TrackPlayer.seekTo(status.positionMillis / 1000);
           TrackPlayer.updateNowPlayingMetadata({
             title,
             artist:
@@ -224,10 +225,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
           if (status.isPlaying) {
             TrackPlayer.play();
-          } else {
+          } else if (!status.isBuffering) {
             TrackPlayer.pause();
           }
-
           if (status.didJustFinish) {
             if (isLoopingSingle || stopAfterCurrentTrack) {
               TrackPlayer.skipToNext();

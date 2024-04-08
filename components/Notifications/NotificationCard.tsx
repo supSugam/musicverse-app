@@ -77,41 +77,37 @@ const NotificationCard = ({
     } else if (type === NotificationType.COLLABORATE_PLAYLIST) {
       return 'offline-pin';
     } else if (type === NotificationType.LIKE_TRACK) {
-      return 'library-music';
+      return 'favorite';
     }
     return 'home';
   }, [type]);
   // type === NotificationType.COLLABORATE_PLAYLIST
 
   const onNotificationPress = () => {};
+  const [height, setHeight] = useState<number>(0);
 
-  const [expandNotificationCardText, setExpandNotificationCardText] =
+  const [expandNotificationCard, setExpandNotificationCard] =
     useState<boolean>(false);
-  const notificationCardTextMaxHeight = useSharedValue(30);
+  const notificationCardHeight = useSharedValue(0);
+  const notificationCardTextOpacity = useSharedValue(0);
 
-  const notificationCardTextAnimatedStyles = useAnimatedStyle(() => {
+  const notificationCardAnimatedStyles = useAnimatedStyle(() => {
+    notificationCardHeight.value = expandNotificationCard
+      ? withTiming(height)
+      : withTiming(30);
+
+    notificationCardTextOpacity.value = expandNotificationCard
+      ? withTiming(1)
+      : withTiming(0.8);
+
     return {
-      height: notificationCardTextMaxHeight.value,
+      height: notificationCardHeight.value,
+      opacity: notificationCardTextOpacity.value,
     };
-  });
-
-  useEffect(() => {
-    notificationCardTextMaxHeight.value = withTiming(
-      expandNotificationCardText ? 50 : 30
-    );
-    // if (expandNotificationCardText) {
-    //   notificationCardTextMaxHeight.value = withTiming(0);
-    //   notificationCardTextMaxHeight.value = withTiming(1);
-    // }
-  }, [expandNotificationCardText]);
+  }, [expandNotificationCard, height]);
 
   return (
-    <AnimatedTouchable
-      duration={index * 200}
-      className="w-full"
-      {...rest}
-      onLayout={(e) => console.log(e.nativeEvent.layout.height)}
-    >
+    <AnimatedTouchable duration={index * 200} className="w-full">
       <View style={styles.wrapper}>
         <View
           style={[
@@ -141,9 +137,7 @@ const NotificationCard = ({
           </View>
         </View>
 
-        <Animated.View
-          style={[styles.contentWrapper, notificationCardTextAnimatedStyles]}
-        >
+        <View style={styles.contentWrapper}>
           <StyledText
             color={COLORS.neutral.light}
             size="base"
@@ -152,18 +146,33 @@ const NotificationCard = ({
           >
             {title}
           </StyledText>
-          <StyledText
-            color={COLORS.neutral.light}
-            opacity="high"
-            size="sm"
-            weight="light"
-            className="mt-1"
-            onPress={() => setExpandNotificationCardText((prev) => !prev)}
-            ellipsizeMode="tail"
+          <Animated.View
+            style={[
+              notificationCardAnimatedStyles,
+              {
+                overflow: 'hidden',
+              },
+            ]}
           >
-            {new Array(5).fill(body).join(', ')}
-          </StyledText>
-        </Animated.View>
+            <View
+              onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+              className="absolute"
+            >
+              <StyledText
+                color={COLORS.neutral.light}
+                opacity="high"
+                size="sm"
+                weight="light"
+                className="mt-1"
+                onPress={() => setExpandNotificationCard((prev) => !prev)}
+                ellipsizeMode={expandNotificationCard ? 'clip' : 'tail'}
+                numberOfLines={expandNotificationCard ? 5 : 1}
+              >
+                {new Array(5).fill(body).join(', ')}
+              </StyledText>
+            </View>
+          </Animated.View>
+        </View>
 
         <View
           style={[

@@ -40,6 +40,7 @@ const CreatePlaylist = () => {
 
     const coverFile = imageAssetToFile(image?.[0]);
 
+    // TODO: public status
     const payload = convertObjectToFormData({
       title: data.title,
       description: data.description,

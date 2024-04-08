@@ -129,6 +129,7 @@ const Notifications = () => {
         alwaysBounceVertical
         renderItem={({ item, index }) => (
           <NotificationCard
+            key={item.id + index}
             index={index}
             {...item}
             notificationDetails={item}

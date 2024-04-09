@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfilePage from '../profile';
+import AlbumPage from '../album';
 
 const Stack = createNativeStackNavigator();
 
@@ -164,6 +165,14 @@ export default function HomeStackScreen() {
         component={Home}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AlbumPage"
+        component={AlbumPage}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_right',
         }}
       />
     </Stack.Navigator>

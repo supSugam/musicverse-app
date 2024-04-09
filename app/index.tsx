@@ -33,6 +33,7 @@ import RNTrackPlayer, {
 import COLORS from '@/constants/Colors';
 import ProfilePage from './(tabs)/profile';
 import { clo } from '@/utils/helpers/Object';
+import AlbumPage from './(tabs)/album';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -207,16 +208,7 @@ export default function index() {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName={currentUser ? 'TabsLayout' : 'Welcome'}
     >
-      <Stack.Screen
-        name="TabsLayout"
-        component={TabsLayout}
-        options={{
-          headerShown: false,
-        }}
-      />
-
       {/* <Stack.Screen
               name="Settings"
               component={() => <></>}
@@ -228,14 +220,30 @@ export default function index() {
       <Stack.Group
         screenOptions={{
           headerTransparent: true,
+          presentation: 'modal',
         }}
       >
+        <Stack.Screen
+          name="TabsLayout"
+          component={TabsLayout}
+          options={{
+            headerShown: false,
+          }}
+        />
+        {/* <Stack.Screen
+          name="AlbumPage"
+          component={AlbumPage}
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        /> */}
         <Stack.Screen
           name="ProfilePage"
           component={ProfilePage}
           options={{
             headerShown: false,
-            animation: 'slide_from_right',
+            animation: 'ios',
           }}
         />
         <Stack.Screen

@@ -50,6 +50,7 @@ export const useProfileQuery = ({
     setCurrentUser,
     currentUserOnHold,
     setCurrentUserOnHold,
+    isApiAuthorized,
   } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -117,7 +118,7 @@ export const useProfileQuery = ({
     queryKey: [username],
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
-    enabled: typeof username === 'string',
+    enabled: typeof username === 'string' && isApiAuthorized(),
     retry: 3,
   });
 

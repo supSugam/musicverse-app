@@ -107,6 +107,7 @@ export default function TabsLayout() {
               backgroundColor: 'transparent',
             },
             tabBarStyle: {
+              zIndex: 1000,
               paddingBottom: 10,
               paddingTop: 10,
               height: GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT,

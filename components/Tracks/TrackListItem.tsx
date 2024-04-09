@@ -160,7 +160,14 @@ const TrackListItem = ({
             },
             {
               label: 'See Artist Profile',
-              onPress: () => {},
+              onPress: () => {
+                navigation.dispatch(
+                  CommonActions.navigate({
+                    name: 'ProfilePage',
+                    params: { username: artistId },
+                  })
+                );
+              },
               icon: 'person',
             },
             {

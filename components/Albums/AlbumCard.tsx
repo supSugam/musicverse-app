@@ -1,9 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import { View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { IGenre } from '@/utils/Interfaces/IGenre';
 import { Image } from 'expo-image';
@@ -20,6 +15,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import FadingDarkGradient from '../Playlist/FadingDarkGradient';
+import { CommonActions } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
 
 interface IAlbumCardProps {
   id: string;
@@ -63,7 +60,6 @@ const AlbumCard = ({
   }, [isCardViewable]);
 
   const playButtonAnimatedStyle = useAnimatedStyle(() => {
-    console.log('isThisQueuePlaying', isThisQueuePlaying);
     playButtonOpacity.value = isThisQueuePlaying
       ? withRepeat(
           withTiming(0.8, {
@@ -79,101 +75,110 @@ const AlbumCard = ({
   }, [isThisQueuePlaying]);
 
   const { playPause } = usePlayerStore();
+  const navigation = useNavigation();
   return (
-    <Animated.View
-      className="flex flex-col w-48 h-48 bg-gray-800 mr-5"
-      style={albumCardAnimatedStyle}
+    <TouchableWithoutFeedback
+      onPress={() => {
+        navigation.dispatch(
+          CommonActions.navigate({ name: 'AlbumPage', params: { id } })
+        );
+      }}
     >
-      <View
-        className="relative"
-        style={{
-          width: '100%',
-          height: '100%',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderColor: COLORS.neutral.semidark,
-          borderWidth: 1,
-          borderRadius: 6,
-        }}
+      <Animated.View
+        className="flex flex-col w-48 h-48 bg-gray-800 mr-5"
+        style={albumCardAnimatedStyle}
       >
-        <FadingDarkGradient opacity={0.65} />
-
-        <Image
-          source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
+        <View
+          className="relative"
           style={{
             width: '100%',
             height: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderColor: COLORS.neutral.semidark,
+            borderWidth: 1,
+            borderRadius: 6,
           }}
-        />
-
-        {/* Options Button */}
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 2,
-          }}
-          onPress={onOptionsClick}
         >
-          <MaterialIcons
-            name="more-vert"
-            size={24}
-            color={COLORS.neutral.light}
-          />
-        </TouchableOpacity>
+          <FadingDarkGradient opacity={0.65} />
 
-        {/* Play Pause */}
-        <Animated.View
-          className="absolute pb-4"
-          style={[playButtonAnimatedStyle, { zIndex: 2 }]}
-        >
-          <TouchableWithoutFeedback
-            onPress={() => {
-              if (isThisQueuePlaying) {
-                playPause();
-              } else {
-                onPlayClick?.();
-              }
+          <Image
+            source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
+            style={{
+              width: '100%',
+              height: '100%',
             }}
+          />
+
+          {/* Options Button */}
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 2,
+            }}
+            onPress={onOptionsClick}
           >
             <MaterialIcons
-              name={
-                isThisQueuePlaying
-                  ? 'pause-circle-filled'
-                  : 'play-circle-filled'
-              }
-              size={38}
+              name="more-vert"
+              size={24}
               color={COLORS.neutral.light}
             />
-          </TouchableWithoutFeedback>
-        </Animated.View>
+          </TouchableOpacity>
 
-        {/* Info */}
-
-        <View
-          className="absolute bottom-0 left-0 p-3 w-full flex flex-row justify-between items-end"
-          style={{ zIndex: 2 }}
-        >
-          <View className="flex flex-col">
-            <StyledText size="lg" ellipsizeMode="tail" numberOfLines={1}>
-              {title}
-            </StyledText>
-            <StyledText
-              size="sm"
-              opacity="high"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-              weight="light"
+          {/* Play Pause */}
+          <Animated.View
+            className="absolute pb-4"
+            style={[playButtonAnimatedStyle, { zIndex: 2 }]}
+          >
+            <TouchableWithoutFeedback
+              onPress={() => {
+                if (isThisQueuePlaying) {
+                  playPause();
+                } else {
+                  onPlayClick?.();
+                }
+              }}
             >
-              {subtitle}
-            </StyledText>
+              <MaterialIcons
+                name={
+                  isThisQueuePlaying
+                    ? 'pause-circle-filled'
+                    : 'play-circle-filled'
+                }
+                size={38}
+                color={COLORS.neutral.light}
+              />
+            </TouchableWithoutFeedback>
+          </Animated.View>
+
+          {/* Info */}
+
+          <View
+            className="absolute bottom-0 left-0 p-3 w-full flex flex-row justify-between items-end"
+            style={{ zIndex: 2 }}
+          >
+            <View className="flex flex-col">
+              <StyledText size="lg" ellipsizeMode="tail" numberOfLines={1}>
+                {title}
+              </StyledText>
+              <StyledText
+                size="sm"
+                opacity="high"
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                weight="light"
+              >
+                {subtitle}
+              </StyledText>
+            </View>
           </View>
         </View>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </TouchableWithoutFeedback>
   );
 };
 

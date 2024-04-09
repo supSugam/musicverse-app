@@ -155,7 +155,7 @@ export const useAuthStore = create<AuthStore>(
     },
     verifyOtp: async (payload: IVerifyOtpDTO) => await verifyOtp(payload),
     resendOtp: async (email: string) => await resendOtp(email),
-    initialize: async (): Promise<boolean> => {
+    initialize: async (): Promise<true> => {
       const { setCurrentUser, deregisterFcmToken, refreshToken } = get();
       const userJson = await AsyncStorage.getItem('current-user');
       if (userJson) {

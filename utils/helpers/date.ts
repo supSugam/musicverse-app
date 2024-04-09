@@ -24,3 +24,9 @@ export const getFormattedTime = (
 
   return `${d.toLocaleString('default', { month: 'short' })} ${d.getDate()}`;
 };
+
+export const getYear = (date?: Date | null | number | string): string => {
+  if (!date) return '?';
+  const d = new Date(date);
+  return d.getFullYear().toString();
+};

@@ -33,11 +33,33 @@ interface AuthStore {
   resendOtp: (email: string) => Promise<AxiosResponse<any>>;
   initialize: () => Promise<boolean>;
   isApiAuthorized: () => boolean;
+  refreshToken: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
     isApiAuthorized: () => !!get().api.defaults.headers?.['Authorization'],
+    refreshToken: async () => {
+      const { currentUser, api, isApiAuthorized } = get();
+      if (!currentUser || !isApiAuthorized()) return;
+      const response = await api.post('/auth/refresh-token');
+      const { access_token: accessToken } = response.data.result;
+      const decodedToken = jwtDecode(accessToken);
+      const axiosInstance = axios.create({
+        baseURL: BASE_URL,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      set(() => ({ api: axiosInstance }));
+      const updatedUser = {
+        ...currentUser,
+        accessToken,
+        exp: decodedToken.exp,
+      } as ICurrentUser;
+      set(() => ({ currentUser: updatedUser }));
+      await AsyncStorage.setItem('current-user', JSON.stringify(updatedUser));
+    },
     fcmDeviceToken: null,
     setFcmDeviceToken: (fcmDeviceToken: string | null) =>
       set({ fcmDeviceToken }),
@@ -45,7 +67,7 @@ export const useAuthStore = create<AuthStore>(
     currentUser: null,
     currentUserProfile: null,
     currentUserOnHold: null,
-    api: api,
+    api,
     setApi: (api) => {
       set(() => ({ api }));
     },
@@ -131,14 +153,10 @@ export const useAuthStore = create<AuthStore>(
         throw error;
       }
     },
-    verifyOtp: async (payload: IVerifyOtpDTO) => {
-      return await verifyOtp(payload);
-    },
-    resendOtp: async (email: string) => {
-      return await resendOtp(email);
-    },
+    verifyOtp: async (payload: IVerifyOtpDTO) => await verifyOtp(payload),
+    resendOtp: async (email: string) => await resendOtp(email),
     initialize: async (): Promise<boolean> => {
-      const { setCurrentUser, deregisterFcmToken } = get();
+      const { setCurrentUser, deregisterFcmToken, refreshToken } = get();
       const userJson = await AsyncStorage.getItem('current-user');
       if (userJson) {
         const user = JSON.parse(userJson) as ICurrentUser;
@@ -154,7 +172,7 @@ export const useAuthStore = create<AuthStore>(
           setCurrentUser(null);
           deregisterFcmToken();
         } else {
-          setCurrentUser(user);
+          await refreshToken();
         }
       } else {
         setCurrentUser(null);

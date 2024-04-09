@@ -15,8 +15,6 @@ import {
   formatBytes,
   formatDuration,
 } from '@/utils/helpers/string';
-import { EmptyGhostLA } from '@/assets/lottie';
-import LottieView from 'lottie-react-native';
 import useUploadAssets from '@/hooks/react-query/useUploadAssets';
 import { ICreateAlbumPayload } from '@/utils/Interfaces/IAlbum';
 
@@ -25,7 +23,6 @@ import {
   getValueFromRecordByIndex,
 } from '@/utils/helpers/ts-utilities';
 import { UploadStatus } from '@/utils/enums/IUploadStatus';
-import Animated from 'react-native-reanimated';
 import AddTrackButton from './components/AddTrackButton';
 import { cleanObject } from '@/utils/helpers/Object';
 import { ITrack } from '@/utils/Interfaces/ITrack';
@@ -205,7 +202,6 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
               size="2xl"
               className="text-purple-400"
             >
-              {' '}
               {album?.title}
             </StyledText>
           )}
@@ -289,30 +285,25 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
         {!isUploadTypeSingle &&
           album?.tracks &&
           album.tracks.length > 0 &&
-          album.tracks.map((track) => {
-            const { progress, uploadStatus } = progressDetails?.[
-              track.uploadKey
-            ] || { progress: 0, uploadStatus: UploadStatus.QUEUED };
-            return (
-              <AudioDetailsCard
-                key={track.uploadKey}
-                title={track.title}
-                size={formatBytes(track.src.size)}
-                duration={formatDuration(track.src.duration, true)}
-                extension={extractExtension(track.src.name)}
-                onRemove={() => {
-                  toastResponseMessage({
-                    content: 'Track removed successfully.',
-                    type: 'success',
-                  });
-                  removeTrackFromAlbum(track.title);
-                }}
-                uploadProgress={progress}
-                uploadStatus={uploadStatus}
-                alwaysShowProgressBar
-              />
-            );
-          })}
+          album.tracks.map((track) => (
+            <AudioDetailsCard
+              key={track.uploadKey}
+              title={track.title}
+              size={formatBytes(track.src.size)}
+              duration={formatDuration(track.src.duration, true)}
+              extension={extractExtension(track.src.name)}
+              onRemove={() => {
+                toastResponseMessage({
+                  content: 'Track removed successfully.',
+                  type: 'success',
+                });
+                removeTrackFromAlbum(track.title);
+              }}
+              uploadProgress={progressDetails?.[track.uploadKey]?.progress || 0}
+              uploadStatus={progressDetails?.[track.uploadKey]?.uploadStatus}
+              alwaysShowProgressBar
+            />
+          ))}
         {isUploadTypeSingle && track && (
           <AudioDetailsCard
             key={track.uploadKey}

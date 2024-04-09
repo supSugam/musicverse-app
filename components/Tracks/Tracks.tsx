@@ -64,7 +64,6 @@ const Tracks = () => {
   }, [ownedTracksData]);
 
   useEffect(() => {
-    console.log(FileSystem.documentDirectory);
     const tracks = likedTracksData?.data?.result?.items;
     if (tracks) {
       setLikedTracks(tracks);

@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   ScrollView,
   RefreshControl,
   ViewabilityConfigCallbackPairs,
@@ -9,9 +8,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import StyledText from '../reusables/StyledText';
 import SearchField from '../reusables/SearchField';
 import { IAlbumDetails } from '@/utils/Interfaces/IAlbum';
-import PlaylistPreviewList from '../Playlist/PlaylistPreviewList';
-import { MaterialIcons } from '@expo/vector-icons';
-import COLORS from '@/constants/Colors';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import { IMenuItemProps } from '../reusables/BottomSheetMenu/MenuItem';
 import { useNavigation } from 'expo-router';
@@ -211,44 +207,43 @@ const Albums = () => {
           placeholder="Search Albums"
         />
         {ownedAlbums.length > 0 && (
-          <View className="flex flex-col w-full overflow-visible flex-1">
+          <View className="flex flex-col w-full">
             <StyledText weight="semibold" size="xl" className="my-3">
               Owned Albums
             </StyledText>
 
-            <Animated.FlatList
+            <ScrollView
               horizontal
-              data={ownedAlbums}
-              renderItem={({ item, index }) => (
+              showsHorizontalScrollIndicator={false}
+              className="flex flex-row w-full"
+              contentContainerStyle={{ paddingRight: 20 }}
+            >
+              {ownedAlbums.map((album, index) => (
                 <AlbumCard
-                  key={item.id + index}
-                  cover={item.cover}
-                  title={item.title}
-                  subtitle={`${item._count.tracks} tracks • ${item._count.savedBy} saves`}
-                  genre={item.genre}
-                  id={`${item.id}owned-${index}`}
+                  key={`${album.id}owned-${index}`}
+                  id={album.id}
+                  cover={album.cover}
+                  title={album.title}
+                  subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
+                  genre={album.genre}
                   isCardViewable={
-                    viewableAlbumCardId.owned === item.id &&
+                    viewableAlbumCardId.owned === album.id &&
                     ownedAlbums.length > 1
                   }
                   onPlayClick={() => {
-                    if (item.tracks?.length) {
-                      updateTracks(item.tracks);
-                      setQueueId(item.id);
-                      playATrackById(item.tracks[0].id);
+                    if (album.tracks?.length) {
+                      updateTracks(album.tracks);
+                      setQueueId(album.id);
+                      playATrackById(album.tracks[0].id);
                     }
                   }}
                   onOptionsClick={() => {
-                    setSelectedAlbum({ album: item, type: 'owned' });
+                    setSelectedAlbum({ album, type: 'owned' });
                     setIsAlbumOptionsModalVisible(true);
                   }}
                 />
-              )}
-              keyExtractor={(item, i) => `${item.id}${i}owned`}
-              viewabilityConfigCallbackPairs={
-                viewabilityConfigCallbackPairsOwned.current
-              }
-            />
+              ))}
+            </ScrollView>
           </View>
         )}
         {savedAlbums.length > 0 && (

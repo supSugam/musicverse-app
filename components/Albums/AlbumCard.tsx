@@ -1,4 +1,9 @@
-import { View, StyleSheet } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { IGenre } from '@/utils/Interfaces/IGenre';
 import { Image } from 'expo-image';
@@ -6,10 +11,7 @@ import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import COLORS from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from 'react-native-gesture-handler';
+
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import Animated, {
   useAnimatedStyle,
@@ -17,14 +19,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import {
-  Circle,
-  Defs,
-  LinearGradient,
-  Rect,
-  Stop,
-  Svg,
-} from 'react-native-svg';
+import FadingDarkGradient from '../Playlist/FadingDarkGradient';
 
 interface IAlbumCardProps {
   id: string;
@@ -47,7 +42,6 @@ const AlbumCard = ({
   onOptionsClick,
   isCardViewable = false,
 }: IAlbumCardProps) => {
-  const [cardWidth, setCardWidth] = useState<number>(0);
   const { queueId, isPlaying } = usePlayerStore();
   const [isThisQueuePlaying, setIsThisQueuePlaying] = useState<boolean>(false);
 
@@ -59,49 +53,36 @@ const AlbumCard = ({
   const albumCardScale = useSharedValue(1);
 
   const albumCardAnimatedStyle = useAnimatedStyle(() => {
+    albumCardScale.value = withTiming(isCardViewable ? 1 : 1, {
+      duration: 300,
+    });
+
     return {
       transform: [{ scale: albumCardScale.value }],
     };
-  });
+  }, [isCardViewable]);
 
   const playButtonAnimatedStyle = useAnimatedStyle(() => {
+    console.log('isThisQueuePlaying', isThisQueuePlaying);
+    playButtonOpacity.value = isThisQueuePlaying
+      ? withRepeat(
+          withTiming(0.8, {
+            duration: 1000,
+          }),
+          -1,
+          true
+        )
+      : withTiming(1);
     return {
       opacity: playButtonOpacity.value,
     };
-  });
-
-  useEffect(() => {
-    if (isThisQueuePlaying) {
-      const pulseAnimation = withRepeat(
-        withTiming(0.8, {
-          duration: 1000,
-        }),
-        -1,
-        true
-      );
-      playButtonOpacity.value = pulseAnimation;
-    } else {
-      playButtonOpacity.value = withTiming(1);
-    }
   }, [isThisQueuePlaying]);
-
-  useEffect(() => {
-    if (isCardViewable) {
-      albumCardScale.value = withTiming(1.1);
-    } else {
-      albumCardScale.value = withTiming(1);
-    }
-  }, [isCardViewable]);
 
   const { playPause } = usePlayerStore();
   return (
     <Animated.View
       className="flex flex-col w-48 h-48 bg-gray-800 mr-5"
       style={albumCardAnimatedStyle}
-      onLayout={(event) => {
-        const { width } = event.nativeEvent.layout;
-        setCardWidth(width);
-      }}
     >
       <View
         className="relative"
@@ -112,42 +93,10 @@ const AlbumCard = ({
           justifyContent: 'center',
           borderColor: COLORS.neutral.semidark,
           borderWidth: 1,
-          overflow: 'hidden',
           borderRadius: 6,
         }}
       >
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1,
-            },
-          ]}
-        >
-          <Svg
-            height="100%"
-            width="100%"
-            viewBox={`0 0 ${cardWidth} ${cardWidth}`}
-          >
-            <Defs>
-              <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
-                <Stop offset="0.5" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
-                <Stop offset="0.8" stopColor="rgb(0,0,0)" stopOpacity="0.85" />
-                <Stop offset="1" stopColor="rgb(0,0,0)" stopOpacity="1" />
-              </LinearGradient>
-            </Defs>
-            <Rect
-              x="0"
-              y="0"
-              width={cardWidth}
-              height={cardWidth}
-              fill="url(#grad)"
-            />
-          </Svg>
-        </View>
+        <FadingDarkGradient opacity={0.65} />
 
         <Image
           source={cover ? { uri: cover } : TRACK_PLACEHOLDER_IMAGE}
@@ -161,7 +110,7 @@ const AlbumCard = ({
 
         <TouchableOpacity
           activeOpacity={0.7}
-          containerStyle={{
+          style={{
             position: 'absolute',
             top: 8,
             right: 8,

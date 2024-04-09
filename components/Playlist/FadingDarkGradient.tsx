@@ -3,15 +3,12 @@ import React, { useState } from 'react';
 import { Defs, Rect, Stop, Svg, LinearGradient } from 'react-native-svg';
 
 const defaultStops: GradientStop[] = [
-  { offset: 0, stopOpacity: 0.9 },
-  { offset: 0.3, stopOpacity: 0.3 },
-  { offset: 0.8, stopOpacity: 0.9 },
-  { offset: 1, stopOpacity: 1 },
+  [0, 0.9],
+  [0.3, 0.3],
+  [0.8, 0.9],
+  [1, 1],
 ];
-type GradientStop = {
-  offset: `${number}` | number;
-  stopOpacity: `${number}` | number;
-};
+type GradientStop = [`${number}` | number, `${number}` | number];
 interface IFadingDarkGradientProps extends React.ComponentProps<typeof View> {
   opacity?: number;
   stops?: GradientStop[];
@@ -51,7 +48,7 @@ const FadingDarkGradient = ({
       <Svg height="100%" width="100%">
         <Defs>
           <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-            {stops.map(({ offset, stopOpacity }, index) => (
+            {stops.map(([offset, stopOpacity], index) => (
               <Stop
                 key={index}
                 offset={offset}

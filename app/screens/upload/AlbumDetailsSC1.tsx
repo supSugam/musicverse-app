@@ -79,19 +79,21 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           textAlign="center"
           errorMessage={errors.title?.message}
           autoCapitalize="words"
-          wrapperClassName="my-2 mb-8"
+          wrapperClassName="my-2"
         />
-        <ImageDisplay
-          source={image?.[0]}
-          placeholder="Select Album Cover"
-          width={164}
-          height={164}
-          onPress={pickImage}
-          onEdit={reselectImage}
-          onDelete={deleteAllImages}
-          bordered
-          shadows
-        />
+        <View className="w-full flex justify-center items-center my-6">
+          <ImageDisplay
+            source={image?.[0]}
+            placeholder="Select Album Cover"
+            width={164}
+            height={164}
+            onPress={pickImage}
+            onEdit={reselectImage}
+            onDelete={deleteAllImages}
+            bordered
+            shadows
+          />
+        </View>
         <StyledTextField
           variant="default"
           control={control}
@@ -104,7 +106,7 @@ const AlbumDetailsSC1 = ({ navigation }: { navigation: any }) => {
           numberOfLines={3}
           textAlignVertical="top"
           errorMessage={errors.description?.message}
-          wrapperClassName="my-2 mt-8"
+          wrapperClassName="my-2"
           backgroundColor="transparent"
           borderColor="#ffffff60"
           autoCapitalize="sentences"

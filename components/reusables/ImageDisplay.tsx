@@ -150,7 +150,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    overflow: 'hidden',
   },
   bordered: {
     borderColor: COLORS.neutral.normal,

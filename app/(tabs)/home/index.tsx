@@ -8,7 +8,6 @@ import {
   useTracksQuery,
 } from '@/hooks/react-query/useTracksQuery';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
-import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -26,8 +25,6 @@ import AlbumPage from '../album';
 const Stack = createNativeStackNavigator();
 
 const Home: React.FC = () => {
-  const { currentUser, currentUserProfile } = useAuthStore();
-
   // Genres
   const { genres, isLoading: isGenresLoading } = useGenreQuery();
 
@@ -80,6 +77,9 @@ const Home: React.FC = () => {
     tracks: playerTracks,
     playATrackById,
     isBuffering,
+    isThisTrackPlaying,
+    playPause,
+    setQueueId,
   } = usePlayerStore();
 
   useEffect(() => {
@@ -122,11 +122,16 @@ const Home: React.FC = () => {
               key={track.id}
               id={track.id}
               title={track.title}
-              onPlayClick={async () => {
+              onPlayClick={() => {
+                if (isThisTrackPlaying(track.id)) {
+                  playPause();
+                  return;
+                }
                 updateTracks(tracksOfSelectedGenre);
-                await playATrackById(track.id);
+                setQueueId(tracksOfSelectedGenre?.[0]?.id);
+                playATrackById(track.id);
               }}
-              isPlaying={currentTrack()?.id === track.id && isPlaying}
+              isPlaying={isThisTrackPlaying(track.id)}
               artistName={
                 track?.creator?.profile.name || track?.creator?.username
               }
@@ -172,7 +177,7 @@ export default function HomeStackScreen() {
         component={AlbumPage}
         options={{
           headerShown: false,
-          animation: 'ios',
+          animation: 'slide_from_right',
         }}
       />
       <Stack.Screen

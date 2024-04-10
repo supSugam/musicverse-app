@@ -99,8 +99,13 @@ const ProfilePage: React.FC = () => {
 
   // Player Store
 
-  const { updateTracks, currentTrack, isPlaying, playATrackById, isBuffering } =
-    usePlayerStore();
+  const {
+    updateTracks,
+    currentTrack,
+    isThisQueuePlaying,
+    playATrackById,
+    isBuffering,
+  } = usePlayerStore();
 
   // Image View
   const [profileCoverWidth, setProfileCoverWidth] = useState<number>(0);
@@ -117,7 +122,7 @@ const ProfilePage: React.FC = () => {
     transform: [{ scale: imageContainerScale.value }],
   }));
 
-  const { isThisPlaying, setQueueId, playPause } = usePlayerStore();
+  const { isThisTrackPlaying, setQueueId, playPause } = usePlayerStore();
 
   const { toggleFollow } = useFollowQuery();
   const onFollowPress = async () => {
@@ -284,7 +289,7 @@ const ProfilePage: React.FC = () => {
             <TogglePlayButton
               size={40}
               onPress={() => {
-                if (isThisPlaying(usersPopularTracks?.[0]?.id)) {
+                if (isThisQueuePlaying(usersPopularTracks?.[0]?.id)) {
                   playPause();
                   return;
                 }
@@ -293,7 +298,7 @@ const ProfilePage: React.FC = () => {
                 setQueueId(usersPopularTracks?.[0].id);
                 playATrackById(usersPopularTracks?.[0].id);
               }}
-              isPlaying={isThisPlaying(usersPopularTracks?.[0]?.id)}
+              isPlaying={isThisQueuePlaying(usersPopularTracks?.[0]?.id)}
             />
           </View>
 
@@ -340,10 +345,10 @@ const ProfilePage: React.FC = () => {
                       key={track.id + index}
                       id={track.id}
                       title={track.title}
-                      onPlayClick={async () => {
-                        await playATrackById(track.id);
+                      onPlayClick={() => {
+                        playATrackById(track.id);
                       }}
-                      isPlaying={currentTrack()?.id === track.id && isPlaying}
+                      isPlaying={isThisTrackPlaying(track.id, true)}
                       artistName={
                         track?.creator?.profile?.name ||
                         track?.creator?.username
@@ -371,7 +376,6 @@ const ProfilePage: React.FC = () => {
               />
             </View>
           </View>
-          {/*  */}
         </ScrollView>
       </View>
     </Container>

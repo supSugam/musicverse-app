@@ -74,7 +74,6 @@ export default function index() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log(currentUser);
     if (currentUser) {
       navigation.dispatch(CommonActions.navigate('TabsLayout'));
     } else {

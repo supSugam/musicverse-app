@@ -72,7 +72,8 @@ interface PlayerState {
 
   resetPlayer: () => void;
   api: () => AxiosInstance;
-  isThisPlaying: (id?: string) => boolean;
+  isThisQueuePlaying: (id?: string, softCheck?: boolean) => boolean;
+  isThisTrackPlaying: (id?: string, softCheck?: boolean) => boolean;
 }
 
 // TODO : Sleep Timer
@@ -484,10 +485,17 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set((state) => ({ ...state, ...InitialState }));
   },
 
-  isThisPlaying: (id?: string) => {
+  isThisQueuePlaying: (id?: string, softCheck = false) => {
     if (!id) return false;
     const { currentTrack, queueId, isPlaying } = get();
     if (!currentTrack) return false;
-    return (currentTrack()?.id === id || queueId === id) && isPlaying;
+    return queueId === id && (isPlaying || softCheck);
+  },
+
+  isThisTrackPlaying: (id?: string, softCheck = false) => {
+    if (!id) return false;
+    const { currentTrack, isPlaying } = get();
+    if (!currentTrack) return false;
+    return currentTrack()?.id === id && (isPlaying || softCheck);
   },
 }));

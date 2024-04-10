@@ -30,12 +30,6 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
   const isKeyboardOpen = useKeyboardListener();
   // Animation when
 
-  const containerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.value }],
-    };
-  });
-
   const {
     isPlaying,
     playPause,
@@ -47,7 +41,8 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
     currentTrack: currTrack,
   } = usePlayerStore();
   const currentTrack = currTrack();
-  useEffect(() => {
+
+  const containerAnimatedStyle = useAnimatedStyle(() => {
     const showPlayerAboveTabBar =
       activeTab &&
       currentTrack &&
@@ -57,7 +52,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
 
     if (showPlayerAboveTabBar) {
       translateY.value = withSpring(
-        0,
+        5,
         // showPlayerAboveTabBar ? 0 : GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 2,
         {
           damping: 10, // Decreased damping value for faster animation
@@ -76,8 +71,10 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
         restSpeedThreshold: 0.01,
       });
     }
+    return {
+      transform: [{ translateY: translateY.value }],
+    };
   }, [currentTrack, activeTab, isKeyboardOpen]);
-
   // API
 
   const [isTrackLiked, setIsTrackLiked] = useState<boolean>(false);
@@ -178,6 +175,13 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
               }}
               numberOfLines={1}
               ellipsizeMode="tail"
+              onPress={() => {
+                navigation.dispatch(
+                  CommonActions.navigate('Profile', {
+                    id: currentTrack?.creator?.id,
+                  })
+                );
+              }}
             >
               {currentTrack?.creator?.profile?.name ||
                 currentTrack?.creator?.username ||

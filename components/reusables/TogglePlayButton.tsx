@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AnimatedTouchable from './AnimatedTouchable';
 import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '@/constants/Colors';
@@ -19,6 +19,9 @@ const TogglePlayButton = ({
   isPlaying = false,
   onPress,
 }: ITogglePlayButtonProps) => {
+  const [iconName, setIconName] = useState<'pause' | 'play-arrow'>(
+    isPlaying ? 'pause' : 'play-arrow'
+  );
   const iconAnimation = useSharedValue(0);
 
   const iconAnimatedStyle = useAnimatedStyle(() => {
@@ -50,6 +53,7 @@ const TogglePlayButton = ({
         alignItems: 'center',
       }}
       onPress={() => {
+        setIconName((prev) => (prev === 'play-arrow' ? 'pause' : 'play-arrow'));
         iconAnimation.value = withTiming(iconAnimation.value === 0 ? 360 : 0, {
           duration: 500,
         });
@@ -58,7 +62,7 @@ const TogglePlayButton = ({
     >
       <Animated.View style={iconAnimatedStyle}>
         <MaterialIcons
-          name={isPlaying ? 'pause' : 'play-arrow'}
+          name={iconName}
           size={size}
           color={COLORS.neutral.dense}
         />

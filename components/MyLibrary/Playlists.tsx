@@ -12,6 +12,7 @@ import { IMenuItemProps } from '../reusables/BottomSheetMenu/MenuItem';
 import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
 import ReusableAlert from '../reusables/ReusableAlert';
+import AnimatedTouchable from '../reusables/AnimatedTouchable';
 
 const Playlists = () => {
   const navigation = useNavigation();
@@ -211,6 +212,25 @@ const Playlists = () => {
           }}
           placeholder="Search playlists"
         />
+        <AnimatedTouchable
+          onPress={() => {
+            navigation.dispatch(CommonActions.navigate('CreatePlaylist'));
+          }}
+        >
+          <View className="flex flex-row items-center w-full px-2 py-3">
+            <MaterialIcons
+              name="add-circle"
+              size={24}
+              color={COLORS.neutral.light}
+              style={{
+                marginRight: 10,
+              }}
+            />
+            <StyledText weight="semibold" size="lg">
+              Create a New Playlist
+            </StyledText>
+          </View>
+        </AnimatedTouchable>
         {ownedPlaylists.length > 0 && (
           <View className="flex flex-col w-full">
             <StyledText weight="semibold" size="lg" className="mt-4">

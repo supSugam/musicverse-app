@@ -4,7 +4,6 @@ import FollowButton from '@/components/Profile/FollowButton';
 import ProfileName from '@/components/Profile/ProfileName';
 import TrackListItem from '@/components/Tracks/TrackListItem';
 import AnimatedTouchable from '@/components/reusables/AnimatedTouchable';
-import BackButton from '@/components/reusables/BackButton';
 import BackNavigator from '@/components/reusables/BackNavigator';
 import Capsule from '@/components/reusables/Capsule';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
@@ -17,12 +16,10 @@ import { useFollowQuery } from '@/hooks/react-query/useFollowQuery';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { IAlbumDetails } from '@/utils/Interfaces/IAlbum';
-import { clo } from '@/utils/helpers/Object';
 import { getYear } from '@/utils/helpers/date';
 import { calculatePercentage } from '@/utils/helpers/number';
-import { capitalizeFirstLetter } from '@/utils/helpers/string';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
@@ -31,19 +28,22 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { Defs, LinearGradient, Rect, Stop, Svg } from 'react-native-svg';
+import MenuModal from '@/components/reusables/BottomSheetMenu/MenuModal';
+import { IMenuItemProps } from '@/components/reusables/BottomSheetMenu/MenuItem';
+import { CommonActions } from '@react-navigation/native';
 
 const AlbumPage: React.FC = () => {
   // For Album Data
+  const { currentUser } = useAuthStore();
   const { id } = useLocalSearchParams();
   const [albumDetails, setAlbumDetails] = useState<IAlbumDetails | undefined>();
-
   const {
     getAlbumById: {
       data: albumData,
       refetch: refetchAlbumDetails,
       isRefetching: isRefetchingAlbumDetails,
     },
+    toggleSaveAlbum,
   } = useAlbumsQuery({
     id: id as string,
   });
@@ -71,7 +71,7 @@ const AlbumPage: React.FC = () => {
     playATrackById,
     isBuffering,
     setQueueId,
-    isThisPlaying,
+    isThisQueuePlaying,
     playPause,
   } = usePlayerStore();
 
@@ -104,12 +104,66 @@ const AlbumPage: React.FC = () => {
     });
   };
 
-  const onAlbumOptionsPress = () => {
-    console.log('Album Options Pressed');
-  };
+  // Album Options
+  const navigation = useNavigation();
+  const [isAlbumOptionsModalVisible, setIsAlbumOptionsModalVisible] =
+    useState<boolean>(false);
+
+  const albumOptions: IMenuItemProps[] = useMemo(() => {
+    if (!albumDetails) return [];
+    let options: IMenuItemProps[] = [
+      {
+        label: 'Share',
+        onPress: () => {},
+        icon: 'share',
+      },
+      {
+        label: 'See Artist Profile',
+        onPress: () => {
+          setIsAlbumOptionsModalVisible(false);
+          navigation.dispatch(
+            CommonActions.navigate('Profile', {
+              id: albumDetails?.creator?.id,
+            })
+          );
+        },
+        icon: 'person',
+      },
+    ];
+
+    if (albumDetails?.creator?.id === currentUser?.id) {
+      options.push({
+        label: 'Update Album',
+        onPress: () => {
+          setIsAlbumOptionsModalVisible(false);
+          navigation.dispatch(
+            CommonActions.navigate('UpdateAlbum', {
+              id: albumDetails?.id,
+            })
+          );
+        },
+        icon: 'edit',
+      });
+    } else if (albumDetails.isSaved) {
+      options.push({
+        label: 'Unsave',
+        onPress: () => {
+          toggleSaveAlbum.mutate(albumDetails?.id);
+        },
+        icon: 'delete',
+      });
+    }
+    return options;
+  }, [albumDetails, currentUser]);
 
   return (
     <Container statusBarPadding={false}>
+      <MenuModal
+        visible={isAlbumOptionsModalVisible}
+        onClose={() => setIsAlbumOptionsModalVisible(false)}
+        items={albumOptions}
+        header={albumDetails?.title}
+      />
       <Animated.View
         className="w-full h-full flex-grow absolute top-0 left-0"
         style={[
@@ -186,7 +240,7 @@ const AlbumPage: React.FC = () => {
           rightComponent={
             <AnimatedTouchable
               wrapperClassName="flex flex-row items-center px-4 py-1"
-              onPress={onAlbumOptionsPress}
+              onPress={() => setIsAlbumOptionsModalVisible(true)}
               disableInitialAnimation
             >
               <MaterialIcons
@@ -297,7 +351,7 @@ const AlbumPage: React.FC = () => {
             <TogglePlayButton
               size={40}
               onPress={() => {
-                if (isThisPlaying(albumDetails?.id)) {
+                if (isThisQueuePlaying(albumDetails?.id)) {
                   playPause();
                   return;
                 }
@@ -306,7 +360,7 @@ const AlbumPage: React.FC = () => {
                 setQueueId(albumDetails?.id);
                 playATrackById(albumDetails?.tracks[0].id);
               }}
-              isPlaying={isThisPlaying(albumDetails?.id)}
+              isPlaying={isThisQueuePlaying(albumDetails?.id)}
             />
           </Animated.View>
 
@@ -380,8 +434,8 @@ const AlbumPage: React.FC = () => {
                     key={track.id + index}
                     id={track.id}
                     title={track.title}
-                    onPlayClick={async () => {
-                      await playATrackById(track.id);
+                    onPlayClick={() => {
+                      playATrackById(track.id);
                     }}
                     isPlaying={currentTrack()?.id === track.id && isPlaying}
                     artistName={

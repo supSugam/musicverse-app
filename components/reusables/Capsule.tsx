@@ -11,23 +11,27 @@ interface ICapsuleProps extends React.ComponentProps<typeof TouchableOpacity> {
 }
 
 const Capsule = ({ text, selected = false, ...rest }: ICapsuleProps) => {
+  const { style, ...props } = rest;
   return (
     <TouchableOpacity
-      style={{
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        marginRight: 8,
-        borderRadius: 20,
-        position: 'relative',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: selected
-          ? `${COLORS.primary.violet}95`
-          : `${COLORS.neutral.gray}60`,
-      }}
+      style={[
+        {
+          paddingHorizontal: 12,
+          paddingVertical: 4,
+          marginRight: 8,
+          borderRadius: 20,
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: selected
+            ? `${COLORS.primary.violet}95`
+            : `${COLORS.neutral.gray}60`,
+        },
+        style,
+      ]}
       activeOpacity={0.85}
-      {...rest}
+      {...props}
     >
       <StyledText size="sm" weight="semibold">
         {text}

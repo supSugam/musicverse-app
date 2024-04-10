@@ -5,6 +5,7 @@ import { IGenre } from '@/utils/Interfaces/IGenre';
 import StyledText from '../reusables/StyledText';
 import COLORS from '@/constants/Colors';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import Capsule from '../reusables/Capsule';
 
 interface IGenreScrollViewProps {
   selectedGenre: string;
@@ -23,23 +24,14 @@ const GenreScrollView = ({
         const isSelected = selectedGenre === genre;
         const isAll = genre === 'All';
         return (
-          <Pressable
+          <Capsule
             key={genre}
-            onPress={() => onGenreChange(genre)}
+            text={genre}
+            selected={isSelected}
             style={{
               paddingHorizontal: isAll ? 16 : 12,
-              paddingVertical: 3,
-              marginRight: 8,
-              backgroundColor: isSelected
-                ? COLORS.primary.light
-                : COLORS.neutral.dark,
-              borderRadius: 20,
             }}
-          >
-            <StyledText size="sm" weight="semibold">
-              {genre}
-            </StyledText>
-          </Pressable>
+          />
         );
       })}
     </ScrollView>

@@ -35,6 +35,8 @@ export interface IUser {
   isVerified: boolean;
   artistStatus: ReviewStatus;
   _count?: IUserCountStats;
+  isFollowing?: boolean;
+  isFollower?: boolean;
 }
 
 export interface IUserProfile {

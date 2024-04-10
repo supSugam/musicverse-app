@@ -64,3 +64,5 @@ export const playlistKeyFactory = {
   deletePlaylist: (id?: string) => [PLAYLIST_QUERY_KEY, ...(id ? [id] : [])],
   toggleSave: (id?: string) => [PLAYLIST_QUERY_KEY, ...(id ? [id] : [])],
 };
+
+export const FOLLOWERS_QUERY_KEY = 'followers' as const;

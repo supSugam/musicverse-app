@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import AnimatedTouchable from './AnimatedTouchable';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { MaterialIcons } from '@expo/vector-icons';
 import COLORS from '@/constants/Colors';
 import Animated, {
@@ -9,36 +8,30 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-interface IPlayButtonProps {
+interface ITogglePlayButtonProps {
   size?: number;
   isPlaying?: boolean;
   onPress?: () => void;
 }
 
-const PlayButon = ({
+const TogglePlayButton = ({
   size = 24,
   isPlaying = false,
   onPress,
-}: IPlayButtonProps) => {
+}: ITogglePlayButtonProps) => {
   const iconAnimation = useSharedValue(0);
 
   const iconAnimatedStyle = useAnimatedStyle(() => {
-    iconAnimation.value = withTiming(isPlaying ? 180 : 0, {
-      duration: 300,
-    });
     return {
       transform: [{ rotate: `${iconAnimation.value}deg` }],
     };
-  }, [isPlaying]);
+  });
 
-  useEffect(() => {
-    console.log('isPlaying', isPlaying);
-  }, [isPlaying]);
   return (
     <AnimatedTouchable
       activeOpacity={0.9}
-      onPressAnimation={{ scale: 0.95, duration: 200 }}
-      onPressOutAnimation={{ scale: 1, duration: 200 }}
+      onPressAnimation={{ scale: 0.95, duration: 100 }}
+      onPressOutAnimation={{ scale: 1, duration: 100 }}
       wrapperStyles={{
         shadowColor: '#000',
         shadowOffset: {
@@ -56,7 +49,12 @@ const PlayButon = ({
         justifyContent: 'center',
         alignItems: 'center',
       }}
-      onPress={onPress}
+      onPress={() => {
+        iconAnimation.value = withTiming(iconAnimation.value === 0 ? 360 : 0, {
+          duration: 500,
+        });
+        onPress?.();
+      }}
     >
       <Animated.View style={iconAnimatedStyle}>
         <MaterialIcons
@@ -69,4 +67,4 @@ const PlayButon = ({
   );
 };
 
-export default PlayButon;
+export default TogglePlayButton;

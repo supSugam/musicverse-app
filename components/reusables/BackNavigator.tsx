@@ -35,9 +35,7 @@ const BackNavigator = ({
       ]}
       onPress={() => navigation.goBack()}
     >
-      <AnimatedTouchable
-      // i want this component to be in the left not centered
-      >
+      <AnimatedTouchable disableInitialAnimation>
         <BackButton iconSize={iconSize} showBackText={showBackText} />
       </AnimatedTouchable>
 

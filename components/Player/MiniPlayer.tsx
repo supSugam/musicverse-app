@@ -180,7 +180,8 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
               ellipsizeMode="tail"
             >
               {currentTrack?.creator?.profile?.name ||
-                currentTrack?.creator?.username}
+                currentTrack?.creator?.username ||
+                'Unknown Artist'}
             </StyledText>
           </View>
           <View className="flex flex-row items-center ml-auto justify-end">

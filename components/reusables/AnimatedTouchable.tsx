@@ -21,6 +21,7 @@ interface IAnimatedTouchableProps
   };
   wrapperStyles?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
   wrapperClassName?: string;
+  disableInitialAnimation?: boolean;
 }
 
 const AnimatedTouchable = ({
@@ -36,17 +37,17 @@ const AnimatedTouchable = ({
   },
   wrapperStyles = {},
   wrapperClassName = '',
+  disableInitialAnimation = false,
   ...rest
 }: IAnimatedTouchableProps) => {
-  const translateX = useSharedValue(50); // Start position outside the screen
+  const translateX = useSharedValue(disableInitialAnimation ? 0 : 50); // Start position outside the screen
   const translateStyle = useAnimatedStyle(() => {
+    translateX.value = withTiming(0, { duration });
     return {
       transform: [{ translateX: translateX.value }],
     };
-  });
-  useEffect(() => {
-    translateX.value = withTiming(0, { duration });
   }, [duration]);
+
   const scale = useSharedValue(1);
   const scaleStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

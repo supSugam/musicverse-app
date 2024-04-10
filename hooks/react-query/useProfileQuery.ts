@@ -46,7 +46,6 @@ export const useProfileQuery = ({
   const {
     api,
     registerFcmToken,
-    currentUser,
     setCurrentUser,
     currentUserOnHold,
     setCurrentUserOnHold,
@@ -87,10 +86,11 @@ export const useProfileQuery = ({
   const get = useQuery({
     queryKey: PROFILE_QUERY_KEY(),
     queryFn: async () => await api.get('/profile/me'),
-    retry: currentUser !== null,
+    retry: isApiAuthorized(),
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
+    enabled: isApiAuthorized(),
   });
 
   const update = useMutation({
@@ -115,11 +115,11 @@ export const useProfileQuery = ({
   });
 
   const getProfileByUsername = useQuery({
-    queryKey: [username],
+    queryKey: [username, 'profile'],
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
-    enabled: typeof username === 'string' && isApiAuthorized(),
-    retry: 3,
+    enabled: !!username && isApiAuthorized(),
+    retry: isApiAuthorized(),
   });
 
   return {

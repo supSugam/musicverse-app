@@ -43,6 +43,7 @@ export interface IAlbumDetails {
   tags?: ITag[];
   tracks?: ITrackDetails[];
   savedBy?: IUserProfile[];
+  isSaved?: boolean;
 }
 export interface IGetAllAlbumsResponse {
   items: IAlbumDetails[];

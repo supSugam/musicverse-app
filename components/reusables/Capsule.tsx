@@ -7,10 +7,10 @@ import COLORS from '@/constants/Colors';
 
 interface ICapsuleProps extends React.ComponentProps<typeof TouchableOpacity> {
   text: string;
-  selected: boolean;
+  selected?: boolean;
 }
 
-const Capsule = ({ text, selected, ...rest }: ICapsuleProps) => {
+const Capsule = ({ text, selected = false, ...rest }: ICapsuleProps) => {
   return (
     <TouchableOpacity
       style={{

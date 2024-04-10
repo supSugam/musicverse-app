@@ -172,6 +172,14 @@ export default function HomeStackScreen() {
         component={AlbumPage}
         options={{
           headerShown: false,
+          animation: 'ios',
+        }}
+      />
+      <Stack.Screen
+        name="ProfilePage"
+        component={ProfilePage}
+        options={{
+          headerShown: false,
           animation: 'slide_from_right',
         }}
       />

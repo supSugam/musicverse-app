@@ -13,6 +13,7 @@ import { jwtDecode } from 'jwt-decode';
 import 'core-js/stable/atob'; // <- polyfill here
 import { BASE_URL } from '@env';
 import { toastResponseMessage } from '@/utils/toast';
+import { clo } from '@/utils/helpers/Object';
 interface AuthStore {
   fcmDeviceToken: string | null;
   setFcmDeviceToken: (fcmDeviceToken: string | null) => void;
@@ -40,8 +41,8 @@ export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
     isApiAuthorized: () => !!get().api.defaults.headers?.['Authorization'],
     refreshToken: async () => {
-      const { currentUser, api, isApiAuthorized } = get();
-      if (!currentUser || !isApiAuthorized()) return;
+      const { api, isApiAuthorized, setCurrentUser } = get();
+      if (!isApiAuthorized()) return;
       const response = await api.post('/auth/refresh-token');
       const { access_token: accessToken } = response.data.result;
       const decodedToken = jwtDecode(accessToken);
@@ -53,11 +54,10 @@ export const useAuthStore = create<AuthStore>(
       });
       set(() => ({ api: axiosInstance }));
       const updatedUser = {
-        ...currentUser,
+        ...decodedToken,
         accessToken,
-        exp: decodedToken.exp,
       } as ICurrentUser;
-      set(() => ({ currentUser: updatedUser }));
+      setCurrentUser(updatedUser);
       await AsyncStorage.setItem('current-user', JSON.stringify(updatedUser));
     },
     fcmDeviceToken: null,

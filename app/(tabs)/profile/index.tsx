@@ -1,10 +1,16 @@
 import Container from '@/components/Container';
+import FadingDarkGradient from '@/components/Playlist/FadingDarkGradient';
+import FollowButton from '@/components/Profile/FollowButton';
+import ProfileName from '@/components/Profile/ProfileName';
 import TrackListItem from '@/components/Tracks/TrackListItem';
 import AnimatedTouchable from '@/components/reusables/AnimatedTouchable';
-import BackButton from '@/components/reusables/BackButton';
+import BackNavigator from '@/components/reusables/BackNavigator';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
 import StyledText from '@/components/reusables/StyledText';
+import TextContainer from '@/components/reusables/TextContainer';
+import TogglePlayButton from '@/components/reusables/TogglePlayButton';
 import COLORS from '@/constants/Colors';
+import { useFollowQuery } from '@/hooks/react-query/useFollowQuery';
 import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
@@ -17,12 +23,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { Defs, LinearGradient, Rect, Stop, Svg } from 'react-native-svg';
 
 const ProfilePage: React.FC = () => {
   // For Profile Data
@@ -32,8 +38,13 @@ const ProfilePage: React.FC = () => {
   >();
 
   const isOwnProfile = useAuthStore(
-    (state) => state.currentUser?.username === username
+    ({ currentUser }) =>
+      currentUser?.username === username || currentUser?.id === username
   );
+
+  const usernameOrId = useMemo(() => {
+    return Array.isArray(username) ? username[0] : username;
+  }, [username]);
 
   const {
     getProfileByUsername: {
@@ -42,7 +53,7 @@ const ProfilePage: React.FC = () => {
       isRefetching: isRefetchingProfile,
     },
   } = useProfileQuery({
-    username: username as string,
+    username: usernameOrId,
   });
 
   useEffect(() => {
@@ -106,6 +117,17 @@ const ProfilePage: React.FC = () => {
     transform: [{ scale: imageContainerScale.value }],
   }));
 
+  const { isThisPlaying, setQueueId, playPause } = usePlayerStore();
+
+  const { toggleFollow } = useFollowQuery();
+  const onFollowPress = async () => {
+    if (!userProfile?.id) return;
+    await toggleFollow.mutateAsync(userProfile?.id, {
+      onSuccess: () => {
+        refetchProfile();
+      },
+    });
+  };
   return (
     <Container statusBarPadding={false}>
       <Animated.View
@@ -128,40 +150,14 @@ const ProfilePage: React.FC = () => {
       >
         {/* // Gradient */}
 
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1,
-              opacity: 1,
-            },
+        <FadingDarkGradient
+          stops={[
+            [0, 0.9],
+            [0.3, 0.3],
+            [0.8, 0.9],
+            [1, 1],
           ]}
-        >
-          <Svg height="100%" width="100%">
-            <Defs>
-              <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor="rgb(0,0,0)" stopOpacity="0.9" />
-
-                <Stop offset="0.3" stopColor="rgb(0,0,0)" stopOpacity="0.3" />
-                <Stop offset="0.8" stopColor="rgb(0,0,0)" stopOpacity="0.9" />
-
-                <Stop offset="1" stopColor="rgb(0,0,0)" stopOpacity="1" />
-              </LinearGradient>
-            </Defs>
-            <Rect
-              x="0"
-              y="0"
-              width={profileCoverWidth}
-              height={profileCoverWidth}
-              fill="url(#grad)"
-            />
-          </Svg>
-
-          {/*  */}
-        </View>
-
+        />
         <ImageDisplay
           placeholder="Cover Image"
           width={'100%'}
@@ -208,7 +204,7 @@ const ProfilePage: React.FC = () => {
             },
           ]}
         />
-        <BackButton showBackText />
+        <BackNavigator showBackText />
         <AnimatedTouchable
           wrapperClassName="flex flex-row items-center px-4 py-1"
           onPress={() => {}}
@@ -259,7 +255,9 @@ const ProfilePage: React.FC = () => {
           {/* </GestureDetector> */}
           {/* User's Public Contents */}
 
-          <View className="flex p-4 mt-64">
+          <View className="h-64 w-full" />
+
+          <View className="flex p-4 flex-row justify-between items-center">
             <View className="flex flex-col">
               <StyledText
                 size="4xl"
@@ -283,6 +281,20 @@ const ProfilePage: React.FC = () => {
                 )} Following`}
               </StyledText>
             </View>
+            <TogglePlayButton
+              size={40}
+              onPress={() => {
+                if (isThisPlaying(usersPopularTracks?.[0]?.id)) {
+                  playPause();
+                  return;
+                }
+                if (!usersPopularTracks?.length) return;
+                updateTracks(usersPopularTracks || []);
+                setQueueId(usersPopularTracks?.[0].id);
+                playATrackById(usersPopularTracks?.[0].id);
+              }}
+              isPlaying={isThisPlaying(usersPopularTracks?.[0]?.id)}
+            />
           </View>
 
           <View
@@ -292,27 +304,24 @@ const ProfilePage: React.FC = () => {
               paddingVertical: 4,
             }}
           >
-            {/* Bio */}
-            {/* <View
-            className="flex flex-col my-3"
-            style={{
-              paddingHorizontal: 8,
-              paddingVertical: 12,
-              borderRadius: 8,
-            }}
-          >
-            <StyledText
-              size="lg"
-              weight="semibold"
-              tracking="tighter"
-              color={COLORS.neutral.light}
-            >
-              Bio
-            </StyledText>
-            <StyledText size="base" weight="normal" tracking="tighter">
-              {userProfile?.profile?.bio}
-            </StyledText>
-          </View> */}
+            {!isOwnProfile && (
+              <ProfileName
+                fullWidth
+                name={userProfile?.username}
+                image={userProfile?.profile?.avatar}
+                id={userProfile?.id}
+                userRole={userProfile?.role}
+                width={36}
+                height={36}
+                rightComponent={
+                  <FollowButton
+                    isFollowing={userProfile?.isFollowing || false}
+                    onPress={onFollowPress}
+                  />
+                }
+                className="my-3"
+              />
+            )}
 
             {/* Tracks */}
             <View className="flex flex-col my-3">
@@ -325,32 +334,41 @@ const ProfilePage: React.FC = () => {
                 Popular Tracks
               </StyledText>
               <View className="flex flex-col mt-4">
-                {[
-                  ...usersPopularTracks,
-                  ...usersPopularTracks,
-                  ...usersPopularTracks,
-                  ...usersPopularTracks,
-                ].map((track, i) => (
-                  <TrackListItem
-                    key={track.id + i}
-                    id={track.id}
-                    title={track.title}
-                    onPlayClick={async () => {
-                      await playATrackById(track.id);
-                    }}
-                    isPlaying={currentTrack()?.id === track.id && isPlaying}
-                    artistName={
-                      track?.creator?.profile.name || track?.creator?.username
-                    }
-                    artistId={track?.creator?.id}
-                    cover={track.cover}
-                    duration={track.trackDuration}
-                    isLiked={track?.isLiked}
-                    isBuffering={isBuffering && currentTrack()?.id === track.id}
-                    label={i + 1}
-                  />
-                ))}
+                <FlatList
+                  renderItem={({ item: track, index }) => (
+                    <TrackListItem
+                      key={track.id + index}
+                      id={track.id}
+                      title={track.title}
+                      onPlayClick={async () => {
+                        await playATrackById(track.id);
+                      }}
+                      isPlaying={currentTrack()?.id === track.id && isPlaying}
+                      artistName={
+                        track?.creator?.profile?.name ||
+                        track?.creator?.username
+                      }
+                      artistId={track?.creator?.id}
+                      cover={track.cover}
+                      duration={track.trackDuration}
+                      isLiked={track?.isLiked}
+                      isBuffering={
+                        isBuffering && currentTrack()?.id === track.id
+                      }
+                      label={index + 1}
+                    />
+                  )}
+                  data={usersPopularTracks}
+                  bounces
+                  alwaysBounceVertical
+                />
               </View>
+
+              <TextContainer
+                text={userProfile?.profile?.bio || 'No Bio'}
+                heading="Bio"
+                className="text-left"
+              />
             </View>
           </View>
           {/*  */}

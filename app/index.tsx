@@ -238,14 +238,7 @@ export default function index() {
             animation: 'slide_from_right',
           }}
         /> */}
-        <Stack.Screen
-          name="ProfilePage"
-          component={ProfilePage}
-          options={{
-            headerShown: false,
-            animation: 'ios',
-          }}
-        />
+
         <Stack.Screen
           name="Notifications"
           component={Notifications}

@@ -4,7 +4,7 @@ import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from './useAuthStore';
 import { AxiosInstance } from 'axios';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, { isPlaying } from 'react-native-track-player';
 
 const InitialState = {
   isPlaying: false,
@@ -133,7 +133,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const { playbackInstance, currentTrack } = get();
     tracks.forEach((track) => {
       if (track.id === currentTrack()?.id) {
-        playbackInstance?.loadAsync({ uri: track.src }, {}, true);
+        playbackInstance?.loadAsync({ uri: track.src }, {}, false);
       }
     });
   },
@@ -486,8 +486,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   isThisPlaying: (id?: string) => {
     if (!id) return false;
-    const { currentTrack, queueId } = get();
+    const { currentTrack, queueId, isPlaying } = get();
     if (!currentTrack) return false;
-    return currentTrack()?.id === id || queueId === id;
+    return (currentTrack()?.id === id || queueId === id) && isPlaying;
   },
 }));

@@ -131,7 +131,11 @@ const NavBar = ({ title = 'NavBar' }: { title?: string | React.ReactNode }) => {
         <View className="flex flex-row items-center">
           <AnimatedTouchable
             onPress={() =>
-              navigation.dispatch(CommonActions.navigate('Notifications'))
+              navigation.dispatch(
+                CommonActions.navigate({
+                  name: 'Notifications',
+                })
+              )
             }
             onPressIn={() => setNotificationIcon('notifications')}
             onPressOut={() => setNotificationIcon('notifications-outline')}

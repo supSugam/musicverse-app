@@ -43,14 +43,6 @@ const Stack = createNativeStackNavigator();
 RNTrackPlayer.registerPlaybackService(() => require('./service'));
 
 export default function index() {
-  const { currentUser, initialize, api } = useAuthStore();
-  useEffect(() => {
-    const onInitialize = async () => {
-      await initialize();
-    };
-    onInitialize();
-  }, [initialize]);
-
   const { setFcmDeviceToken } = useAuthStore();
 
   // Notifications
@@ -72,14 +64,6 @@ export default function index() {
   };
   const navigation = useNavigation();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (currentUser) {
-      navigation.dispatch(CommonActions.navigate('TabsLayout'));
-    } else {
-      navigation.dispatch(CommonActions.navigate('Welcome'));
-    }
-  }, [currentUser]);
 
   useEffect(() => {
     const setupNotifications = async () => {
@@ -121,7 +105,11 @@ export default function index() {
         async (notification) => {
           console.log(notification);
           // Redirect to the notification page
-          navigation.dispatch(CommonActions.navigate('Notifications'));
+          navigation.dispatch(
+            CommonActions.navigate({
+              name: 'Notifications',
+            })
+          );
         }
       );
     };

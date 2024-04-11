@@ -13,6 +13,7 @@ import {
   SuccessResponse,
 } from '@/utils/Interfaces/IApiResponse';
 import { IUserWithProfile } from '@/utils/Interfaces/IUser';
+import { profileKeyFactory } from '@/services/key-factory';
 
 interface IFollowQueryProps {
   usernameOrId?: string | null;
@@ -26,9 +27,10 @@ export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
     mutationKey: ['follow'],
     mutationFn: async (id: string) =>
       await api.post(`/users/toggle-follow/${id}`),
-    onSuccess: (data, vars) => {
-      console.log(vars, 'vars');
-      console.log(data);
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: profileKeyFactory.getProfileByUsername(vars),
+      });
     },
     onError: (error) => {
       toastResponseMessage({

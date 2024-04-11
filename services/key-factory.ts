@@ -23,14 +23,13 @@
 // };
 
 export const USER_QUERY_KEY = 'user';
-export const PROFILE_QUERY_KEY = (...args: (string | undefined)[]) => [
-  USER_QUERY_KEY,
-  'profile',
-  ...args,
-];
+export const PROFILE_QUERY_KEY = 'profile';
 
 export const profileKeyFactory = {
-  getProfileByUsername: (username?: string) => PROFILE_QUERY_KEY(username),
+  createProfile: () => [PROFILE_QUERY_KEY],
+  updateProfile: (id?: string) => [PROFILE_QUERY_KEY, ...(id ? [id] : [])],
+  getProfile: () => [PROFILE_QUERY_KEY],
+  getProfileByUsername: (username?: string) => [PROFILE_QUERY_KEY, username],
 };
 export const GENRES_QUERY_KEY = 'genres';
 export const TAGS_QUERY_KEY = 'tags';

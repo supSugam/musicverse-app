@@ -247,6 +247,14 @@ const TrackListItem = ({
               }}
               numberOfLines={1}
               ellipsizeMode="tail"
+              onPress={() => {
+                navigation.dispatch(
+                  CommonActions.navigate({
+                    name: 'ProfilePage',
+                    params: { username: artistId },
+                  })
+                );
+              }}
             >
               {artistName}
             </StyledText>

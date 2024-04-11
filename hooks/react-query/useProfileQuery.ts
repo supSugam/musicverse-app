@@ -5,10 +5,10 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { PROFILE_QUERY_KEY, profileKeyFactory } from '@/services/key-factory';
+import { profileKeyFactory } from '@/services/key-factory';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { Axios, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 import { IUserWithProfile } from '@/utils/Interfaces/IUser';
 
@@ -64,7 +64,7 @@ export const useProfileQuery = ({
 
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: PROFILE_QUERY_KEY(),
+        queryKey: profileKeyFactory.createProfile(),
       });
       setCurrentUser(currentUserOnHold);
       setCurrentUserOnHold(null);
@@ -84,7 +84,7 @@ export const useProfileQuery = ({
   });
 
   const get = useQuery({
-    queryKey: PROFILE_QUERY_KEY(),
+    queryKey: profileKeyFactory.getProfile(),
     queryFn: async () => await api.get('/profile/me'),
     retry: isApiAuthorized(),
     refetchOnMount: true,
@@ -94,12 +94,12 @@ export const useProfileQuery = ({
   });
 
   const update = useMutation({
-    mutationKey: ['updateProfile'],
+    mutationKey: profileKeyFactory.updateProfile(username),
     mutationFn: async (data: IUpdateUserProfileDTO) =>
       await api.patch('/profile', data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: PROFILE_QUERY_KEY(),
+        queryKey: profileKeyFactory.updateProfile(username),
       });
       toastResponseMessage({
         content: 'Profile updated successfully',
@@ -115,7 +115,7 @@ export const useProfileQuery = ({
   });
 
   const getProfileByUsername = useQuery({
-    queryKey: [username, 'profile'],
+    queryKey: profileKeyFactory.getProfileByUsername(username),
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
     enabled: !!username && isApiAuthorized(),

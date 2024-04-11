@@ -33,6 +33,7 @@ import Animated, {
 const ProfilePage: React.FC = () => {
   // For Profile Data
   const { username } = useLocalSearchParams();
+  const [usernameValue, setUsernameValue] = useState<string | undefined>();
   const [userProfile, setUserProfile] = useState<
     IUserWithProfile | undefined
   >();
@@ -42,10 +43,9 @@ const ProfilePage: React.FC = () => {
       currentUser?.username === username || currentUser?.id === username
   );
 
-  const usernameOrId = useMemo(() => {
-    return Array.isArray(username) ? username[0] : username;
+  useEffect(() => {
+    setUsernameValue(Array.isArray(username) ? undefined : username);
   }, [username]);
-
   const {
     getProfileByUsername: {
       data: userData,
@@ -53,7 +53,7 @@ const ProfilePage: React.FC = () => {
       isRefetching: isRefetchingProfile,
     },
   } = useProfileQuery({
-    username: usernameOrId,
+    username: username as any,
   });
 
   useEffect(() => {
@@ -78,6 +78,9 @@ const ProfilePage: React.FC = () => {
         page: 1,
         creator: true,
         creatorId: userProfile?.id,
+      },
+      queryOptions: {
+        enabled: !!userProfile?.id,
       },
     },
   });

@@ -71,6 +71,23 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const navigation = useNavigation();
+  const { currentUser, initialize } = useAuthStore();
+  useEffect(() => {
+    const onInitialize = async () => {
+      await initialize();
+    };
+    onInitialize();
+  }, [initialize]);
+
+  useEffect(() => {
+    console.log('currentUser', currentUser);
+    if (currentUser) {
+      navigation.dispatch(CommonActions.navigate('TabsLayout'));
+    } else {
+      navigation.navigate('Welcome' as never);
+    }
+  }, [currentUser]);
   return (
     <ThemeProvider value={DarkTheme}>
       <AppSidebarDrawer>

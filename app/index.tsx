@@ -43,7 +43,7 @@ const Stack = createNativeStackNavigator();
 RNTrackPlayer.registerPlaybackService(() => require('./service'));
 
 export default function index() {
-  const { currentUser, initialize } = useAuthStore();
+  const { currentUser, initialize, api } = useAuthStore();
   useEffect(() => {
     const onInitialize = async () => {
       await initialize();
@@ -80,6 +80,7 @@ export default function index() {
       navigation.dispatch(CommonActions.navigate('Welcome'));
     }
   }, [currentUser]);
+
   useEffect(() => {
     const setupNotifications = async () => {
       const permission = await requestUserPermission();
@@ -229,6 +230,7 @@ export default function index() {
             headerShown: false,
           }}
         />
+
         {/* <Stack.Screen
           name="AlbumPage"
           component={AlbumPage}
@@ -304,15 +306,7 @@ export default function index() {
             ),
           }}
         />
-        <Stack.Screen
-          name="CreatePlaylist"
-          component={CreatePlaylist}
-          options={{
-            presentation: 'transparentModal',
-            animation: 'slide_from_right',
-            animationDuration: 200,
-          }}
-        />
+
         <Stack.Screen
           name="UpdatePlaylist"
           component={UpdatePlaylist}

@@ -5,17 +5,24 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api"
+      }
     },
     "preview": {
       "android": {
         "buildType": "apk"
       },
       "env": {
-        "BASE_URL": "http://192.168.1.68:5984/api"
+        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api"
+      }
+    }
   },
   "submit": {
     "production": {}

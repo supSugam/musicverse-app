@@ -4,7 +4,7 @@ import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from './useAuthStore';
 import { AxiosInstance } from 'axios';
-import TrackPlayer, { isPlaying } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 
 const InitialState = {
   isPlaying: false,

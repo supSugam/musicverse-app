@@ -75,7 +75,6 @@ const CreatePlaylist = () => {
   };
   useEffect(() => {
     setFocus('title');
-    Keyboard.dismiss();
   }, []);
 
   const {

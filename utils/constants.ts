@@ -5,7 +5,7 @@ import { v4 } from 'uuid';
 import { UserRole } from './Interfaces/IUser';
 import * as FileSystem from 'expo-file-system';
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: BASE_URL ?? 'https://uajgu6utdks5.share.zrok.io/api',
 });
 
 export const UPLOAD_KEY = 'uploadKey' as const;

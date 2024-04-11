@@ -21,6 +21,7 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfilePage from '../profile';
 import AlbumPage from '../album';
+import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
 
 const Stack = createNativeStackNavigator();
 
@@ -188,6 +189,24 @@ export default function HomeStackScreen() {
           animation: 'slide_from_right',
         }}
       />
+
+      <Stack.Group
+        screenOptions={{
+          presentation: 'transparentModal',
+          animation: 'slide_from_bottom',
+          animationDuration: 200,
+        }}
+      >
+        <Stack.Screen
+          name="CreatePlaylist"
+          component={CreatePlaylist}
+          options={{
+            presentation: 'transparentModal',
+            animation: 'slide_from_bottom',
+            animationDuration: 200,
+          }}
+        />
+      </Stack.Group>
     </Stack.Navigator>
   );
 }

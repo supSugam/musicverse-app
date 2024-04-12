@@ -33,7 +33,6 @@ import Animated, {
 const ProfilePage: React.FC = () => {
   // For Profile Data
   const { username } = useLocalSearchParams();
-  const [usernameValue, setUsernameValue] = useState<string | undefined>();
   const [userProfile, setUserProfile] = useState<
     IUserWithProfile | undefined
   >();
@@ -43,9 +42,6 @@ const ProfilePage: React.FC = () => {
       currentUser?.username === username || currentUser?.id === username
   );
 
-  useEffect(() => {
-    setUsernameValue(Array.isArray(username) ? undefined : username);
-  }, [username]);
   const {
     getProfileByUsername: {
       data: userData,
@@ -53,7 +49,7 @@ const ProfilePage: React.FC = () => {
       isRefetching: isRefetchingProfile,
     },
   } = useProfileQuery({
-    username: username as any,
+    username: !username || username instanceof Array ? undefined : username,
   });
 
   useEffect(() => {
@@ -96,8 +92,8 @@ const ProfilePage: React.FC = () => {
     return isRefetchingProfile || isTracksRefetching;
   }, [isRefetchingProfile, isTracksRefetching]);
   const refetchEverything = async () => {
-    await refetchProfile();
-    await refetchTracks();
+    refetchProfile();
+    refetchTracks();
   };
 
   // Player Store
@@ -128,13 +124,9 @@ const ProfilePage: React.FC = () => {
   const { isThisTrackPlaying, setQueueId, playPause } = usePlayerStore();
 
   const { toggleFollow } = useFollowQuery();
-  const onFollowPress = async () => {
+  const onFollowPress = () => {
     if (!userProfile?.id) return;
-    await toggleFollow.mutateAsync(userProfile?.id, {
-      onSuccess: () => {
-        refetchProfile();
-      },
-    });
+    toggleFollow.mutateAsync(userProfile?.id);
   };
   return (
     <Container statusBarPadding={false}>
@@ -342,34 +334,27 @@ const ProfilePage: React.FC = () => {
                 Popular Tracks
               </StyledText>
               <View className="flex flex-col mt-4">
-                <FlatList
-                  renderItem={({ item: track, index }) => (
-                    <TrackListItem
-                      key={track.id + index}
-                      id={track.id}
-                      title={track.title}
-                      onPlayClick={() => {
-                        playATrackById(track.id);
-                      }}
-                      isPlaying={isThisTrackPlaying(track.id, true)}
-                      artistName={
-                        track?.creator?.profile?.name ||
-                        track?.creator?.username
-                      }
-                      artistId={track?.creator?.id}
-                      cover={track.cover}
-                      duration={track.trackDuration}
-                      isLiked={track?.isLiked}
-                      isBuffering={
-                        isBuffering && currentTrack()?.id === track.id
-                      }
-                      label={index + 1}
-                    />
-                  )}
-                  data={usersPopularTracks}
-                  bounces
-                  alwaysBounceVertical
-                />
+                {usersPopularTracks.map((track, i) => (
+                  <TrackListItem
+                    index={i}
+                    key={track.id + i}
+                    id={track.id}
+                    title={track.title}
+                    onPlayClick={() => {
+                      playATrackById(track.id);
+                    }}
+                    isPlaying={isThisTrackPlaying(track.id, true)}
+                    artistName={
+                      track?.creator?.profile?.name || track?.creator?.username
+                    }
+                    artistId={track?.creator?.id}
+                    cover={track.cover}
+                    duration={track.trackDuration}
+                    isLiked={track?.isLiked}
+                    isBuffering={isBuffering && currentTrack()?.id === track.id}
+                    label={i + 1}
+                  />
+                ))}
               </View>
 
               <TextContainer

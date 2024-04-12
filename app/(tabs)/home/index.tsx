@@ -120,6 +120,7 @@ const Home: React.FC = () => {
         <View className="flex flex-col mt-4">
           {tracksOfSelectedGenre.map((track, i) => (
             <TrackListItem
+              index={i}
               key={track.id}
               id={track.id}
               title={track.title}
@@ -164,7 +165,6 @@ export default function HomeStackScreen() {
         headerTransparent: true,
         headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
       }}
-      initialRouteName="HomeScreen"
     >
       <Stack.Screen
         name="HomeScreen"
@@ -189,24 +189,6 @@ export default function HomeStackScreen() {
           animation: 'slide_from_right',
         }}
       />
-
-      <Stack.Group
-        screenOptions={{
-          presentation: 'transparentModal',
-          animation: 'slide_from_bottom',
-          animationDuration: 200,
-        }}
-      >
-        <Stack.Screen
-          name="CreatePlaylist"
-          component={CreatePlaylist}
-          options={{
-            presentation: 'transparentModal',
-            animation: 'slide_from_bottom',
-            animationDuration: 200,
-          }}
-        />
-      </Stack.Group>
     </Stack.Navigator>
   );
 }

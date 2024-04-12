@@ -3,10 +3,11 @@ import { IPlaylistDetails } from '@/utils/Interfaces/IPlaylist';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { IUserWithProfile } from '@/utils/Interfaces/IUser';
 import { RecentSearchUtility } from '@/utils/helpers/ts-utilities';
-import { NavigationContainerRef } from '@react-navigation/native';
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { INotification } from '@/utils/Interfaces/INotification';
+import { toastResponseMessage } from '@/utils/toast';
+import * as Sharing from 'expo-sharing';
+import * as Linking from 'expo-linking';
 
 export type RecentSearch =
   | RecentSearchUtility<ITrackDetails, 'Track'>
@@ -18,11 +19,6 @@ export type RecentSearch =
 interface IAppGlobalState {
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
-  rootNavigation?: NavigationContainerRef<ReactNavigation.RootParamList> | null;
-  setRootNavigation: (
-    ref: NavigationContainerRef<ReactNavigation.RootParamList>
-  ) => void;
-
   activeTab: string | null;
   setActiveTab: (activeTab: string | null) => void;
   recentSearches: RecentSearch[];
@@ -30,18 +26,26 @@ interface IAppGlobalState {
   removeRecentSearch: (id: string) => void;
   clearAllRecentSearches: () => void;
   updateRecentSearches: () => void;
+  share: (url: string, options?: Sharing.SharingOptions) => void;
 }
 
 export const useAppState = create<IAppGlobalState>((set, get) => ({
   isLoading: false,
-  setIsLoading: (isLoading: boolean) => set({ isLoading }),
-  rootNavigation: null,
-  setRootNavigation: (
-    ref: NavigationContainerRef<ReactNavigation.RootParamList>
-  ) => set({ rootNavigation: ref }),
+  setIsLoading: (isLoading: boolean) => {
+    set({ isLoading });
+
+    // If isLoading is set to true, set a timeout to set it to false after 15 seconds
+    if (isLoading) {
+      const timeoutId = setTimeout(() => {
+        set({ isLoading: false });
+      }, 15000); // 15 seconds
+
+      // Clear the timeout if isLoading is set to false before 15 seconds
+      return () => clearTimeout(timeoutId);
+    }
+  },
   activeTab: 'Home',
   setActiveTab: (activeTab: string | null) => set({ activeTab }),
-
   // For recent searches
   recentSearches: [],
   addRecentSearch: (search: RecentSearch) => {
@@ -70,7 +74,6 @@ export const useAppState = create<IAppGlobalState>((set, get) => ({
     AsyncStorage.removeItem('recentSearches');
     updateRecentSearches();
   },
-
   updateRecentSearches: async () => {
     const recentSearches = await AsyncStorage.getItem('recentSearches');
     if (recentSearches) {
@@ -78,5 +81,23 @@ export const useAppState = create<IAppGlobalState>((set, get) => ({
     } else {
       set({ recentSearches: [] });
     }
+  },
+
+  // Linking and Sharing
+
+  share: async (url: string, options?: Sharing.SharingOptions) => {
+    if (!(await Sharing.isAvailableAsync())) {
+      toastResponseMessage({
+        type: 'error',
+        content: 'Sharing is not available on this device',
+      });
+      return;
+    }
+
+    await Sharing.shareAsync(url, options);
+  },
+
+  createUrl: ([path, options]: Parameters<typeof Linking.createURL>) => {
+    return Linking.createURL(path, options);
   },
 }));

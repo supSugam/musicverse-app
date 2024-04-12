@@ -23,16 +23,25 @@ export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
   const { api, isApiAuthorized } = useAuthStore();
   const queryClient = useQueryClient();
 
-  const toggleFollow = useMutation<AxiosResponse<BaseResponse>, Error, string>({
+  const toggleFollow = useMutation<
+    AxiosResponse<SuccessResponse<{ message: string }>>,
+    Error,
+    string
+  >({
     mutationKey: ['follow'],
     mutationFn: async (id: string) =>
       await api.post(`/users/toggle-follow/${id}`),
     onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({
+      toastResponseMessage({
+        type: 'info',
+        content: _.data?.result?.message || '💚',
+      });
+      queryClient.refetchQueries({
         queryKey: profileKeyFactory.getProfileByUsername(vars),
       });
     },
     onError: (error) => {
+      console.log('error', error);
       toastResponseMessage({
         type: 'error',
         content: error,

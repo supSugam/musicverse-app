@@ -25,6 +25,7 @@ const GenreScrollView = ({
         const isAll = genre === 'All';
         return (
           <Capsule
+            onPress={() => onGenreChange(genre)}
             key={genre}
             text={genre}
             selected={isSelected}

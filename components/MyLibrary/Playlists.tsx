@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, RefreshControl } from 'react-native';
+import { View, ScrollView, RefreshControl } from 'react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import StyledText from '../reusables/StyledText';
 import SearchField from '../reusables/SearchField';
@@ -129,6 +129,19 @@ const Playlists = () => {
           label: 'Manage Collaborators',
           onPress: () => {},
           icon: 'group',
+        });
+
+        options.push({
+          label: 'Add/Remove Songs',
+          onPress: () => {
+            navigation.dispatch(
+              CommonActions.navigate({
+                name: 'PlaylistPage',
+                params: { id: playlistId },
+              })
+            );
+          },
+          icon: 'library-add',
         });
         break;
       case 'collaborated':

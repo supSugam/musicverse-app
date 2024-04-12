@@ -11,6 +11,7 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { AxiosResponse } from 'axios';
 import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 import { IUserWithProfile } from '@/utils/Interfaces/IUser';
+import { useEffect } from 'react';
 
 export interface ICreateUserProfileDTO {
   name: string;
@@ -118,8 +119,7 @@ export const useProfileQuery = ({
     queryKey: profileKeyFactory.getProfileByUsername(username),
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
-    enabled: !!username && isApiAuthorized(),
-    retry: isApiAuthorized(),
+    enabled: typeof username === 'string' && isApiAuthorized(),
   });
 
   return {

@@ -29,7 +29,10 @@ export const profileKeyFactory = {
   createProfile: () => [PROFILE_QUERY_KEY],
   updateProfile: (id?: string) => [PROFILE_QUERY_KEY, ...(id ? [id] : [])],
   getProfile: () => [PROFILE_QUERY_KEY],
-  getProfileByUsername: (username?: string) => [PROFILE_QUERY_KEY, username],
+  getProfileByUsername: (username?: string) => [
+    PROFILE_QUERY_KEY,
+    ...(username ? [username] : []),
+  ],
 };
 export const GENRES_QUERY_KEY = 'genres';
 export const TAGS_QUERY_KEY = 'tags';

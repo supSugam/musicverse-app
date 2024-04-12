@@ -21,7 +21,13 @@ import { calculatePercentage } from '@/utils/helpers/number';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -31,6 +37,9 @@ import Animated, {
 import MenuModal from '@/components/reusables/BottomSheetMenu/MenuModal';
 import { IMenuItemProps } from '@/components/reusables/BottomSheetMenu/MenuItem';
 import { CommonActions } from '@react-navigation/native';
+import SelectedTouchable from '@/components/reusables/SelectedTouchable';
+import TrackPreview from '@/components/Tracks/TrackPreview';
+import PlayButton from '@/components/reusables/PlayButton';
 
 const PlaylistPage: React.FC = () => {
   // For Playlist Data
@@ -75,6 +84,7 @@ const PlaylistPage: React.FC = () => {
     setQueueId,
     isThisQueuePlaying,
     playPause,
+    isThisTrackPlaying,
   } = usePlayerStore();
 
   // Image View
@@ -157,6 +167,8 @@ const PlaylistPage: React.FC = () => {
     }
     return options;
   }, [playlistDetails, currentUser]);
+
+  const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
 
   return (
     <Container statusBarPadding={false}>
@@ -408,7 +420,35 @@ const PlaylistPage: React.FC = () => {
                 >
                   Tracks ({playlistDetails?._count?.tracks || 0})
                 </StyledText>
-                <FlatList
+
+                <AnimatedTouchable
+                  onPress={() => {
+                    if (selectedTracks.length > 0) {
+                      setSelectedTracks([]);
+                    } else {
+                      setSelectedTracks(
+                        playlistDetails?.tracks?.map((t) => t.id) || []
+                      );
+                    }
+                  }}
+                  wrapperStyles={{
+                    flexDirection: 'row',
+                  }}
+                >
+                  <StyledText weight="semibold" size="lg" className="mr-2">
+                    {selectedTracks.length > 0
+                      ? `${selectedTracks.length} Selected`
+                      : `Select All`}
+                  </StyledText>
+
+                  <SelectedTouchable
+                    selected={
+                      playlistDetails?.tracks?.length === selectedTracks.length
+                    }
+                  />
+                </AnimatedTouchable>
+
+                {/* <FlatList
                   horizontal
                   renderItem={({ item, index }) => (
                     <Capsule
@@ -417,35 +457,71 @@ const PlaylistPage: React.FC = () => {
                       selected={index === 0}
                     />
                   )}
-                  data={playlistDetails?.tags ? playlistDetails?.tags : []}
+                  data={playlistDetails?.tags}
                   bounces
                   alwaysBounceHorizontal
                   contentContainerStyle={{
                     maxWidth: '50%',
                     marginLeft: 'auto',
                   }}
-                />
+                /> */}
               </View>
 
               <FlatList
                 renderItem={({ item: track, index }) => (
-                  <TrackListItem
-                    key={track.id + index}
+                  <TrackPreview
+                    index={index}
+                    onPress={() => {
+                      if (selectedTracks.length > 0) {
+                        if (selectedTracks.includes(track.id)) {
+                          setSelectedTracks(
+                            selectedTracks.filter((t) => t !== track.id)
+                          );
+                        } else {
+                          setSelectedTracks([...selectedTracks, track.id]);
+                        }
+                      }
+                    }}
+                    onLongPress={() => {
+                      if (selectedTracks.includes(track.id)) {
+                        setSelectedTracks(
+                          selectedTracks.filter((t) => t !== track.id)
+                        );
+                      } else {
+                        setSelectedTracks([...selectedTracks, track.id]);
+                      }
+                    }}
+                    key={`${track.id}-added`}
                     id={track.id}
                     title={track.title}
-                    onPlayClick={() => {
-                      playATrackById(track.id);
-                    }}
-                    isPlaying={currentTrack()?.id === track.id && isPlaying}
-                    artistName={
-                      track?.creator?.profile?.name || track?.creator?.username
-                    }
-                    artistId={track?.creator?.id}
+                    artistName={track.creator?.username}
                     cover={track.cover}
                     duration={track.trackDuration}
-                    isLiked={track?.isLiked}
-                    isBuffering={isBuffering && currentTrack()?.id === track.id}
-                    label={index + 1}
+                    onPlayClick={() => {
+                      updateTracks(playlistDetails?.tracks || []);
+                      playATrackById(track.id);
+                    }}
+                    rightComponent={
+                      <View className="flex flex-row items-center ml-auto justify-end">
+                        {selectedTracks.length > 0 ? (
+                          <>
+                            <SelectedTouchable
+                              selected={selectedTracks.includes(track.id)}
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <PlayButton
+                              isPlaying={false}
+                              onPlayClick={() => {
+                                updateTracks(playlistDetails?.tracks || []);
+                                playATrackById(track.id);
+                              }}
+                            />
+                          </>
+                        )}
+                      </View>
+                    }
                   />
                 )}
                 data={playlistDetails?.tracks || []}

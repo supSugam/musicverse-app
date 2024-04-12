@@ -2,12 +2,15 @@ import { View, Text } from 'react-native';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import COLORS from '@/constants/Colors';
 import StyledText from '../reusables/StyledText';
+import { useState } from 'react';
 
 interface IFollowButtonProps {
   onPress: () => void;
   isFollowing?: boolean;
 }
 const FollowButton = ({ isFollowing = false, onPress }: IFollowButtonProps) => {
+  const [following, setFollowing] = useState<boolean>(isFollowing);
+
   return (
     <AnimatedTouchable
       wrapperStyles={{
@@ -22,10 +25,13 @@ const FollowButton = ({ isFollowing = false, onPress }: IFollowButtonProps) => {
         flexShrink: 1,
       }}
       activeOpacity={0.85}
-      onPress={onPress}
+      onPress={() => {
+        setFollowing((prev) => !prev);
+        onPress();
+      }}
     >
       <StyledText size="base" weight="semibold" color={COLORS.neutral.light}>
-        {isFollowing ? 'Following' : 'Follow'}
+        {following ? 'Following' : 'Follow'}
       </StyledText>
     </AnimatedTouchable>
   );

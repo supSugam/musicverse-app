@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import Container from '@/components/Container';
 import {
   MaterialTopTabBarProps,

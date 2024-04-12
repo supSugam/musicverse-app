@@ -24,16 +24,12 @@ import * as ExpoNotifications from 'expo-notifications';
 import { CommonActions } from '@react-navigation/native';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import RNTrackPlayer, {
-  AndroidAudioContentType,
   AppKilledPlaybackBehavior,
   Capability,
   Event,
-  useProgress,
 } from 'react-native-track-player';
-import COLORS from '@/constants/Colors';
-import ProfilePage from './(tabs)/profile';
-import { clo } from '@/utils/helpers/Object';
-import AlbumPage from './(tabs)/album';
+import * as Linking from 'expo-linking';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -43,7 +39,8 @@ const Stack = createNativeStackNavigator();
 RNTrackPlayer.registerPlaybackService(() => require('./service'));
 
 export default function index() {
-  const { setFcmDeviceToken } = useAuthStore();
+  const { setFcmDeviceToken, currentUser } = useAuthStore();
+  const { isLoading } = useAppState();
 
   // Notifications
 
@@ -191,6 +188,11 @@ export default function index() {
     setupPlayer();
   }, []);
 
+  useEffect(() => {
+    Linking.addEventListener('url', (event) => {
+      console.log(event);
+    });
+  }, []);
   return (
     <Stack.Navigator
       screenOptions={{
@@ -205,115 +207,157 @@ export default function index() {
               }}
             /> */}
 
-      <Stack.Group
-        screenOptions={{
-          headerTransparent: true,
-          presentation: 'modal',
-        }}
-      >
+      {/* No Auth Group */}
+      {isLoading ? (
         <Stack.Screen
-          name="TabsLayout"
-          component={TabsLayout}
-          options={{
-            headerShown: false,
-          }}
-        />
-
-        {/* <Stack.Screen
-          name="AlbumPage"
-          component={AlbumPage}
-          options={{
-            headerShown: false,
-            animation: 'slide_from_right',
-          }}
-        /> */}
-
-        <Stack.Screen
-          name="Notifications"
-          component={Notifications}
-          options={{
-            headerShown: false,
-            animation: 'slide_from_right',
-            animationDuration: 100,
-          }}
-        />
-        <Stack.Screen
-          name="Welcome"
+          name="Loading"
           component={Welcome}
           options={{
             headerShown: false,
           }}
         />
-        <Stack.Screen
-          name="Register"
-          component={Register}
-          options={{
-            headerShown: false,
-          }}
-        />
+      ) : (
+        <>
+          {currentUser ? (
+            <Stack.Group>
+              <Stack.Screen
+                name="TabsLayout"
+                component={TabsLayout}
+                options={{
+                  headerShown: false,
+                }}
+              />
 
-        <Stack.Screen
-          name="OTPVerification"
-          component={OTPVerification}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={Login}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="ProfileSetup"
-          component={ProfileSetup}
-          options={{
-            headerShown: false,
-            animation: 'slide_from_right',
-          }}
-        />
-        <Stack.Screen
-          name="TrackPlayer"
-          component={TrackPlayer}
-          options={{
-            headerShown: false,
-            animation: 'slide_from_bottom',
-          }}
-        />
-        <Stack.Screen
-          name="AddToPlaylist"
-          component={AddToPlaylistSC1}
-          options={{
-            presentation: 'transparentModal',
-            animation: 'slide_from_bottom',
-            animationDuration: 200,
-            header: () => (
-              <BackNavigator showBackText title="Add to Playlist" />
-            ),
-          }}
-        />
+              <Stack.Screen
+                name="CreatePlaylist"
+                component={CreatePlaylist}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                  animationDuration: 200,
+                  contentStyle: {
+                    display: 'flex',
+                    width: '100%',
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                  },
+                }}
+              />
 
-        <Stack.Screen
-          name="UpdatePlaylist"
-          component={UpdatePlaylist}
-          options={{
-            presentation: 'transparentModal',
-            animation: 'slide_from_bottom',
-            animationDuration: 200,
-          }}
-        />
-        <Stack.Screen
-          name="UpdateAlbum"
-          component={UpdateAlbum}
-          options={{
-            presentation: 'transparentModal',
-            animation: 'slide_from_bottom',
-            animationDuration: 200,
-          }}
-        />
-      </Stack.Group>
+              <Stack.Screen
+                name="Notifications"
+                component={Notifications}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                  animationDuration: 100,
+                }}
+              />
+
+              <Stack.Screen
+                name="TrackPlayer"
+                component={TrackPlayer}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="AddToPlaylist"
+                component={AddToPlaylistSC1}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                  header: () => (
+                    <BackNavigator showBackText title="Add to Playlist" />
+                  ),
+                  contentStyle: {
+                    display: 'flex',
+                    width: '100%',
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                  },
+                }}
+              />
+
+              <Stack.Screen
+                name="UpdatePlaylist"
+                component={UpdatePlaylist}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                  animationDuration: 200,
+                  contentStyle: {
+                    display: 'flex',
+                    width: '100%',
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="UpdateAlbum"
+                component={UpdateAlbum}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                  animationDuration: 200,
+                  contentStyle: {
+                    display: 'flex',
+                    width: '100%',
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                  },
+                }}
+              />
+            </Stack.Group>
+          ) : (
+            <Stack.Group
+              screenOptions={{
+                headerTransparent: true,
+              }}
+            >
+              <Stack.Screen
+                name="Welcome"
+                component={Welcome}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="Register"
+                component={Register}
+                options={{
+                  headerShown: false,
+                }}
+              />
+
+              <Stack.Screen
+                name="OTPVerification"
+                component={OTPVerification}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="Login"
+                component={Login}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="ProfileSetup"
+                component={ProfileSetup}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                }}
+              />
+            </Stack.Group>
+          )}
+        </>
+      )}
     </Stack.Navigator>
   );
 }

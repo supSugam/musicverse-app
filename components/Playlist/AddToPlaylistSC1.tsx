@@ -15,7 +15,6 @@ import PlaylistPreviewList from './PlaylistPreviewList';
 import { MaterialIcons } from '@expo/vector-icons';
 import SearchField from '../reusables/SearchField';
 import { toastResponseMessage } from '@/utils/toast';
-import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 const AddToPlaylistSC1 = () => {
   const { params } = useRoute();

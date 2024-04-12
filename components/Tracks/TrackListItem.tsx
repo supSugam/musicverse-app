@@ -7,6 +7,7 @@ import COLORS from '@/constants/Colors';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,6 +37,7 @@ interface ITrackListItemProps {
   options?: IMenuItemProps[];
   onOptionsClick?: () => void;
   optionsVisible?: boolean;
+  index?: number;
 }
 
 const TrackListItem = ({
@@ -53,6 +55,7 @@ const TrackListItem = ({
   options,
   onOptionsClick,
   optionsVisible,
+  index,
 }: ITrackListItemProps) => {
   const translateX = useSharedValue(400); // Start position outside the screen
 
@@ -66,23 +69,16 @@ const TrackListItem = ({
     };
   });
 
+  useEffect(() => {
+    translateX.value = withSpring(0, {
+      dampingRatio: 0.8,
+      duration: ((index ?? 0) + 1) * 200,
+    });
+  }, [duration, index]);
+
   const favoriteButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: favoriteButtonScale.value }],
   }));
-
-  useEffect(() => {
-    translateX.value = withTiming(0, { duration: 400 });
-  }, []);
-
-  const leaveAnimation = () => {
-    favoriteButtonScale.value = withTiming(1, { duration: 250 });
-  };
-
-  const playButtonAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: playButtonOpacity.value,
-    };
-  });
 
   useEffect(() => {
     const id = setInterval(() => {

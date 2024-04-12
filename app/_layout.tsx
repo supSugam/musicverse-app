@@ -24,6 +24,7 @@ import * as Notifications from 'expo-notifications';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -71,23 +72,17 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const navigation = useNavigation();
-  const { currentUser, initialize } = useAuthStore();
+  const { initialize } = useAuthStore();
+  const { setIsLoading } = useAppState();
   useEffect(() => {
     const onInitialize = async () => {
+      setIsLoading(true);
       await initialize();
+      setIsLoading(false);
     };
     onInitialize();
   }, [initialize]);
 
-  useEffect(() => {
-    console.log('currentUser', currentUser);
-    if (currentUser) {
-      navigation.dispatch(CommonActions.navigate('TabsLayout'));
-    } else {
-      navigation.navigate('Welcome' as never);
-    }
-  }, [currentUser]);
   return (
     <ThemeProvider value={DarkTheme}>
       <AppSidebarDrawer>

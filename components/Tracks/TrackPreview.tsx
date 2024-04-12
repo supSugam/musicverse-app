@@ -1,4 +1,4 @@
-import { Touchable, View } from 'react-native';
+import { View } from 'react-native';
 import React, { useEffect } from 'react';
 import StyledText from '../reusables/StyledText';
 import ImageDisplay from '../reusables/ImageDisplay';
@@ -6,7 +6,7 @@ import COLORS from '@/constants/Colors';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
+  withSpring,
 } from 'react-native-reanimated';
 import { TRACK_PLACEHOLDER_IMAGE } from '@/utils/constants';
 import { formatDuration } from '@/utils/helpers/string';
@@ -27,6 +27,7 @@ interface ITrackPreviewProps
   onPlayClick?: () => void;
   rightComponent?: React.ReactNode;
   onPress?: () => void;
+  index?: number;
 }
 
 const TrackPreview = ({
@@ -38,23 +39,27 @@ const TrackPreview = ({
   rightComponent,
   onPlayClick,
   onPress,
+  index,
   ...props
 }: ITrackPreviewProps) => {
   const { className, style } = props;
-  const translateX = useSharedValue(400); // Start position outside the screen
+  const translateX = useSharedValue(100);
 
   const { currentTrack, isPlaying } = usePlayerStore((state) => state);
   const IsPlaying = currentTrack?.()?.id === id && isPlaying;
+
+  useEffect(() => {
+    translateX.value = withSpring(0, {
+      dampingRatio: 0.8,
+      duration: ((index ?? 0) + 1) * 200,
+    });
+  }, [duration, index]);
 
   const translateStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: translateX.value }],
     };
   });
-
-  useEffect(() => {
-    translateX.value = withTiming(0, { duration: 400 });
-  }, []);
 
   return (
     <AnimatedTouchable onPress={onPress} {...props}>

@@ -77,14 +77,10 @@ const PlaylistPage: React.FC = () => {
 
   const {
     updateTracks,
-    currentTrack,
-    isPlaying,
     playATrackById,
-    isBuffering,
     setQueueId,
     isThisQueuePlaying,
     playPause,
-    isThisTrackPlaying,
   } = usePlayerStore();
 
   // Image View

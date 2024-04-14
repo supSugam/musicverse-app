@@ -192,7 +192,11 @@ export default function index() {
     Linking.addEventListener('url', (event) => {
       console.log(event);
     });
-  }, []);
+  }, [Linking]);
+
+  useEffect(() => {
+    console.log('currentUser', currentUser);
+  }, [currentUser]);
   return (
     <Stack.Navigator
       screenOptions={{

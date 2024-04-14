@@ -19,7 +19,14 @@ const GenreScrollView = ({
   genres,
 }: IGenreScrollViewProps) => {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{
+        backgroundColor: COLORS.neutral.dense,
+        paddingVertical: 12,
+      }}
+    >
       {genres.map((genre) => {
         const isSelected = selectedGenre === genre;
         const isAll = genre === 'All';

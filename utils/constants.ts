@@ -122,3 +122,5 @@ export const getRoleLabel = (role: UserRole) => {
       return 'User';
   }
 };
+
+export const PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY = 15 as const;

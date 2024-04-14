@@ -58,7 +58,7 @@ const SearchPage = () => {
   >({
     queryKey: ['search', searchParams],
     queryFn: async () =>
-      await api.get('/search/', {
+      await api.get('/paginate/search', {
         params: searchParams,
       }),
     refetchOnWindowFocus: true,

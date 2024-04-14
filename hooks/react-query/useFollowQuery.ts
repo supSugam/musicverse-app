@@ -13,7 +13,10 @@ import {
   SuccessResponse,
 } from '@/utils/Interfaces/IApiResponse';
 import { IUserWithProfile } from '@/utils/Interfaces/IUser';
-import { profileKeyFactory } from '@/services/key-factory';
+import { FEED_QUERY_KEY, profileKeyFactory } from '@/services/key-factory';
+import { ITrackDetails } from '@/utils/Interfaces/ITrack';
+import { IPlaylistDetails } from '@/utils/Interfaces/IPlaylist';
+import { IAlbumDetails } from '@/utils/Interfaces/IAlbum';
 
 interface IFollowQueryProps {
   usernameOrId?: string | null;
@@ -22,6 +25,23 @@ interface IFollowQueryProps {
 export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
   const { api, isApiAuthorized } = useAuthStore();
   const queryClient = useQueryClient();
+
+  const getFeedContent = useQuery<
+    AxiosResponse<
+      SuccessResponse<{
+        tracks: ITrackDetails[];
+        playlists: IPlaylistDetails[];
+        albums: IAlbumDetails[];
+      }>
+    >,
+    Error
+  >({
+    queryKey: [FEED_QUERY_KEY],
+    queryFn: async () => await api.get('/paginate/feed'),
+    enabled: isApiAuthorized(),
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+  });
 
   const toggleFollow = useMutation<
     AxiosResponse<SuccessResponse<{ message: string }>>,
@@ -86,5 +106,6 @@ export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
     getFollowers,
     getFollowing,
     getFollowCounts,
+    getFeedContent,
   };
 };

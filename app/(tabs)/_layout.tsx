@@ -12,6 +12,7 @@ import { TabRouteName } from '@/utils/helpers/types';
 import MyLibrary from './library';
 import SearchPage from './search';
 import HomeStackScreen from './home';
+import Feed from './feed';
 
 const Tab = createBottomTabNavigator();
 
@@ -143,7 +144,7 @@ export default function TabsLayout() {
         />
         <Tab.Screen
           name="Feed"
-          component={Home}
+          component={Feed}
           options={{
             headerTitle: 'Feed',
           }}

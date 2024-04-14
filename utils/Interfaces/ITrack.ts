@@ -65,4 +65,5 @@ export interface ITrackDetails {
     likedBy: number;
     downloads: number;
   };
+  type?: string;
 }

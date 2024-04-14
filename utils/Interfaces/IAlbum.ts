@@ -44,6 +44,7 @@ export interface IAlbumDetails {
   tracks?: ITrackDetails[];
   savedBy?: IUserProfile[];
   isSaved?: boolean;
+  type?: string;
 }
 export interface IGetAllAlbumsResponse {
   items: IAlbumDetails[];

@@ -5,6 +5,8 @@ import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from './useAuthStore';
 import { AxiosInstance } from 'axios';
 import TrackPlayer from 'react-native-track-player';
+import { calculatePercentage } from '@/utils/helpers/number';
+import { PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY } from '@/utils/constants';
 
 const InitialState = {
   isPlaying: false,
@@ -23,6 +25,7 @@ const InitialState = {
   stopAfterCurrentTrack: false,
   playbackError: null,
   queueId: null,
+  msPlayed: 0,
 };
 
 interface PlayerState {
@@ -74,6 +77,9 @@ interface PlayerState {
   api: () => AxiosInstance;
   isThisQueuePlaying: (id?: string, softCheck?: boolean) => boolean;
   isThisTrackPlaying: (id?: string, softCheck?: boolean) => boolean;
+  msPlayed: number;
+  setMsPlayed: (ms: number) => void;
+  increaseMsPlayed: () => void;
 }
 
 // TODO : Sleep Timer
@@ -82,6 +88,45 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
   volume: 1,
   api: () => useAuthStore.getState().api,
+  setMsPlayed: (ms: number) => {
+    set({ msPlayed: ms });
+  },
+  increaseMsPlayed: () => {
+    set((state) => {
+      const { msPlayed, currentTrack, api } = state;
+
+      const oldPercentagePlayed = calculatePercentage(
+        msPlayed,
+        currentTrack()?.trackDuration || 0
+      );
+
+      if (oldPercentagePlayed >= PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY) {
+        console.log('MS Played', msPlayed);
+        console.log(
+          `Returned because:${oldPercentagePlayed} is greater/equal than ${PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY}`
+        );
+        return { msPlayed };
+      }
+
+      const newMsPlayed = msPlayed + 1000;
+
+      const newPercentagePlayed = calculatePercentage(
+        newMsPlayed,
+        currentTrack()?.trackDuration || 0
+      );
+
+      if (newPercentagePlayed >= PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY) {
+        try {
+          // api().post(`/tracks/play/${currentTrack()?.id}`);
+          console.log('API Call to increase play count');
+        } catch (error) {
+          console.log('Error playing track', error);
+        }
+      }
+
+      return { msPlayed: newMsPlayed };
+    });
+  },
 
   didJustFinish: false,
 
@@ -152,6 +197,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         volume,
         playbackSpeed,
         api,
+        increaseMsPlayed,
+        msPlayed,
       } = get();
 
       if (playbackInstance) {
@@ -186,12 +233,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       if (!src || !id) return;
 
-      try {
-        api().post(`/tracks/play/${id}`);
-      } catch (error) {
-        console.log('Error playing track', error);
-      }
-
       await newPlaybackInstance.loadAsync(
         { uri: src },
         {
@@ -206,6 +247,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
+          increaseMsPlayed();
           TrackPlayer.setVolume(0);
           TrackPlayer.seekTo(status.positionMillis / 1000);
           TrackPlayer.play();
@@ -302,7 +344,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
     const index = tracks.findIndex((track) => track.id === id);
     if (index === -1) return;
-    await loadTrack(index);
+    await loadTrack(index).then(() => playPause(true));
   },
 
   nextTrack: async () => {

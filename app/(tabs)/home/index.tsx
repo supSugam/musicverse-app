@@ -22,10 +22,20 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfilePage from '../profile';
 import AlbumPage from '../album';
 import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
+import useRecommendations from '@/hooks/react-query/useRecommendations';
+import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
+import { IAlbumDetails } from '@/utils/Interfaces/IAlbum';
+import AlbumCard from '@/components/Albums/AlbumCard';
+import StyledText from '@/components/reusables/StyledText';
+import COLORS from '@/constants/Colors';
+import GenericSquareCard from '@/components/reusables/GenericSquareCard';
+import { CommonActions } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
 
 const Stack = createNativeStackNavigator();
 
 const Home: React.FC = () => {
+  const navigation = useNavigation();
   // Genres
   const { genres, isLoading: isGenresLoading } = useGenreQuery();
 
@@ -90,6 +100,38 @@ const Home: React.FC = () => {
     }
   }, [data, playerTracks]);
 
+  // Popular Albums
+
+  const [popularAlbums, setpopularAlbums] = useState<IAlbumDetails[]>([]);
+
+  const {
+    getAllAlbums: { data: popularAlbumsData, refetch: refetchpopularAlbums },
+    deleteAlbumById,
+    toggleSaveAlbum,
+  } = useAlbumsQuery({
+    getAllAlbumsConfig: {
+      params: {
+        creator: true,
+        genre: true,
+        tracks: true,
+      },
+    },
+  });
+
+  useEffect(() => {
+    setpopularAlbums(popularAlbumsData?.data?.result?.items ?? []);
+  }, [popularAlbumsData]);
+
+  // Recommended Tracks
+
+  const { data: recommendedTracksData } = useRecommendations();
+
+  const [recommendations, setRecommendations] = useState<ITrackDetails[]>([]);
+
+  useEffect(() => {
+    setRecommendations(recommendedTracksData?.data?.result?.items ?? []);
+  }, [recommendedTracksData]);
+
   return (
     <Container includeNavBar navbarTitle="Home">
       <ScrollView
@@ -102,22 +144,21 @@ const Home: React.FC = () => {
             }}
           />
         }
+        scrollEnabled
+        stickyHeaderIndices={[0]}
       >
-        {/* <View>
-          <StyledText size="2xl" weight="bold" tracking="tighter">
-            Hi, {currentUserProfile?.name || currentUser?.username}!
-          </StyledText>
-        </View> */}
-        {/* 
-        a horizontal scroll view of the user's favorite categories
-        */}
         <GenreScrollView
           genres={['All', ...genres.map((genre) => genre.name)]}
           selectedGenre={selectedGenre}
           onGenreChange={setSelectedGenre}
         />
 
-        <View className="flex flex-col mt-4">
+        <View
+          style={{
+            paddingHorizontal: 15,
+          }}
+          className="flex flex-col"
+        >
           {tracksOfSelectedGenre.map((track, i) => (
             <TrackListItem
               index={i}
@@ -146,6 +187,78 @@ const Home: React.FC = () => {
             />
           ))}
         </View>
+
+        <View
+          className="flex flex-col w-full"
+          style={{
+            paddingHorizontal: 20,
+          }}
+        >
+          <StyledText weight="semibold" size="lg" className="my-3">
+            Trending Albums
+          </StyledText>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
+          >
+            {popularAlbums.map((album, index) => (
+              <GenericSquareCard
+                key={album.id}
+                index={index}
+                image={album.cover || undefined}
+                title={album.title}
+                subtitle={`${album?.genre?.name}, ${album._count.tracks} tracks`}
+                onPress={() => {
+                  navigation.dispatch(
+                    CommonActions.navigate('AlbumPage', {
+                      id: album.id,
+                    })
+                  );
+                }}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        <View
+          style={{
+            paddingHorizontal: 15,
+            marginTop: 10,
+          }}
+          className="flex flex-col"
+        >
+          <StyledText weight="semibold" size="lg" className="my-3">
+            Based on your listening
+          </StyledText>
+          {recommendations.map((track, i) => (
+            <TrackListItem
+              index={i}
+              key={track.id}
+              id={track.id}
+              title={track.title}
+              onPlayClick={() => {
+                if (isThisTrackPlaying(track.id)) {
+                  playPause();
+                  return;
+                }
+                updateTracks(recommendations);
+                setQueueId(recommendations?.[0]?.id);
+                playATrackById(track.id);
+              }}
+              isPlaying={isThisTrackPlaying(track.id)}
+              artistName={
+                track?.creator?.profile.name || track?.creator?.username
+              }
+              artistId={track?.creator?.id}
+              cover={track.cover}
+              duration={track.trackDuration}
+              isLiked={track?.isLiked}
+              isBuffering={isBuffering && currentTrack()?.id === track.id}
+              label={i + 1}
+            />
+          ))}
+        </View>
       </ScrollView>
     </Container>
   );
@@ -154,7 +267,7 @@ const Home: React.FC = () => {
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
-    padding: 15,
+    maxHeight: '100%',
   },
 });
 

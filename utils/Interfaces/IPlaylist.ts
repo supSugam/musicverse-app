@@ -27,6 +27,8 @@ export interface IPlaylistDetails {
   tracks?: ITrackDetails[];
   savedBy?: IUserWithProfile[];
   collaborators?: IUserWithProfile[];
+  type?: string;
+  genre: undefined;
 }
 
 export interface Counts {

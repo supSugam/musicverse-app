@@ -106,14 +106,10 @@ const Home: React.FC = () => {
 
   const {
     getAllAlbums: { data: popularAlbumsData, refetch: refetchpopularAlbums },
-    deleteAlbumById,
-    toggleSaveAlbum,
   } = useAlbumsQuery({
     getAllAlbumsConfig: {
       params: {
-        creator: true,
         genre: true,
-        tracks: true,
       },
     },
   });

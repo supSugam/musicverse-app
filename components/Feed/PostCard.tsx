@@ -18,6 +18,8 @@ import COLORS from '@/constants/Colors';
 import { getFormattedTime } from '@/utils/helpers/date';
 import FadingDarkGradient from '../Playlist/FadingDarkGradient';
 import Capsule from '../reusables/Capsule';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 interface IPostCardProps extends IFeedContent {
   index: number;
@@ -44,6 +46,7 @@ const PostCard = ({
   });
 
   useEffect(() => {
+    console.log('index', tags);
     postCardPositionY.value = withDelay(
       100 * index,
       withTiming(0, { duration: 500 })
@@ -54,9 +57,29 @@ const PostCard = ({
     );
   }, [index]);
 
+  const { share } = useAppState();
+
+  const onShareClick = async () => {
+    share({
+      url: `https://www.musicbox.com/post/${id}`,
+      message: `Check out this post on MusicBox!`,
+      showAppsToView: true,
+      title: 'Share Post',
+      type: 'url',
+    });
+  };
+
   return (
     <Animated.View
-      style={postCardAnimatedStyles}
+      style={[
+        postCardAnimatedStyles,
+        {
+          backgroundColor: COLORS.neutral.dense,
+          borderColor: COLORS.neutral.semidark,
+          borderBottomWidth: 1,
+          marginBottom: 10,
+        },
+      ]}
       className="w-full flex flex-col px-5"
     >
       <View className="flex flex-row items-center mb-5">
@@ -89,28 +112,61 @@ const PostCard = ({
       </View>
 
       <TouchableWithoutFeedback onPress={onPress}>
-        <View className="relative w-full h-56 mb-8">
-          {/* <FadingDarkGradient /> */}
-          <ImageDisplay source={cover} width="100%" height="100%" />
-          <FlatList
-            horizontal
-            renderItem={({ item, index }) => (
-              <Capsule
-                key={(item?.id as string) + index}
-                text={item?.name || ''}
-                selected={index === 0}
-              />
-            )}
-            data={[genre, ...(tags ? tags : [])] || []}
-            bounces
-            alwaysBounceHorizontal
-            contentContainerStyle={{
-              maxWidth: '90%',
-              position: 'absolute',
-              bottom: 10,
-              left: 10,
+        <View className="flex flex-row justify-between items-center mb-4">
+          <View
+            className="flex flex-col"
+            style={{
+              maxWidth: '70%',
             }}
-          />
+          >
+            <View className="flex flex-row items-center">
+              <TouchableOpacity activeOpacity={0.85} onPress={onShareClick}>
+                <MaterialIcons
+                  name="share"
+                  size={24}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                containerStyle={{
+                  marginLeft: 16,
+                }}
+              >
+                <MaterialIcons
+                  name="link"
+                  size={24}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              horizontal
+              renderItem={({ item, index }) => (
+                <Capsule
+                  key={(item?.id as string) + index}
+                  text={item?.name || ''}
+                  selected={index === 0}
+                  style={{ marginRight: 8 }}
+                />
+              )}
+              data={[genre, ...(tags ? tags : [])] || []}
+              bounces
+              alwaysBounceHorizontal
+              contentContainerStyle={{
+                alignSelf: 'flex-end',
+              }}
+            />
+          </View>
+          <View className="relative h-20 w-20">
+            <FadingDarkGradient
+              stops={[
+                [0, 0],
+                [1, 0.7],
+              ]}
+            />
+            <ImageDisplay source={cover} width="100%" height="100%" />
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </Animated.View>

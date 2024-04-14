@@ -6,7 +6,7 @@ import { RecentSearchUtility } from '@/utils/helpers/ts-utilities';
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { toastResponseMessage } from '@/utils/toast';
-import * as Sharing from 'expo-sharing';
+import Share, { ShareOptions } from 'react-native-share';
 import * as Linking from 'expo-linking';
 
 export type RecentSearch =
@@ -26,7 +26,7 @@ interface IAppGlobalState {
   removeRecentSearch: (id: string) => void;
   clearAllRecentSearches: () => void;
   updateRecentSearches: () => void;
-  share: (url: string, options?: Sharing.SharingOptions) => void;
+  share: (options: ShareOptions) => void;
 }
 
 export const useAppState = create<IAppGlobalState>((set, get) => ({
@@ -85,16 +85,12 @@ export const useAppState = create<IAppGlobalState>((set, get) => ({
 
   // Linking and Sharing
 
-  share: async (url: string, options?: Sharing.SharingOptions) => {
-    if (!(await Sharing.isAvailableAsync())) {
-      toastResponseMessage({
-        type: 'error',
-        content: 'Sharing is not available on this device',
-      });
-      return;
+  share: async (options: ShareOptions) => {
+    try {
+      await Share.open(options);
+    } catch (error) {
+      console.error('Error sharing:', error);
     }
-
-    await Sharing.shareAsync(url, options);
   },
 
   createUrl: ([path, options]: Parameters<typeof Linking.createURL>) => {

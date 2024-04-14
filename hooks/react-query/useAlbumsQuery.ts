@@ -73,7 +73,7 @@ export const useAlbumsQuery = <T extends string | undefined = undefined>({
   };
 }): AlbumsQuery<T> => {
   // Stuffs
-  const { api } = useAuthStore();
+  const { api, isApiAuthorized } = useAuthStore();
   const queryClient = useQueryClient();
 
   // CREATE
@@ -117,6 +117,7 @@ export const useAlbumsQuery = <T extends string | undefined = undefined>({
         params: cleanObject(getAllAlbumsConfig?.params || {}),
       });
     },
+    enabled: isApiAuthorized(),
     ...getAllAlbumsConfig?.queryOptions,
   });
 

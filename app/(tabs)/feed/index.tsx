@@ -8,6 +8,13 @@ import { useNavigation } from 'expo-router';
 import { FeedContentType, IFeedContent } from '@/utils/Interfaces/IFeed';
 import PostCard from '@/components/Feed/PostCard';
 import { CommonActions } from '@react-navigation/native';
+import { useProfileQuery } from '@/hooks/react-query/useProfileQuery';
+import { ReviewStatus } from '@/utils/enums/ReviewStatus';
+import { IUserWithProfile } from '@/utils/Interfaces/IUser';
+import ArtistCard from '@/components/Feed/ArtistCard';
+import StyledText from '@/components/reusables/StyledText';
+import COLORS from '@/constants/Colors';
+import PrimaryGradient from '@/components/reusables/Gradients/PrimaryGradient';
 
 const Feed: React.FC = () => {
   const navigation = useNavigation();
@@ -16,6 +23,23 @@ const Feed: React.FC = () => {
   const {
     getFeedContent: { data: feedContentData, refetch: refetchAllFeedContent },
   } = useFollowQuery();
+
+  const [topArtists, setTopArtists] = useState<IUserWithProfile[]>([]);
+  const {
+    getMany: { data: usersData },
+  } = useProfileQuery({
+    getManyUsersConfig: {
+      params: {
+        artistStatus: ReviewStatus.APPROVED,
+        pageSize: 10,
+        page: 1,
+        sortByPopularity: true,
+      },
+    },
+  });
+  useEffect(() => {
+    setTopArtists(usersData?.data?.result?.items || []);
+  }, [usersData]);
 
   useEffect(() => {
     const feedData = feedContentData?.data?.result;
@@ -67,6 +91,39 @@ const Feed: React.FC = () => {
         scrollEnabled
         stickyHeaderIndices={[0]}
       >
+        <View
+          className="flex flex-col w-full"
+          style={{
+            paddingVertical: 10,
+            backgroundColor: COLORS.neutral.dense,
+            paddingHorizontal: 15,
+            paddingBottom: 28,
+          }}
+        >
+          <PrimaryGradient opacity={0.1} />
+          <StyledText size="lg" weight="semibold" className="mb-4">
+            Popular Artists 🕺
+          </StyledText>
+          <ScrollView horizontal>
+            {[
+              ...topArtists,
+              ...topArtists,
+              ...topArtists,
+              ...topArtists,
+              ...topArtists,
+            ].map((artist, index) => (
+              <ArtistCard
+                index={index}
+                avatar={artist.profile.avatar}
+                name={artist.profile.name}
+                followers={artist._count?.followers}
+                id={artist.id}
+                key={artist.id + index}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
         <View
           style={{
             paddingHorizontal: 15,

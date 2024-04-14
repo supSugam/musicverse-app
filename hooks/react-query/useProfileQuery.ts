@@ -1,5 +1,6 @@
 import {
   UseMutationResult,
+  UseQueryOptions,
   UseQueryResult,
   useMutation,
   useQuery,
@@ -9,15 +10,27 @@ import { profileKeyFactory } from '@/services/key-factory';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { AxiosResponse } from 'axios';
-import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
-import { IUserWithProfile } from '@/utils/Interfaces/IUser';
+import {
+  PaginationResponse,
+  SuccessResponse,
+} from '@/utils/Interfaces/IApiResponse';
+import { IUserWithProfile, UserRole } from '@/utils/Interfaces/IUser';
 import { useEffect } from 'react';
+import { IBasePaginationParams } from '@/utils/Interfaces/IPagination';
+import { ReviewStatus } from '@/utils/enums/ReviewStatus';
 
 export interface ICreateUserProfileDTO {
   name: string;
   bio?: string;
   avatar?: string;
   cover?: string;
+}
+
+export interface IUsersPaginationQueryParams extends IBasePaginationParams {
+  isVerified?: boolean;
+  role?: UserRole;
+  artistStatus?: ReviewStatus;
+  sortByPopularity?: boolean;
 }
 
 export interface IUpdateUserProfileDTO extends ICreateUserProfileDTO {}
@@ -35,14 +48,28 @@ interface IProfileQuery {
     AxiosResponse<SuccessResponse<IUserWithProfile>, Error>,
     Error
   >;
+  getMany: UseQueryResult<
+    AxiosResponse<PaginationResponse<IUserWithProfile>, any>,
+    Error
+  >;
 }
 
 interface IProfileQueryProps {
   username?: string;
+  getManyUsersConfig?: {
+    params?: IUsersPaginationQueryParams;
+    queryOptions?: Partial<
+      UseQueryOptions<
+        AxiosResponse<PaginationResponse<IUserWithProfile>, any>,
+        Error
+      >
+    >;
+  };
 }
 
 export const useProfileQuery = ({
   username,
+  getManyUsersConfig,
 }: IProfileQueryProps = {}): IProfileQuery => {
   const {
     api,
@@ -94,6 +121,18 @@ export const useProfileQuery = ({
     enabled: isApiAuthorized(),
   });
 
+  const getMany = useQuery({
+    queryKey: ['getManyUsers', getManyUsersConfig?.params],
+    queryFn: async () =>
+      await api.get('/users', { params: getManyUsersConfig?.params }),
+    retry: isApiAuthorized(),
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    enabled: isApiAuthorized(),
+    ...getManyUsersConfig?.queryOptions,
+  });
+
   const update = useMutation({
     mutationKey: profileKeyFactory.updateProfile(username),
     mutationFn: async (data: IUpdateUserProfileDTO) =>
@@ -127,5 +166,6 @@ export const useProfileQuery = ({
     create,
     update,
     getProfileByUsername,
+    getMany,
   };
 };

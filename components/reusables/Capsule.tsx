@@ -16,11 +16,11 @@ const Capsule = ({ text, selected = false, ...rest }: ICapsuleProps) => {
     <TouchableOpacity
       style={[
         {
+          height: 32,
           paddingHorizontal: 12,
           paddingVertical: 4,
           marginRight: 8,
           borderRadius: 20,
-          position: 'relative',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',

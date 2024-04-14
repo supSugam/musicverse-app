@@ -15,9 +15,9 @@ import { CommonActions } from '@react-navigation/native';
 
 interface IArtistCardProps {
   id: string;
-  avatar: string;
+  avatar?: string | null;
   name: string;
-  followers: number;
+  followers?: number;
   index: number;
 }
 
@@ -25,7 +25,7 @@ const ArtistCard = ({
   id,
   avatar,
   name,
-  followers,
+  followers = 0,
   index,
 }: IArtistCardProps) => {
   const translateX = useSharedValue(-100);
@@ -56,19 +56,19 @@ const ArtistCard = ({
   return (
     <AnimatedTouchable onPress={onPress}>
       <Animated.View
-        className="flex flex-col items-center"
+        className="flex flex-col items-center mr-4"
         style={artistCardAnimatedStyles}
       >
         <ImageDisplay
           source={avatar}
-          width={80}
-          height={80}
+          width={60}
+          height={60}
           borderRadius="full"
         />
         <View className="flex flex-col items-center justify-center">
           <StyledText
             color={COLORS.neutral.light}
-            size="base"
+            size="sm"
             weight="semibold"
             className="mt-2"
           >
@@ -76,11 +76,11 @@ const ArtistCard = ({
           </StyledText>
           <StyledText
             color={COLORS.neutral.light}
-            size="sm"
-            weight="light"
-            className="mt-1"
+            size="xs"
+            weight="extralight"
+            opacity="high"
           >
-            {followers} followers
+            {`${followers} ${followers === 1 ? 'follower' : 'followers'}`}
           </StyledText>
         </View>
       </Animated.View>

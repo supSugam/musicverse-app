@@ -57,12 +57,18 @@ const PostCard = ({
     );
   }, [index]);
 
-  const { share } = useAppState();
+  const { share, createUrl } = useAppState();
 
   const onShareClick = async () => {
+    const url = createUrl(`/post/${id}`, {
+      queryParams: {
+        id,
+      },
+      isTripleSlashed: true,
+    });
     share({
-      url: `https://www.musicbox.com/post/${id}`,
-      message: `Check out this post on MusicBox!`,
+      message: `Check out this post on MusicVerse! ${url}`,
+      url,
       showAppsToView: true,
       title: 'Share Post',
       type: 'url',
@@ -111,64 +117,63 @@ const PostCard = ({
         </View>
       </View>
 
-      <TouchableWithoutFeedback onPress={onPress}>
-        <View className="flex flex-row justify-between items-center mb-4">
-          <View
-            className="flex flex-col"
-            style={{
-              maxWidth: '70%',
-            }}
-          >
-            <View className="flex flex-row items-center">
-              <TouchableOpacity activeOpacity={0.85} onPress={onShareClick}>
-                <MaterialIcons
-                  name="share"
-                  size={24}
-                  color={COLORS.neutral.normal}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                containerStyle={{
-                  marginLeft: 16,
-                }}
-              >
-                <MaterialIcons
-                  name="link"
-                  size={24}
-                  color={COLORS.neutral.normal}
-                />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              horizontal
-              renderItem={({ item, index }) => (
-                <Capsule
-                  key={(item?.id as string) + index}
-                  text={item?.name || ''}
-                  selected={index === 0}
-                  style={{ marginRight: 8 }}
-                />
-              )}
-              data={[genre, ...(tags ? tags : [])] || []}
-              bounces
-              alwaysBounceHorizontal
-              contentContainerStyle={{
-                alignSelf: 'flex-end',
+      <View className="flex flex-row justify-between items-center mb-4">
+        <View
+          className="flex flex-col"
+          style={{
+            maxWidth: '70%',
+          }}
+        >
+          <View className="flex flex-row items-center">
+            <TouchableOpacity
+              activeOpacity={0.85}
+              containerStyle={{
+                marginRight: 10,
               }}
-            />
+              onPress={onPress}
+            >
+              <MaterialIcons
+                name="open-in-new"
+                size={24}
+                color={COLORS.neutral.normal}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.85} onPress={onShareClick}>
+              <MaterialIcons
+                name="share"
+                size={24}
+                color={COLORS.neutral.normal}
+              />
+            </TouchableOpacity>
           </View>
-          <View className="relative h-20 w-20">
-            <FadingDarkGradient
-              stops={[
-                [0, 0],
-                [1, 0.7],
-              ]}
-            />
-            <ImageDisplay source={cover} width="100%" height="100%" />
-          </View>
+          <FlatList
+            horizontal
+            renderItem={({ item, index }) => (
+              <Capsule
+                key={(item?.id as string) + index}
+                text={item?.name || ''}
+                selected={index === 0}
+                style={{ marginRight: 8 }}
+              />
+            )}
+            data={[genre, ...(tags ? tags : [])] || []}
+            bounces
+            alwaysBounceHorizontal
+            contentContainerStyle={{
+              alignSelf: 'flex-end',
+            }}
+          />
         </View>
-      </TouchableWithoutFeedback>
+        <View className="relative h-20 w-20">
+          <FadingDarkGradient
+            stops={[
+              [0, 0],
+              [1, 0.7],
+            ]}
+          />
+          <ImageDisplay source={cover} width="100%" height="100%" />
+        </View>
+      </View>
     </Animated.View>
   );
 };

@@ -27,6 +27,7 @@ interface IAppGlobalState {
   clearAllRecentSearches: () => void;
   updateRecentSearches: () => void;
   share: (options: ShareOptions) => void;
+  createUrl: (path: string, options?: Linking.CreateURLOptions) => string;
 }
 
 export const useAppState = create<IAppGlobalState>((set, get) => ({
@@ -93,7 +94,8 @@ export const useAppState = create<IAppGlobalState>((set, get) => ({
     }
   },
 
-  createUrl: ([path, options]: Parameters<typeof Linking.createURL>) => {
+  // createUrl: ([path, options]: Parameters<typeof Linking.createURL>) => {
+  createUrl: (path: string, options?: Linking.CreateURLOptions) => {
     return Linking.createURL(path, options);
   },
 }));

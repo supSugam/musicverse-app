@@ -15,6 +15,7 @@ import ArtistCard from '@/components/Feed/ArtistCard';
 import StyledText from '@/components/reusables/StyledText';
 import COLORS from '@/constants/Colors';
 import PrimaryGradient from '@/components/reusables/Gradients/PrimaryGradient';
+import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 
 const Feed: React.FC = () => {
   const navigation = useNavigation();
@@ -76,6 +77,8 @@ const Feed: React.FC = () => {
     }
   }, [feedContentData]);
 
+  const { updateTracks, playATrackById } = usePlayerStore();
+
   return (
     <Container includeNavBar navbarTitle="Feed">
       <ScrollView
@@ -97,10 +100,12 @@ const Feed: React.FC = () => {
             paddingVertical: 10,
             backgroundColor: COLORS.neutral.dense,
             paddingHorizontal: 15,
-            paddingBottom: 28,
+            paddingBottom: 18,
+            borderBottomColor: COLORS.neutral.semidark,
+            borderBottomWidth: 1,
+            marginBottom: 10,
           }}
         >
-          <PrimaryGradient opacity={0.1} />
           <StyledText size="lg" weight="semibold" className="mb-4">
             Popular Artists 🕺
           </StyledText>
@@ -159,6 +164,17 @@ const Feed: React.FC = () => {
                   );
                   break;
                 case FeedContentType.TRACK:
+                  const track = feedContentData?.data?.result?.tracks?.find(
+                    (track) => track.id === content.id
+                  );
+                  updateTracks(track ? [track] : []);
+                  playATrackById(content.id);
+                  navigation.dispatch(
+                    CommonActions.navigate({
+                      name: 'TrackPlayer',
+                    })
+                  );
+
                   break;
               }
             }}

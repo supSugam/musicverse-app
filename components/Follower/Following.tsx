@@ -62,23 +62,25 @@ const Following = () => {
             borderBottomWidth: 1,
             borderBottomColor: COLORS.neutral.semidark,
           }}
-          rightComponent={
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className="mr-2"
-              onPress={() => onRightComponentPress(following.id)}
-            >
-              <Ionicons
-                name={following.isFollowing ? 'checkmark' : 'person-add'}
-                size={24}
-                color={
-                  following.isFollowing
-                    ? COLORS.primary.light
-                    : COLORS.neutral.normal
-                }
-              />
-            </TouchableOpacity>
-          }
+          {...(!following.isMe && {
+            rightComponent: (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                className="mr-2"
+                onPress={() => onRightComponentPress(following.id)}
+              >
+                <Ionicons
+                  name={following.isFollowing ? 'checkmark' : 'person-add'}
+                  size={24}
+                  color={
+                    following.isFollowing
+                      ? COLORS.primary.light
+                      : COLORS.neutral.normal
+                  }
+                />
+              </TouchableOpacity>
+            ),
+          })}
         />
       )}
       keyExtractor={(item) => item.id}

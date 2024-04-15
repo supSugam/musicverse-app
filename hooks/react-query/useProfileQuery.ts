@@ -55,7 +55,7 @@ interface IProfileQuery {
 }
 
 interface IProfileQueryProps {
-  username?: string;
+  username?: any;
   getManyUsersConfig?: {
     params?: IUsersPaginationQueryParams;
     queryOptions?: Partial<
@@ -158,10 +158,10 @@ export const useProfileQuery = ({
     queryKey: profileKeyFactory.getProfileByUsername(username),
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
-    retry: isApiAuthorized(),
+    retry: typeof username === 'string' && isApiAuthorized(),
     refetchOnMount: true,
     refetchOnReconnect: true,
-    enabled: isApiAuthorized(),
+    enabled: typeof username === 'string' && isApiAuthorized(),
   });
 
   return {

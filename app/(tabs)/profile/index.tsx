@@ -49,7 +49,7 @@ const ProfilePage: React.FC = () => {
       isRefetching: isRefetchingProfile,
     },
   } = useProfileQuery({
-    username: !username || username instanceof Array ? undefined : username,
+    username,
   });
 
   useEffect(() => {
@@ -73,8 +73,7 @@ const ProfilePage: React.FC = () => {
         pageSize: 5,
         page: 1,
         creator: true,
-        creatorId:
-          !username || username instanceof Array ? undefined : username,
+        creatorId: typeof username === 'string' ? username : undefined,
       },
       queryOptions: {
         enabled: !!username && typeof username === 'string',

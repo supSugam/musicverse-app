@@ -33,6 +33,7 @@ import { useAppState } from '@/services/zustand/stores/useAppStore';
 import FollowerFollowingTabs from '@/components/Follower/FollowerFollowingTabs';
 import ProfilePage from './(tabs)/profile';
 import AlbumPage from './(tabs)/album';
+import COLORS from '@/constants/Colors';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -325,6 +326,7 @@ export default function index() {
                     width: '100%',
                     height: '100%',
                     justifyContent: 'flex-end',
+                    backgroundColor: COLORS.background.transparent(),
                   },
                 }}
               />

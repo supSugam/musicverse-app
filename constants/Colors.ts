@@ -3,6 +3,7 @@ const COLORS = {
     dense: '#12091d',
     dark: '#1d0f2f',
     light: '#3f2164',
+    transparent: (opacity = 0.5) => `rgba(0, 0, 0, ${opacity})`,
   },
   neutral: {
     white: '#ffffff',

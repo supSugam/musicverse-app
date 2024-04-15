@@ -77,6 +77,22 @@ const Feed: React.FC = () => {
     }
   }, [feedContentData]);
 
+  const onFollowersFollowingPress = () => {
+    navigation.dispatch(
+      CommonActions.navigate({
+        name: 'FollowerFollowingTabs',
+        params: {
+          userId: '1',
+        },
+      })
+    );
+  };
+
+  useEffect(() => {
+    onFollowersFollowingPress();
+    console.log('Followers Following Pressed');
+  }, []);
+
   const { updateTracks, playATrackById } = usePlayerStore();
 
   return (
@@ -129,12 +145,12 @@ const Feed: React.FC = () => {
           </ScrollView>
         </View>
 
-        <View
+        {/* <View
           style={{
             paddingHorizontal: 15,
           }}
           className="flex flex-col"
-        ></View>
+        ></View> */}
 
         {feedContent.map((content, index) => (
           <PostCard

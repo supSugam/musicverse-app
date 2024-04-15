@@ -71,8 +71,7 @@ export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
 
   const getFollowers = useQuery<
     AxiosResponse<PaginationResponse<IUserWithProfile>>,
-    Error,
-    string
+    Error
   >({
     queryKey: ['followers'],
     queryFn: async () => await api.get(`/users/followers/${usernameOrId}`),
@@ -81,8 +80,7 @@ export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
 
   const getFollowing = useQuery<
     AxiosResponse<PaginationResponse<IUserWithProfile>>,
-    Error,
-    string
+    Error
   >({
     queryKey: ['following'],
     queryFn: async () => await api.get(`/users/following/${usernameOrId}`),

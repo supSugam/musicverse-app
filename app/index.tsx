@@ -30,6 +30,9 @@ import RNTrackPlayer, {
 } from 'react-native-track-player';
 import * as Linking from 'expo-linking';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
+import FollowerFollowingTabs from '@/components/Follower/FollowerFollowingTabs';
+import ProfilePage from './(tabs)/profile';
+import AlbumPage from './(tabs)/album';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -202,6 +205,9 @@ export default function index() {
       screenOptions={{
         headerShown: false,
       }}
+      initialRouteName={
+        isLoading ? 'Loading' : currentUser ? 'TabsLayout' : 'Welcome'
+      }
     >
       {/* <Stack.Screen
               name="Settings"
@@ -223,7 +229,7 @@ export default function index() {
       ) : (
         <>
           {currentUser ? (
-            <Stack.Group>
+            <>
               <Stack.Screen
                 name="TabsLayout"
                 component={TabsLayout}
@@ -314,7 +320,40 @@ export default function index() {
                   },
                 }}
               />
-            </Stack.Group>
+
+              <Stack.Screen
+                name="FollowerFollowingTabs"
+                component={FollowerFollowingTabs}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                  animationDuration: 200,
+                  contentStyle: {
+                    display: 'flex',
+                    width: '100%',
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                  },
+                }}
+              />
+
+              <Stack.Screen
+                name="AlbumPage"
+                component={AlbumPage}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="ProfilePage"
+                component={ProfilePage}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                }}
+              />
+            </>
           ) : (
             <Stack.Group
               screenOptions={{

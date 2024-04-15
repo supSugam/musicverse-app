@@ -46,9 +46,9 @@ const ArtistCard = ({
   const onPress = () => {
     navigation.dispatch(
       CommonActions.navigate({
-        name: 'ArtistPage',
+        name: 'ProfilePage',
         params: {
-          artistId: id,
+          username: id,
         },
       })
     );

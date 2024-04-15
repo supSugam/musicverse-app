@@ -158,7 +158,10 @@ export const useProfileQuery = ({
     queryKey: profileKeyFactory.getProfileByUsername(username),
     queryFn: async () => await api.get(`/users/${username}`),
     refetchOnWindowFocus: true,
-    enabled: typeof username === 'string' && isApiAuthorized(),
+    retry: isApiAuthorized(),
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    enabled: isApiAuthorized(),
   });
 
   return {

@@ -20,7 +20,8 @@ import { IUserWithProfile } from '@/utils/Interfaces/IUser';
 import { calculatePercentage } from '@/utils/helpers/number';
 import { formatNumber } from '@/utils/helpers/string';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
@@ -127,6 +128,18 @@ const ProfilePage: React.FC = () => {
   const onFollowPress = () => {
     if (!userProfile?.id) return;
     toggleFollow.mutateAsync(userProfile?.id);
+  };
+
+  const navigation = useNavigation();
+  const onFollowersFollowingPress = () => {
+    navigation.dispatch(
+      CommonActions.navigate({
+        name: 'FollowerFollowingTabs',
+        params: {
+          userId: userProfile?.id,
+        },
+      })
+    );
   };
   return (
     <Container statusBarPadding={false}>
@@ -273,6 +286,7 @@ const ProfilePage: React.FC = () => {
                 tracking="tight"
                 color={COLORS.neutral.normal}
                 className="mt-1"
+                onPress={onFollowersFollowingPress}
               >
                 {`${formatNumber(
                   userProfile?._count?.followers

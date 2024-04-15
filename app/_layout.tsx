@@ -75,12 +75,8 @@ function RootLayoutNav() {
   const { initialize } = useAuthStore();
   const { setIsLoading } = useAppState();
   useEffect(() => {
-    const onInitialize = async () => {
-      setIsLoading(true);
-      await initialize();
-      setIsLoading(false);
-    };
-    onInitialize();
+    setIsLoading(true);
+    initialize().finally(() => setIsLoading(false));
   }, [initialize]);
 
   return (

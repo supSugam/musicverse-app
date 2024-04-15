@@ -27,7 +27,7 @@ const TextContainer = ({
       stickyHeaderIndices={[0]}
     >
       <StyledText
-        size="xl"
+        size="lg"
         weight="bold"
         style={{
           borderBottomColor: COLORS.primary.light,
@@ -41,7 +41,7 @@ const TextContainer = ({
         size="lg"
         weight="light"
         opacity="high"
-        className="mt-3 text-center leading-8"
+        className="mt-3"
         {...textProps}
       >
         {text || 'No Description Available.'}

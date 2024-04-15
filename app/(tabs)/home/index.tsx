@@ -11,30 +11,16 @@ import { useAppState } from '@/services/zustand/stores/useAppStore';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-  Platform,
-} from 'react-native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ProfilePage from '../profile';
-import AlbumPage from '../album';
-import CreatePlaylist from '@/components/Playlist/CreatePlaylist';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import useRecommendations from '@/hooks/react-query/useRecommendations';
 import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
 import { IAlbumDetails } from '@/utils/Interfaces/IAlbum';
-import AlbumCard from '@/components/Albums/AlbumCard';
 import StyledText from '@/components/reusables/StyledText';
-import COLORS from '@/constants/Colors';
 import GenericSquareCard from '@/components/reusables/GenericSquareCard';
 import { CommonActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 
-const Stack = createNativeStackNavigator();
-
-const Home: React.FC = () => {
+export default function Home() {
   const navigation = useNavigation();
   // Genres
   const { genres, isLoading: isGenresLoading } = useGenreQuery();
@@ -258,7 +244,7 @@ const Home: React.FC = () => {
       </ScrollView>
     </Container>
   );
-};
+}
 
 const styles = StyleSheet.create({
   scrollView: {
@@ -267,21 +253,21 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function HomeStackScreen() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTransparent: true,
-        headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
-      }}
-    >
-      <Stack.Screen
-        name="HomeScreen"
-        component={Home}
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
+// export default function HomeStackScreen() {
+//   return (
+//     <Stack.Navigator
+//       screenOptions={{
+//         headerTransparent: true,
+//         headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
+//       }}
+//     >
+//       <Stack.Screen
+//         name="HomeScreen"
+//         component={Home}
+//         options={{
+//           headerShown: false,
+//         }}
+//       />
+//     </Stack.Navigator>
+//   );
+// }

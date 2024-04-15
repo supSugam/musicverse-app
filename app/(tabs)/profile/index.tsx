@@ -24,7 +24,6 @@ import { CommonActions } from '@react-navigation/native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -55,7 +54,7 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     setUserProfile(userData?.data?.result);
-  }, [userProfile]);
+  }, [userData]);
 
   // For Tracks Data
   const [usersPopularTracks, setUsersPopularTracks] = useState<ITrackDetails[]>(
@@ -74,18 +73,17 @@ const ProfilePage: React.FC = () => {
         pageSize: 5,
         page: 1,
         creator: true,
-        creatorId: userProfile?.id,
+        creatorId:
+          !username || username instanceof Array ? undefined : username,
       },
       queryOptions: {
-        enabled: !!userProfile?.id,
+        enabled: !!username && typeof username === 'string',
       },
     },
   });
 
   useEffect(() => {
-    if (userTracks) {
-      setUsersPopularTracks(userTracks.data.result.items);
-    }
+    setUsersPopularTracks(userTracks?.data.result.items ?? []);
   }, [userTracks]);
 
   // Refetch
@@ -136,7 +134,7 @@ const ProfilePage: React.FC = () => {
       CommonActions.navigate({
         name: 'FollowerFollowingTabs',
         params: {
-          userId: userProfile?.id,
+          userId: username,
         },
       })
     );
@@ -329,7 +327,7 @@ const ProfilePage: React.FC = () => {
                 height={36}
                 rightComponent={
                   <FollowButton
-                    isFollowing={userProfile?.isFollowing || false}
+                    isFollowing={userProfile?.isFollowing}
                     onPress={onFollowPress}
                   />
                 }

@@ -76,6 +76,8 @@ export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
     queryKey: ['followers'],
     queryFn: async () => await api.get(`/users/followers/${usernameOrId}`),
     enabled: !!usernameOrId && isApiAuthorized(),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const getFollowing = useQuery<
@@ -85,6 +87,8 @@ export const useFollowQuery = ({ usernameOrId }: IFollowQueryProps = {}) => {
     queryKey: ['following'],
     queryFn: async () => await api.get(`/users/following/${usernameOrId}`),
     enabled: !!usernameOrId && isApiAuthorized(),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const getFollowCounts = useQuery<

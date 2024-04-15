@@ -3,7 +3,6 @@ import Container from '@/components/Container';
 import { useFollowQuery } from '@/hooks/react-query/useFollowQuery';
 import React, { useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from 'expo-router';
 import { FeedContentType, IFeedContent } from '@/utils/Interfaces/IFeed';
 import PostCard from '@/components/Feed/PostCard';
@@ -14,7 +13,6 @@ import { IUserWithProfile } from '@/utils/Interfaces/IUser';
 import ArtistCard from '@/components/Feed/ArtistCard';
 import StyledText from '@/components/reusables/StyledText';
 import COLORS from '@/constants/Colors';
-import PrimaryGradient from '@/components/reusables/Gradients/PrimaryGradient';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 
 const Feed: React.FC = () => {
@@ -76,22 +74,6 @@ const Feed: React.FC = () => {
       setFeedContent([]);
     }
   }, [feedContentData]);
-
-  const onFollowersFollowingPress = () => {
-    navigation.dispatch(
-      CommonActions.navigate({
-        name: 'FollowerFollowingTabs',
-        params: {
-          userId: '1',
-        },
-      })
-    );
-  };
-
-  useEffect(() => {
-    onFollowersFollowingPress();
-    console.log('Followers Following Pressed');
-  }, []);
 
   const { updateTracks, playATrackById } = usePlayerStore();
 

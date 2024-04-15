@@ -23,7 +23,6 @@ export default function AddToPlaylistStack() {
         // options={{
         //   presentation: 'transparentModal',
         //   animation: 'slide_from_bottom',
-        //   animationDuration: 200,
         // }}
       />
     </Stack.Navigator>

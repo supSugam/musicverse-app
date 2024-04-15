@@ -37,6 +37,7 @@ export interface IUser {
   _count?: IUserCountStats;
   isFollowing?: boolean;
   isFollower?: boolean;
+  isMe?: boolean;
 }
 
 export interface IUserProfile {

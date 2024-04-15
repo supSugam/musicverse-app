@@ -2,7 +2,7 @@ import { View, Text } from 'react-native';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import COLORS from '@/constants/Colors';
 import StyledText from '../reusables/StyledText';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface IFollowButtonProps {
   onPress: () => void;
@@ -10,6 +10,10 @@ interface IFollowButtonProps {
 }
 const FollowButton = ({ isFollowing = false, onPress }: IFollowButtonProps) => {
   const [following, setFollowing] = useState<boolean>(isFollowing);
+
+  useEffect(() => {
+    setFollowing(isFollowing);
+  }, [isFollowing]);
 
   return (
     <AnimatedTouchable

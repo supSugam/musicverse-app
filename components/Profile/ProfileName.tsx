@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { UserRole } from '@/utils/Interfaces/IUser';
 import ImageDisplay from '../reusables/ImageDisplay';
 import StyledText from '../reusables/StyledText';
@@ -7,6 +7,12 @@ import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
 import COLORS from '@/constants/Colors';
 import { View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 
 interface IProfileNameProps
   extends React.ComponentProps<typeof TouchableOpacity> {
@@ -20,6 +26,7 @@ interface IProfileNameProps
   height?: number;
   fullWidth?: boolean;
   rightComponent?: React.ReactNode;
+  index?: number;
 }
 const ProfileName = ({
   name,
@@ -32,6 +39,7 @@ const ProfileName = ({
   height = 40,
   fullWidth = false,
   rightComponent,
+  index,
   ...rest
 }: IProfileNameProps) => {
   const navigation = useNavigation();
@@ -48,45 +56,69 @@ const ProfileName = ({
       })
     );
   };
+
+  const translateX = useSharedValue(100);
+  const opacity = useSharedValue(0);
+  const profileNameAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  useEffect(() => {
+    translateX.value = withDelay(
+      (index ? index + 1 : 1) * 100,
+      withTiming(0, { duration: 500 })
+    );
+    opacity.value = withDelay(
+      (index ? index + 1 : 1) * 100,
+      withTiming(1, { duration: 500 })
+    );
+  }, [index]);
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
-      className={`flex flex-row items-center justify-between ${className}`}
       style={[fullWidth && { width: '100%' }]}
       {...others}
     >
-      <View className="flex flex-row items-center">
-        <ImageDisplay
-          source={image}
-          width={width}
-          height={height}
-          bordered
-          borderRadius="full"
-        />
-        <View className="flex flex-col ml-3">
-          <StyledText
-            size="base"
-            weight="semibold"
-            tracking="tight"
-            color={COLORS.neutral.light}
-          >
-            {name}
-          </StyledText>
-          {subtitle && (
+      <Animated.View
+        className={`w-full flex flex-row items-center justify-between ${className}`}
+        style={[!!index && profileNameAnimatedStyle]}
+      >
+        <View className="flex flex-row items-center">
+          <ImageDisplay
+            source={image}
+            width={width}
+            height={height}
+            bordered
+            borderRadius="full"
+          />
+          <View className="flex flex-col ml-3">
             <StyledText
-              size="sm"
-              opacity="high"
-              color={COLORS.neutral.light}
+              size="base"
+              weight="semibold"
               tracking="tight"
-              weight="medium"
+              color={COLORS.neutral.light}
             >
-              {subtitle}
+              {name}
             </StyledText>
-          )}
+            {subtitle && (
+              <StyledText
+                size="sm"
+                opacity="high"
+                color={COLORS.neutral.light}
+                tracking="tight"
+                weight="medium"
+              >
+                {subtitle}
+              </StyledText>
+            )}
+          </View>
         </View>
-      </View>
-      {rightComponent}
+        {rightComponent}
+      </Animated.View>
     </TouchableOpacity>
   );
 };

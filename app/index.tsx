@@ -205,9 +205,6 @@ export default function index() {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName={
-        isLoading ? 'Loading' : currentUser ? 'TabsLayout' : 'Welcome'
-      }
     >
       {/* <Stack.Screen
               name="Settings"
@@ -244,7 +241,6 @@ export default function index() {
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_bottom',
-                  animationDuration: 200,
                   contentStyle: {
                     display: 'flex',
                     width: '100%',
@@ -260,7 +256,6 @@ export default function index() {
                 options={{
                   headerShown: false,
                   animation: 'slide_from_right',
-                  animationDuration: 100,
                 }}
               />
 
@@ -296,7 +291,6 @@ export default function index() {
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_bottom',
-                  animationDuration: 200,
                   contentStyle: {
                     display: 'flex',
                     width: '100%',
@@ -311,7 +305,6 @@ export default function index() {
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_bottom',
-                  animationDuration: 200,
                   contentStyle: {
                     display: 'flex',
                     width: '100%',
@@ -327,7 +320,6 @@ export default function index() {
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_bottom',
-                  animationDuration: 200,
                   contentStyle: {
                     display: 'flex',
                     width: '100%',

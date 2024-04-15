@@ -221,7 +221,7 @@ const SearchPage = () => {
           )}
 
           {/* Albums */}
-          {allData.albums && allData.albums.items.length > 0 && (
+          {allData.albums && allData.albums?.items.length > 0 && (
             <View className="flex flex-col w-full overflow-visible flex-1">
               <StyledText
                 weight="semibold"

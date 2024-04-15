@@ -1,40 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Followers from './Followers';
 import Following from './Following';
 import COLORS from '@/constants/Colors';
 import { useLocalSearchParams } from 'expo-router';
-import { useFollowQuery } from '@/hooks/react-query/useFollowQuery';
-import { IUserWithProfile } from '@/utils/Interfaces/IUser';
 
 const Tab = createMaterialTopTabNavigator();
 
 function FollowerFollowingTabs() {
   const { userId } = useLocalSearchParams();
-  const [followers, setFollowers] = useState<IUserWithProfile[]>([]);
-  const [following, setFollowing] = useState<IUserWithProfile[]>([]);
-
-  const {
-    getFollowers: { data: followersData },
-
-    getFollowing: { data: followingData },
-  } = useFollowQuery({
-    usernameOrId: !!userId
-      ? userId instanceof Array
-        ? undefined
-        : userId
-      : undefined,
-  });
-
-  useEffect(() => {
-    setFollowers(followersData?.data?.result?.items || []);
-  }, [followersData]);
-
-  useEffect(() => {
-    setFollowing(followingData?.data?.result?.items || []);
-  }, [followingData]);
-
   return (
     <View style={styles.modalContainer}>
       <Tab.Navigator
@@ -43,21 +18,24 @@ function FollowerFollowingTabs() {
           swipeEnabled: true,
           animationEnabled: true,
           tabBarBounces: true,
+          lazy: true,
         }}
       >
         <Tab.Screen
           name="Followers"
-          component={() => <Followers followers={followers} />}
+          component={Followers}
           options={{
             tabBarLabel: 'Followers',
           }}
+          initialParams={userId ? { userId } : {}}
         />
         <Tab.Screen
           name="Following"
-          component={() => <Following following={following} />}
+          component={Following}
           options={{
             tabBarLabel: 'Following',
           }}
+          initialParams={userId ? { userId } : {}}
         />
       </Tab.Navigator>
     </View>

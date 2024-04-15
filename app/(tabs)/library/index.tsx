@@ -210,6 +210,7 @@ const MyLibrary = () => {
           swipeEnabled: true,
           animationEnabled: true,
           tabBarBounces: true,
+          lazy: true,
         }}
         tabBar={(props) => <TabBar {...props} />}
       >

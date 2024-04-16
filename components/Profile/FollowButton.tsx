@@ -18,13 +18,13 @@ const FollowButton = ({ isFollowing = false, onPress }: IFollowButtonProps) => {
   return (
     <AnimatedTouchable
       wrapperStyles={{
-        paddingVertical: 5,
-        paddingHorizontal: 24,
+        paddingVertical: 4,
+        paddingHorizontal: 20,
         borderRadius: 4,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        borderColor: COLORS.neutral.light,
+        borderColor: COLORS.neutral.normal,
         borderWidth: 1,
         flexShrink: 1,
       }}
@@ -34,7 +34,7 @@ const FollowButton = ({ isFollowing = false, onPress }: IFollowButtonProps) => {
         onPress();
       }}
     >
-      <StyledText size="base" weight="semibold" color={COLORS.neutral.light}>
+      <StyledText size="sm" weight="semibold" color={COLORS.neutral.normal}>
         {following ? 'Following' : 'Follow'}
       </StyledText>
     </AnimatedTouchable>

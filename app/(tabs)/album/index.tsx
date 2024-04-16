@@ -20,24 +20,20 @@ import { calculatePercentage } from '@/utils/helpers/number';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import MenuModal from '@/components/reusables/BottomSheetMenu/MenuModal';
 import { IMenuItemProps } from '@/components/reusables/BottomSheetMenu/MenuItem';
 import { CommonActions } from '@react-navigation/native';
 import useImageColors from '@/hooks/useColorExtractor';
-import { StatusBar, setStatusBarTranslucent } from 'expo-status-bar';
+import { setStatusBarTranslucent } from 'expo-status-bar';
 import FadingDarkGradient from '@/components/Playlist/FadingDarkGradient';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
 
 const AlbumPage: React.FC = () => {
   // COlor Extracter
@@ -91,16 +87,24 @@ const AlbumPage: React.FC = () => {
   // Image View
   const [albumCoverWidth, setAlbumCoverWidth] = useState<number>(0);
 
-  const bgOpacity = useSharedValue(0.0);
+  const bgOpacity = useSharedValue(1);
 
   const backgroundViewAnimatedStyle = useAnimatedStyle(() => ({
     opacity: bgOpacity.value,
   }));
 
   const imageContainerScale = useSharedValue(1);
+  const imageContainerPositionY = useSharedValue(0);
+  const imageOpacity = useSharedValue(1);
 
   const imageContainerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: imageContainerScale.value }],
+    transform: [
+      { scale: imageContainerScale.value },
+      {
+        translateY: imageContainerPositionY.value,
+      },
+    ],
+    opacity: imageOpacity.value,
   }));
 
   // Follow/Unfollow
@@ -118,70 +122,74 @@ const AlbumPage: React.FC = () => {
 
   // Album Options
   const navigation = useNavigation();
-  const [isAlbumOptionsModalVisible, setIsAlbumOptionsModalVisible] =
-    useState<boolean>(false);
 
-  const albumOptions: IMenuItemProps[] = useMemo(() => {
-    if (!albumDetails) return [];
-    let options: IMenuItemProps[] = [
-      {
-        label: 'Share',
-        onPress: () => {},
-        icon: 'share',
-      },
-      {
-        label: 'See Artist Profile',
-        onPress: () => {
-          setIsAlbumOptionsModalVisible(false);
-          navigation.dispatch(
-            CommonActions.navigate('Profile', {
-              id: albumDetails?.creator?.id,
-            })
-          );
-        },
-        icon: 'person',
-      },
-    ];
-
-    if (albumDetails?.creator?.id === currentUser?.id) {
-      options.push({
-        label: 'Update Album',
-        onPress: () => {
-          setIsAlbumOptionsModalVisible(false);
-          navigation.dispatch(
-            CommonActions.navigate('UpdateAlbum', {
-              id: albumDetails?.id,
-            })
-          );
-        },
-        icon: 'edit',
-      });
-    } else if (albumDetails.isSaved) {
-      options.push({
-        label: 'Unsave',
-        onPress: () => {
-          toggleSaveAlbum.mutate(albumDetails?.id);
-        },
-        icon: 'delete',
-      });
-    }
-    return options;
-  }, [albumDetails, currentUser]);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
 
   useEffect(() => {
-    setStatusBarTranslucent(true);
-  }, []);
+    setIsSaved(albumDetails?.isSaved || false);
+  }, [albumDetails]);
 
-  const [stickyBackNavHeight, setStickyBackNavHeight] = useState<number>(0);
+  const onToggleAlbumSave = async () => {
+    if (!albumDetails?.id) return;
+    toggleSaveAlbum.mutate(albumDetails?.id, {
+      onSuccess: (data) => {
+        setIsSaved((prev) => !prev);
+        setAlbumDetails((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            _count: {
+              ...prev._count,
+              savedBy: data.data.result.count,
+            },
+          };
+        });
+      },
+    });
+  };
+
+  const { share, createUrl } = useAppState();
+
+  const onShareAlbum = () => {
+    if (!albumDetails?.id) return;
+    const url = createUrl(`/album/${albumDetails?.id}`);
+    share({
+      title: albumDetails?.title,
+      url,
+    });
+  };
 
   return (
     <Container>
-      <MenuModal
-        visible={isAlbumOptionsModalVisible}
-        onClose={() => setIsAlbumOptionsModalVisible(false)}
-        items={albumOptions}
-        header={albumDetails?.title}
-      />
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+        }}
+      >
+        <Animated.View
+          style={[
+            backgroundViewAnimatedStyle,
+            {
+              position: 'absolute',
+              top: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: averageColor,
+            },
+          ]}
+        />
+        <FadingDarkGradient
+          stops={[
+            [0, 0.8],
+            [0.1, 0.4],
+            [0.5, 1],
+          ]}
+        />
+      </View>
       <ScrollView
         onScroll={(event) => {
           // clo(event.nativeEvent.contentOffset.y);
@@ -189,24 +197,19 @@ const AlbumPage: React.FC = () => {
 
           // Image Container Scale
           const percentage = calculatePercentage(
-            contentOffsetY - stickyBackNavHeight,
+            contentOffsetY,
             albumCoverWidth
           );
-
-          imageContainerScale.value = Math.max(0, (1 - percentage / 100) * 0.8);
-
-          // const newValue = percentage / 100;
-          // bgOpacity.value = withSpring(1 - newValue, {
-          //   damping: 5,
-          //   stiffness: 50,
-          // });
-
-          console.log(contentOffsetY, percentage);
-
-          // imageContainerScale.value = withSpring(1 + newValue, {
-          //   damping: 10,
-          //   stiffness: 50,
-          // });
+          const newScale = Math.min(Math.max(1 - percentage / 100, 0.6), 1);
+          imageContainerScale.value = newScale;
+          imageContainerPositionY.value = contentOffsetY / 2;
+          console.log(percentage / 100);
+          bgOpacity.value = 1 - percentage / 100;
+          if (newScale <= 0.6) {
+            imageOpacity.value = 1 - percentage / 100;
+          } else {
+            imageOpacity.value = 1;
+          }
         }}
         style={styles.scrollView}
         bouncesZoom
@@ -220,7 +223,7 @@ const AlbumPage: React.FC = () => {
             }}
           />
         }
-        stickyHeaderIndices={[0]}
+        stickyHeaderIndices={[0, 2]}
       >
         <BackNavigator
           showBackText
@@ -230,34 +233,10 @@ const AlbumPage: React.FC = () => {
             paddingBottom: 10,
           }}
           backgroundColor={COLORS.neutral.dense}
-          rightComponent={
-            <AnimatedTouchable
-              wrapperClassName="flex flex-row items-center px-4 py-1"
-              onPress={() => setIsAlbumOptionsModalVisible(true)}
-              disableInitialAnimation
-            >
-              <MaterialIcons
-                name="more-vert"
-                size={30}
-                color={COLORS.neutral.light}
-              />
-            </AnimatedTouchable>
-          }
-          onLayout={(e) => {
-            if (e.nativeEvent.layout.height !== 0) {
-              setStickyBackNavHeight(e.nativeEvent.layout.height);
-            }
-          }}
+          backgroundOpacity={bgOpacity.value - 0.85}
         />
 
-        <View
-          className="w-full relative flex items-center"
-          style={{
-            backgroundColor: 'red',
-            // transform: [{ translateY: stickyBackNavHeight }],
-          }}
-        >
-          {/* CONTINUE */}
+        <View className="w-full relative flex items-center justify-start">
           <Animated.View
             style={[
               {
@@ -289,14 +268,35 @@ const AlbumPage: React.FC = () => {
             />
           </Animated.View>
         </View>
-        {/* Back Navigator BG */}
 
         {/* Image */}
 
-        <View className="flex flex-row justify-between items-center px-4 py-1 mt-8">
+        <View className="flex flex-row justify-between items-end px-4 py-1 mt-10">
           <View className="flex flex-col">
+            <View className="flex flex-row items-center mb-3">
+              <TouchableOpacity activeOpacity={0.8} onPress={onToggleAlbumSave}>
+                <MaterialIcons
+                  name={isSaved ? 'remove-from-queue' : 'queue'}
+                  size={24}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={onShareAlbum}
+                style={{ marginLeft: 10 }}
+              >
+                <MaterialIcons
+                  name="share"
+                  size={24}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+            </View>
+
             <StyledText
-              size="4xl"
+              size="3xl"
               weight="bold"
               tracking="tight"
               color={COLORS.neutral.light}
@@ -304,20 +304,20 @@ const AlbumPage: React.FC = () => {
               {albumDetails?.title}
             </StyledText>
             <StyledText
-              size="base"
+              size="sm"
               weight="semibold"
-              tracking="tight"
+              tracking="tighter"
               color={COLORS.neutral.normal}
               className="mt-1"
             >
-              {`Album  •  ${
+              {`Album  • ${getYear(albumDetails?.createdAt)} • ${
                 albumDetails?._count?.savedBy || 0
-              } Saves  •  ${getYear(albumDetails?.createdAt)}`}
+              } Saves`}
             </StyledText>
           </View>
 
           <TogglePlayButton
-            size={40}
+            size={28}
             onPress={() => {
               if (isThisQueuePlaying(albumDetails?.id)) {
                 playPause();
@@ -331,6 +331,8 @@ const AlbumPage: React.FC = () => {
             isPlaying={isThisQueuePlaying(albumDetails?.id)}
           />
         </View>
+
+        {/* Options */}
 
         <View
           className="flex flex-1 relative"

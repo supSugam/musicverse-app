@@ -40,7 +40,7 @@ type AlbumsQuery<T extends string | undefined = undefined> = {
     unknown
   >;
   toggleSaveAlbum: UseMutationResult<
-    AxiosResponse<BaseResponse, any>,
+    AxiosResponse<SuccessResponse<{ count: number; message: string }>, any>,
     Error,
     string,
     unknown
@@ -143,17 +143,19 @@ export const useAlbumsQuery = <T extends string | undefined = undefined>({
     },
   });
 
-  const toggleSaveAlbum = useMutation({
+  const toggleSaveAlbum = useMutation<
+    AxiosResponse<SuccessResponse<{ count: number; message: string }>, any>,
+    Error,
+    string,
+    unknown
+  >({
     mutationKey: [ALBUM_QUERY_KEY],
     mutationFn: async (id: string) => {
       return await api.patch(`/albums/toggle-save/${id}`);
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: [ALBUM_QUERY_KEY],
-      });
       toastResponseMessage({
-        content: data.data.message || 'Done',
+        content: data.data.result.message,
         type: 'success',
       });
     },

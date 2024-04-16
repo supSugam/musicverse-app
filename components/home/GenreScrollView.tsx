@@ -25,6 +25,7 @@ const GenreScrollView = ({
       contentContainerStyle={{
         backgroundColor: COLORS.neutral.dense,
         paddingVertical: 12,
+        paddingHorizontal: 16,
       }}
     >
       {genres.map((genre) => {

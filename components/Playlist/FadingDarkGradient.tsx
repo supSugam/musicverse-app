@@ -12,11 +12,14 @@ type GradientStop = [`${number}` | number, `${number}` | number];
 interface IFadingDarkGradientProps extends React.ComponentProps<typeof View> {
   opacity?: number;
   stops?: GradientStop[];
+  stopColor?: string;
+  direction?: 'horizontal' | 'vertical';
 }
 
 const FadingDarkGradient = ({
   opacity = 1,
   stops = defaultStops,
+  stopColor = 'rgb(0,0,0)',
   ...rest
 }: IFadingDarkGradientProps) => {
   const [layout, setLayout] = useState<{ width: number; height: number }>({
@@ -47,13 +50,18 @@ const FadingDarkGradient = ({
     >
       <Svg height="100%" width="100%">
         <Defs>
-          <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+          <LinearGradient
+            id="grad"
+            {...(rest.direction === 'horizontal'
+              ? { x1: 0, y1: 0, x2: 1, y2: 0 }
+              : { x1: 0, y1: 0, x2: 0, y2: 1 })}
+          >
             {stops.map(([offset, stopOpacity], index) => (
               <Stop
                 key={index}
                 offset={offset}
                 stopOpacity={stopOpacity}
-                stopColor="rgb(0,0,0)"
+                stopColor={stopColor}
               />
             ))}
           </LinearGradient>

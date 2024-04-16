@@ -1,9 +1,7 @@
 import Container from '@/components/Container';
-import FadingDarkGradient from '@/components/Playlist/FadingDarkGradient';
 import FollowButton from '@/components/Profile/FollowButton';
 import ProfileName from '@/components/Profile/ProfileName';
 import TrackListItem from '@/components/Tracks/TrackListItem';
-import AnimatedTouchable from '@/components/reusables/AnimatedTouchable';
 import BackNavigator from '@/components/reusables/BackNavigator';
 import Capsule from '@/components/reusables/Capsule';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
@@ -21,27 +19,22 @@ import { calculatePercentage } from '@/utils/helpers/number';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
 } from 'react-native-reanimated';
 import MenuModal from '@/components/reusables/BottomSheetMenu/MenuModal';
-import { IMenuItemProps } from '@/components/reusables/BottomSheetMenu/MenuItem';
 import { CommonActions } from '@react-navigation/native';
-import SelectedTouchable from '@/components/reusables/SelectedTouchable';
-import TrackPreview from '@/components/Tracks/TrackPreview';
-import PlayButton from '@/components/reusables/PlayButton';
+import useImageColors from '@/hooks/useColorExtractor';
+import FadingDarkGradient from '@/components/Playlist/FadingDarkGradient';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
+import ReusableAlert from '@/components/reusables/ReusableAlert';
 
 const PlaylistPage: React.FC = () => {
+  // COlor Extracter
+
   // For Playlist Data
   const { currentUser } = useAuthStore();
   const { id } = useLocalSearchParams();
@@ -55,6 +48,7 @@ const PlaylistPage: React.FC = () => {
       isRefetching: isRefetchingPlaylistDetails,
     },
     toggleSavePlaylist,
+    deletePlaylistById,
   } = usePlaylistsQuery({
     id: id as string,
   });
@@ -72,12 +66,19 @@ const PlaylistPage: React.FC = () => {
   const refetchEverything = async () => {
     await refetchPlaylistDetails();
   };
+  const { averageColor } = useImageColors(playlistDetails?.cover);
 
+  useEffect(() => {
+    console.log(averageColor);
+  }, [averageColor]);
   // Player Store
 
   const {
     updateTracks,
+    currentTrack,
+    isPlaying,
     playATrackById,
+    isBuffering,
     setQueueId,
     isThisQueuePlaying,
     playPause,
@@ -86,18 +87,25 @@ const PlaylistPage: React.FC = () => {
   // Image View
   const [playlistCoverWidth, setPlaylistCoverWidth] = useState<number>(0);
 
-  const bgOpacity = useSharedValue(0.0);
+  const bgOpacity = useSharedValue(1);
 
   const backgroundViewAnimatedStyle = useAnimatedStyle(() => ({
     opacity: bgOpacity.value,
   }));
 
   const imageContainerScale = useSharedValue(1);
+  const imageContainerPositionY = useSharedValue(0);
+  const imageOpacity = useSharedValue(1);
 
   const imageContainerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: imageContainerScale.value }],
+    transform: [
+      { scale: imageContainerScale.value },
+      {
+        translateY: imageContainerPositionY.value,
+      },
+    ],
+    opacity: imageOpacity.value,
   }));
-  const [paddingTop, setPaddingTop] = useState<number>(0);
 
   // Follow/Unfollow
 
@@ -114,231 +122,240 @@ const PlaylistPage: React.FC = () => {
 
   // Playlist Options
   const navigation = useNavigation();
-  const [isPlaylistOptionsModalVisible, setIsPlaylistOptionsModalVisible] =
+
+  const onTogglePlaylistSave = async () => {
+    if (!playlistDetails?.id) return;
+    toggleSavePlaylist.mutate(playlistDetails?.id, {
+      onSuccess: (data) => {
+        setPlaylistDetails((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            isSaved: !prev.isSaved,
+            _count: {
+              ...prev._count,
+              savedBy: data.data.result.count,
+            },
+          };
+        });
+      },
+    });
+  };
+
+  const { share, createUrl } = useAppState();
+
+  const onSharePlaylist = () => {
+    if (!playlistDetails?.id) return;
+    const url = createUrl(`/playlist/${playlistDetails?.id}`);
+    share({
+      title: playlistDetails?.title,
+      url,
+    });
+  };
+
+  const [ownerOptionsModalVisible, setOwnerOptionsModalVisible] =
     useState<boolean>(false);
-
-  const playlistOptions: IMenuItemProps[] = useMemo(() => {
-    if (!playlistDetails) return [];
-    let options: IMenuItemProps[] = [
-      {
-        label: 'Share',
-        onPress: () => {},
-        icon: 'share',
-      },
-      {
-        label: 'See Artist Profile',
-        onPress: () => {
-          setIsPlaylistOptionsModalVisible(false);
-          navigation.dispatch(
-            CommonActions.navigate('Profile', {
-              id: playlistDetails?.creator?.id,
-            })
-          );
-        },
-        icon: 'person',
-      },
-    ];
-
-    if (playlistDetails?.creator?.id === currentUser?.id) {
-      options.push({
-        label: 'Update Playlist',
-        onPress: () => {
-          setIsPlaylistOptionsModalVisible(false);
-          navigation.dispatch(
-            CommonActions.navigate('UpdatePlaylist', {
-              id: playlistDetails?.id,
-            })
-          );
-        },
-        icon: 'edit',
-      });
-    } else if (playlistDetails.isSaved) {
-      options.push({
-        label: 'Unsave',
-        onPress: () => {
-          toggleSavePlaylist.mutate(playlistDetails?.id);
-        },
-        icon: 'delete',
-      });
-    }
-    return options;
-  }, [playlistDetails, currentUser]);
-
-  const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
 
   return (
-    <Container statusBarPadding={false}>
-      <MenuModal
-        visible={isPlaylistOptionsModalVisible}
-        onClose={() => setIsPlaylistOptionsModalVisible(false)}
-        items={playlistOptions}
-        header={playlistDetails?.title}
-      />
-      <Animated.View
-        className="w-full h-full flex-grow absolute top-0 left-0"
-        style={[
-          backgroundViewAnimatedStyle,
-          { zIndex: 2, backgroundColor: COLORS.neutral.dense },
-        ]}
-      />
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFillObject,
-          { zIndex: 1, height: playlistCoverWidth * 0.8 },
-          imageContainerAnimatedStyle,
-        ]}
-        onLayout={(event) => {
-          const { width } = event.nativeEvent.layout;
-          setPlaylistCoverWidth(width);
+    <Container>
+      <ReusableAlert
+        visible={deleteModalVisible}
+        header="Delete Playlist"
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={async () => {
+          if (!playlistDetails?.id) return;
+          await deletePlaylistById.mutateAsync(playlistDetails?.id, {
+            onSuccess: () => {
+              setDeleteModalVisible(false);
+              navigation.dispatch(CommonActions.goBack());
+            },
+          });
         }}
       >
-        {/* // Gradient */}
-
-        <FadingDarkGradient
-          stops={[
-            [0, 0.9],
-            [0.3, 0.3],
-            [0.8, 0.9],
-            [1, 1],
-          ]}
-        />
-
-        <ImageDisplay
-          placeholder="Cover Image"
-          width={'100%'}
-          height={playlistCoverWidth * 0.8}
-          source={playlistDetails?.cover}
-        />
-      </Animated.View>
-      <Animated.View
+        <StyledText size="lg" weight="semibold">
+          Are you sure you want to delete this playlist?
+        </StyledText>
+      </ReusableAlert>
+      <MenuModal
+        visible={ownerOptionsModalVisible}
+        onClose={() => setOwnerOptionsModalVisible(false)}
+        items={[
+          {
+            label: 'Edit Playlist',
+            onPress: () => {
+              setOwnerOptionsModalVisible(false);
+              navigation.dispatch(
+                CommonActions.navigate('UpdatePlaylist', {
+                  id: playlistDetails?.id,
+                })
+              );
+            },
+            icon: 'auto-awesome',
+          },
+          {
+            label: 'Delete Playlist',
+            onPress: () => {
+              setOwnerOptionsModalVisible(false);
+              setDeleteModalVisible(true);
+            },
+            icon: 'delete',
+          },
+        ]}
+      />
+      <View
         style={{
           position: 'absolute',
-          width: '100%',
           top: 0,
-          zIndex: 15,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingTop: 32,
-          paddingBottom: 8,
-          paddingHorizontal: 2,
-        }}
-        onLayout={(event) => {
-          const { height } = event.nativeEvent.layout;
-          setPaddingTop(height);
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
         }}
       >
         <Animated.View
           style={[
             backgroundViewAnimatedStyle,
             {
-              backgroundColor: COLORS.neutral.dense,
-              zIndex: -1,
-              ...StyleSheet.absoluteFillObject,
-              borderBottomColor: COLORS.neutral.semidark,
-              borderBottomWidth: 1,
+              position: 'absolute',
+              top: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: averageColor,
             },
           ]}
         />
+        <FadingDarkGradient
+          stops={[
+            [0, 0.8],
+            [0.1, 0.4],
+            [0.5, 1],
+          ]}
+        />
+      </View>
+      <ScrollView
+        onScroll={(event) => {
+          // clo(event.nativeEvent.contentOffset.y);
+          const contentOffsetY = event.nativeEvent.contentOffset.y;
+
+          // Image Container Scale
+          const percentage = calculatePercentage(
+            contentOffsetY,
+            playlistCoverWidth
+          );
+          const newScale = Math.min(Math.max(1 - percentage / 100, 0.6), 1);
+          imageContainerScale.value = newScale;
+          imageContainerPositionY.value = contentOffsetY / 2;
+          bgOpacity.value = 1 - percentage / 100;
+          if (newScale <= 0.6) {
+            imageOpacity.value = 1 - percentage / 100;
+          } else {
+            imageOpacity.value = 1;
+          }
+        }}
+        style={styles.scrollView}
+        bouncesZoom
+        bounces
+        alwaysBounceVertical
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetchingPlaylistDetails}
+            onRefresh={() => {
+              refetchEverything();
+            }}
+          />
+        }
+        stickyHeaderIndices={[0, 2]}
+      >
         <BackNavigator
           showBackText
+          title="Playlist"
           style={{
-            paddingVertical: 0,
-            paddingHorizontal: 4,
+            paddingTop: 0,
+            paddingBottom: 10,
           }}
-          rightComponent={
-            <AnimatedTouchable
-              wrapperClassName="flex flex-row items-center px-4 py-1"
-              onPress={() => setIsPlaylistOptionsModalVisible(true)}
-              disableInitialAnimation
-            >
-              <MaterialIcons
-                name="more-vert"
-                size={30}
-                color={COLORS.neutral.light}
-              />
-            </AnimatedTouchable>
-          }
+          backgroundColor={COLORS.neutral.dense}
+          backgroundOpacity={bgOpacity.value - 0.85}
         />
-        <AnimatedTouchable
-          disableInitialAnimation
-          wrapperClassName="flex flex-row items-center px-4 py-1"
-        >
-          <MaterialIcons
-            name="more-vert"
-            size={30}
-            color={COLORS.neutral.light}
-          />
-        </AnimatedTouchable>
-      </Animated.View>
-      <View className="w-full z-10 flex-1 h-full">
-        <ScrollView
-          onScroll={(event) => {
-            // clo(event.nativeEvent.contentOffset.y);
-            const contentOffsetY = event.nativeEvent.contentOffset.y;
 
-            // Image Container Scale
-            const percentage = calculatePercentage(
-              contentOffsetY,
-              playlistCoverWidth * 0.7
-            );
-
-            const newValue = percentage / 100;
-            bgOpacity.value = withSpring(newValue, {
-              damping: 5,
-              stiffness: 50,
-            });
-
-            imageContainerScale.value = withSpring(1 + newValue, {
-              damping: 10,
-              stiffness: 50,
-            });
-          }}
-          style={styles.scrollView}
-          bouncesZoom
-          bounces
-          alwaysBounceVertical
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetchingPlaylistDetails}
-              onRefresh={() => {
-                refetchEverything();
-              }}
-            />
-          }
-          stickyHeaderIndices={[1]}
-        >
-          {/* </GestureDetector> */}
-          {/* User's Public Contents */}
-
-          <View className="mt-44" />
-
-          {/* Playlist Details */}
+        <View className="w-full relative flex items-center justify-start">
           <Animated.View
-            className="flex flex-row p-4 justify-between relative"
             style={[
               {
-                zIndex: 10,
-                paddingTop,
+                zIndex: 1,
+                height: playlistCoverWidth,
+                width: '60%',
+                borderRadius: 10,
               },
+              imageContainerAnimatedStyle,
             ]}
+            onLayout={(event) => {
+              const { width } = event.nativeEvent.layout;
+              setPlaylistCoverWidth(width);
+            }}
           >
-            <Animated.View
-              style={[
-                backgroundViewAnimatedStyle,
-                {
-                  backgroundColor: COLORS.neutral.dense,
-                  zIndex: -1,
-                  ...StyleSheet.absoluteFillObject,
-                  borderBottomColor: COLORS.neutral.semidark,
-                  borderBottomWidth: 1,
-                },
+            <FadingDarkGradient
+              stops={[
+                [0, 0.1],
+                [0.7, 0.2],
+                [1, 0.6],
               ]}
             />
+
+            <ImageDisplay
+              placeholder="Cover Image"
+              width="100%"
+              height="100%"
+              source={playlistDetails?.cover}
+            />
+          </Animated.View>
+        </View>
+
+        {/* Image */}
+
+        <View className="flex flex-col px-4 py-1 mt-10">
+          <View className="flex flex-row justify-between items-center">
+            <View className="flex flex-row items-center mb-3">
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={onTogglePlaylistSave}
+              >
+                <MaterialIcons
+                  name={playlistDetails?.isSaved ? 'playlist-remove' : 'queue'}
+                  size={24}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={onSharePlaylist}
+                style={{ marginLeft: 10 }}
+              >
+                <MaterialIcons
+                  name="share"
+                  size={24}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+            </View>
+            {currentUser?.id !== playlistDetails?.creator?.id && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setOwnerOptionsModalVisible(true)}
+              >
+                <MaterialIcons
+                  name="more-vert"
+                  size={28}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View className="flex flex-row justify-between items-center">
             <View className="flex flex-col">
               <StyledText
-                size="4xl"
+                size="3xl"
                 weight="bold"
                 tracking="tight"
                 color={COLORS.neutral.light}
@@ -346,20 +363,19 @@ const PlaylistPage: React.FC = () => {
                 {playlistDetails?.title}
               </StyledText>
               <StyledText
-                size="base"
+                size="sm"
                 weight="semibold"
-                tracking="tight"
+                tracking="tighter"
                 color={COLORS.neutral.normal}
                 className="mt-1"
               >
-                {`Playlist  •  ${
+                {`Playlist  • ${getYear(playlistDetails?.createdAt)} • ${
                   playlistDetails?._count?.savedBy || 0
-                } Saves  •  ${getYear(playlistDetails?.createdAt)}`}
+                } Saves`}
               </StyledText>
             </View>
-
             <TogglePlayButton
-              size={40}
+              size={28}
               onPress={() => {
                 if (isThisQueuePlaying(playlistDetails?.id)) {
                   playPause();
@@ -372,167 +388,103 @@ const PlaylistPage: React.FC = () => {
               }}
               isPlaying={isThisQueuePlaying(playlistDetails?.id)}
             />
-          </Animated.View>
+          </View>
+        </View>
 
-          <View
-            className="flex flex-1 relative"
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-            }}
-          >
-            {/* Tracks */}
-            <View className="flex flex-col my-2">
-              {/* Misc */}
+        {/* Options */}
 
-              <View className="flex w-full flex-row justify-between items-center">
-                <ProfileName
-                  name={
-                    playlistDetails?.creator?.profile?.name ||
-                    playlistDetails?.creator?.username
-                  }
-                  image={playlistDetails?.creator?.profile?.avatar}
-                  id={playlistDetails?.creator?.id}
-                  userRole={playlistDetails?.creator?.role}
-                  width={36}
-                  height={36}
-                  fullWidth
-                  rightComponent={
-                    <FollowButton
-                      isFollowing={
-                        playlistDetails?.creator?.isFollowing || false
-                      }
-                      onPress={onFollowPress}
-                    />
-                  }
-                />
-              </View>
-              <View className="flex flex-row justify-between items-center w-full mb-5 mt-8">
-                <StyledText
-                  size="lg"
-                  weight="bold"
-                  tracking="tight"
-                  color={COLORS.neutral.light}
-                >
-                  Tracks ({playlistDetails?._count?.tracks || 0})
-                </StyledText>
+        <View
+          className="flex flex-1 relative mt-5"
+          style={{
+            paddingHorizontal: 12,
+          }}
+        >
+          {/* Tracks */}
+          <View className="flex flex-col">
+            {/* Misc */}
 
-                <AnimatedTouchable
-                  onPress={() => {
-                    if (selectedTracks.length > 0) {
-                      setSelectedTracks([]);
-                    } else {
-                      setSelectedTracks(
-                        playlistDetails?.tracks?.map((t) => t.id) || []
-                      );
-                    }
-                  }}
-                  wrapperStyles={{
-                    flexDirection: 'row',
-                  }}
-                >
-                  <StyledText weight="semibold" size="lg" className="mr-2">
-                    {selectedTracks.length > 0
-                      ? `${selectedTracks.length} Selected`
-                      : `Select All`}
-                  </StyledText>
-
-                  <SelectedTouchable
-                    selected={
-                      playlistDetails?.tracks?.length === selectedTracks.length
-                    }
+            <View className="flex w-full flex-row justify-between items-center">
+              <ProfileName
+                name={
+                  playlistDetails?.creator?.profile?.name ||
+                  playlistDetails?.creator?.username
+                }
+                image={playlistDetails?.creator?.profile?.avatar}
+                id={playlistDetails?.creator?.id}
+                userRole={playlistDetails?.creator?.role}
+                width={36}
+                height={36}
+                fullWidth
+                rightComponent={
+                  <FollowButton
+                    isFollowing={playlistDetails?.creator?.isFollowing || false}
+                    onPress={onFollowPress}
                   />
-                </AnimatedTouchable>
-
-                {/* <FlatList
-                  horizontal
-                  renderItem={({ item, index }) => (
-                    <Capsule
-                      key={(item?.id as string) + index}
-                      text={item?.name || ''}
-                      selected={index === 0}
-                    />
-                  )}
-                  data={playlistDetails?.tags}
-                  bounces
-                  alwaysBounceHorizontal
-                  contentContainerStyle={{
-                    maxWidth: '50%',
-                    marginLeft: 'auto',
-                  }}
-                /> */}
-              </View>
-
-              <FlatList
-                renderItem={({ item: track, index }) => (
-                  <TrackPreview
-                    index={index}
-                    onPress={() => {
-                      if (selectedTracks.length > 0) {
-                        if (selectedTracks.includes(track.id)) {
-                          setSelectedTracks(
-                            selectedTracks.filter((t) => t !== track.id)
-                          );
-                        } else {
-                          setSelectedTracks([...selectedTracks, track.id]);
-                        }
-                      }
-                    }}
-                    onLongPress={() => {
-                      if (selectedTracks.includes(track.id)) {
-                        setSelectedTracks(
-                          selectedTracks.filter((t) => t !== track.id)
-                        );
-                      } else {
-                        setSelectedTracks([...selectedTracks, track.id]);
-                      }
-                    }}
-                    key={`${track.id}-added`}
-                    id={track.id}
-                    title={track.title}
-                    artistName={track.creator?.username}
-                    cover={track.cover}
-                    duration={track.trackDuration}
-                    onPlayClick={() => {
-                      updateTracks(playlistDetails?.tracks || []);
-                      playATrackById(track.id);
-                    }}
-                    rightComponent={
-                      <View className="flex flex-row items-center ml-auto justify-end">
-                        {selectedTracks.length > 0 ? (
-                          <>
-                            <SelectedTouchable
-                              selected={selectedTracks.includes(track.id)}
-                            />
-                          </>
-                        ) : (
-                          <>
-                            <PlayButton
-                              isPlaying={false}
-                              onPlayClick={() => {
-                                updateTracks(playlistDetails?.tracks || []);
-                                playATrackById(track.id);
-                              }}
-                            />
-                          </>
-                        )}
-                      </View>
-                    }
-                  />
-                )}
-                data={playlistDetails?.tracks || []}
-                bounces
-                alwaysBounceVertical
+                }
               />
             </View>
+            <View className="flex flex-row justify-between items-center w-full mb-5 mt-5">
+              <StyledText
+                size="lg"
+                weight="bold"
+                tracking="tight"
+                color={COLORS.neutral.light}
+              >
+                Tracks ({playlistDetails?._count?.tracks || 0})
+              </StyledText>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                className="flex-row"
+                contentContainerStyle={{
+                  maxWidth: '50%',
+                  marginLeft: 'auto',
+                }}
+              >
+                {[
+                  playlistDetails?.genre,
+                  ...(playlistDetails?.tags ? playlistDetails?.tags : []),
+                ].map((tag, index) => (
+                  <Capsule
+                    key={(tag?.id as string) + index}
+                    text={tag?.name as string}
+                    selected={index === 0}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+
+            <ScrollView bounces alwaysBounceVertical>
+              {playlistDetails?.tracks?.map((track, index) => (
+                <TrackListItem
+                  key={track.id + index}
+                  id={track.id}
+                  title={track.title}
+                  onPlayClick={() => {
+                    playATrackById(track.id);
+                  }}
+                  isPlaying={currentTrack()?.id === track.id && isPlaying}
+                  artistName={
+                    track?.creator?.profile?.name || track?.creator?.username
+                  }
+                  artistId={track?.creator?.id}
+                  cover={track.cover}
+                  duration={track.trackDuration}
+                  isLiked={track?.isLiked}
+                  isBuffering={isBuffering && currentTrack()?.id === track.id}
+                  label={index + 1}
+                />
+              ))}
+            </ScrollView>
           </View>
-          <TextContainer
-            text={playlistDetails?.description}
-            heading="About this Playlist"
-            padding={[18, 8]}
-          />
-        </ScrollView>
-      </View>
+        </View>
+        <TextContainer
+          text={playlistDetails?.description}
+          heading="About this Playlist"
+          padding={[18, 8]}
+        />
+      </ScrollView>
     </Container>
   );
 };

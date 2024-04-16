@@ -16,7 +16,7 @@ const Capsule = ({ text, selected = false, ...rest }: ICapsuleProps) => {
     <TouchableOpacity
       style={[
         {
-          height: 32,
+          height: 30,
           paddingHorizontal: 12,
           paddingVertical: 4,
           marginRight: 8,

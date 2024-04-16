@@ -34,6 +34,7 @@ import { setStatusBarTranslucent } from 'expo-status-bar';
 import FadingDarkGradient from '@/components/Playlist/FadingDarkGradient';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
+import ReusableAlert from '@/components/reusables/ReusableAlert';
 
 const AlbumPage: React.FC = () => {
   // COlor Extracter
@@ -49,6 +50,7 @@ const AlbumPage: React.FC = () => {
       isRefetching: isRefetchingAlbumDetails,
     },
     toggleSaveAlbum,
+    deleteAlbumById,
   } = useAlbumsQuery({
     id: id as string,
   });
@@ -123,21 +125,15 @@ const AlbumPage: React.FC = () => {
   // Album Options
   const navigation = useNavigation();
 
-  const [isSaved, setIsSaved] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsSaved(albumDetails?.isSaved || false);
-  }, [albumDetails]);
-
   const onToggleAlbumSave = async () => {
     if (!albumDetails?.id) return;
     toggleSaveAlbum.mutate(albumDetails?.id, {
       onSuccess: (data) => {
-        setIsSaved((prev) => !prev);
         setAlbumDetails((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
+            isSaved: !prev.isSaved,
             _count: {
               ...prev._count,
               savedBy: data.data.result.count,
@@ -159,8 +155,56 @@ const AlbumPage: React.FC = () => {
     });
   };
 
+  const [ownerOptionsModalVisible, setOwnerOptionsModalVisible] =
+    useState<boolean>(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
+
   return (
     <Container>
+      <ReusableAlert
+        visible={deleteModalVisible}
+        header="Delete Album"
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={async () => {
+          if (!albumDetails?.id) return;
+          await deleteAlbumById.mutateAsync(albumDetails?.id, {
+            onSuccess: () => {
+              setDeleteModalVisible(false);
+              navigation.dispatch(CommonActions.goBack());
+            },
+          });
+        }}
+      >
+        <StyledText size="lg" weight="semibold">
+          Are you sure you want to delete this album?
+        </StyledText>
+      </ReusableAlert>
+      <MenuModal
+        visible={ownerOptionsModalVisible}
+        onClose={() => setOwnerOptionsModalVisible(false)}
+        items={[
+          {
+            label: 'Edit Album',
+            onPress: () => {
+              setOwnerOptionsModalVisible(false);
+              navigation.dispatch(
+                CommonActions.navigate('UpdateAlbum', {
+                  id: albumDetails?.id,
+                })
+              );
+            },
+            icon: 'auto-awesome',
+          },
+          {
+            label: 'Delete Album',
+            onPress: () => {
+              setOwnerOptionsModalVisible(false);
+              setDeleteModalVisible(true);
+            },
+            icon: 'delete',
+          },
+        ]}
+      />
       <View
         style={{
           position: 'absolute',
@@ -203,7 +247,6 @@ const AlbumPage: React.FC = () => {
           const newScale = Math.min(Math.max(1 - percentage / 100, 0.6), 1);
           imageContainerScale.value = newScale;
           imageContainerPositionY.value = contentOffsetY / 2;
-          console.log(percentage / 100);
           bgOpacity.value = 1 - percentage / 100;
           if (newScale <= 0.6) {
             imageOpacity.value = 1 - percentage / 100;
@@ -271,12 +314,12 @@ const AlbumPage: React.FC = () => {
 
         {/* Image */}
 
-        <View className="flex flex-row justify-between items-end px-4 py-1 mt-10">
-          <View className="flex flex-col">
+        <View className="flex flex-col px-4 py-1 mt-10">
+          <View className="flex flex-row justify-between items-center">
             <View className="flex flex-row items-center mb-3">
               <TouchableOpacity activeOpacity={0.8} onPress={onToggleAlbumSave}>
                 <MaterialIcons
-                  name={isSaved ? 'remove-from-queue' : 'queue'}
+                  name={albumDetails?.isSaved ? 'playlist-remove' : 'queue'}
                   size={24}
                   color={COLORS.neutral.normal}
                 />
@@ -294,55 +337,69 @@ const AlbumPage: React.FC = () => {
                 />
               </TouchableOpacity>
             </View>
-
-            <StyledText
-              size="3xl"
-              weight="bold"
-              tracking="tight"
-              color={COLORS.neutral.light}
-            >
-              {albumDetails?.title}
-            </StyledText>
-            <StyledText
-              size="sm"
-              weight="semibold"
-              tracking="tighter"
-              color={COLORS.neutral.normal}
-              className="mt-1"
-            >
-              {`Album  • ${getYear(albumDetails?.createdAt)} • ${
-                albumDetails?._count?.savedBy || 0
-              } Saves`}
-            </StyledText>
+            {currentUser?.id !== albumDetails?.creator?.id && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setOwnerOptionsModalVisible(true)}
+              >
+                <MaterialIcons
+                  name="more-vert"
+                  size={28}
+                  color={COLORS.neutral.normal}
+                />
+              </TouchableOpacity>
+            )}
           </View>
 
-          <TogglePlayButton
-            size={28}
-            onPress={() => {
-              if (isThisQueuePlaying(albumDetails?.id)) {
-                playPause();
-                return;
-              }
-              if (!albumDetails?.tracks) return;
-              updateTracks(albumDetails?.tracks || []);
-              setQueueId(albumDetails?.id);
-              playATrackById(albumDetails?.tracks[0].id);
-            }}
-            isPlaying={isThisQueuePlaying(albumDetails?.id)}
-          />
+          <View className="flex flex-row justify-between items-center">
+            <View className="flex flex-col">
+              <StyledText
+                size="3xl"
+                weight="bold"
+                tracking="tight"
+                color={COLORS.neutral.light}
+              >
+                {albumDetails?.title}
+              </StyledText>
+              <StyledText
+                size="sm"
+                weight="semibold"
+                tracking="tighter"
+                color={COLORS.neutral.normal}
+                className="mt-1"
+              >
+                {`Album  • ${getYear(albumDetails?.createdAt)} • ${
+                  albumDetails?._count?.savedBy || 0
+                } Saves`}
+              </StyledText>
+            </View>
+            <TogglePlayButton
+              size={28}
+              onPress={() => {
+                if (isThisQueuePlaying(albumDetails?.id)) {
+                  playPause();
+                  return;
+                }
+                if (!albumDetails?.tracks) return;
+                updateTracks(albumDetails?.tracks || []);
+                setQueueId(albumDetails?.id);
+                playATrackById(albumDetails?.tracks[0].id);
+              }}
+              isPlaying={isThisQueuePlaying(albumDetails?.id)}
+            />
+          </View>
         </View>
 
         {/* Options */}
 
         <View
-          className="flex flex-1 relative"
+          className="flex flex-1 relative mt-5"
           style={{
             paddingHorizontal: 12,
-            paddingVertical: 4,
           }}
         >
           {/* Tracks */}
-          <View className="flex flex-col my-2">
+          <View className="flex flex-col">
             {/* Misc */}
 
             <View className="flex w-full flex-row justify-between items-center">
@@ -365,7 +422,7 @@ const AlbumPage: React.FC = () => {
                 }
               />
             </View>
-            <View className="flex flex-row justify-between items-center w-full mb-5 mt-8">
+            <View className="flex flex-row justify-between items-center w-full mb-5 mt-5">
               <StyledText
                 size="lg"
                 weight="bold"

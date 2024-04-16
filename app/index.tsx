@@ -193,9 +193,13 @@ export default function index() {
   }, []);
 
   useEffect(() => {
-    Linking.addEventListener('url', (event) => {
+    const subscribeLink = Linking.addEventListener('url', (event) => {
       console.log(event);
     });
+
+    return () => {
+      subscribeLink.remove();
+    };
   }, [Linking]);
 
   useEffect(() => {

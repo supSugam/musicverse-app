@@ -19,6 +19,13 @@ import StyledText from '@/components/reusables/StyledText';
 import GenericSquareCard from '@/components/reusables/GenericSquareCard';
 import { CommonActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
+import {
+  Skeleton,
+  SkeletonLoader,
+} from '@/components/reusables/Skeleton/Skeleton';
+import ListSkeleton from '@/components/reusables/Skeleton/ListSkeleton';
+import CapsuleSkeleton from '@/components/reusables/Skeleton/CapsuleSkeleton';
+import SquareSkeleton from '@/components/reusables/Skeleton/SquareSkeleton';
 
 export default function Home() {
   const navigation = useNavigation();
@@ -49,6 +56,7 @@ export default function Home() {
       data,
       isLoading: isTracksLoading,
       refetch: refetchAllTracks,
+      isRefetching: isTracksRefetching,
     },
   } = useTracksQuery({
     getAllTracksConfig: {
@@ -91,7 +99,11 @@ export default function Home() {
   const [popularAlbums, setpopularAlbums] = useState<IAlbumDetails[]>([]);
 
   const {
-    getAllAlbums: { data: popularAlbumsData, refetch: refetchpopularAlbums },
+    getAllAlbums: {
+      data: popularAlbumsData,
+      refetch: refetchpopularAlbums,
+      isLoading: isPopularAlbumsLoading,
+    },
   } = useAlbumsQuery({
     getAllAlbumsConfig: {
       params: {
@@ -129,118 +141,133 @@ export default function Home() {
         scrollEnabled
         stickyHeaderIndices={[0]}
       >
-        <GenreScrollView
-          genres={['All', ...genres.map((genre) => genre.name)]}
-          selectedGenre={selectedGenre}
-          onGenreChange={setSelectedGenre}
-        />
-
-        <View
-          style={{
-            paddingHorizontal: 15,
-          }}
-          className="flex flex-col"
+        <Skeleton
+          isLoading={
+            isGenresLoading || isTracksLoading || isPopularAlbumsLoading
+          }
+          skeletonComponent={
+            <View className="flex flex-col w-full">
+              <CapsuleSkeleton numbers={5} />
+              <ListSkeleton numbers={3} />
+              <SquareSkeleton numbers={3} />
+              <ListSkeleton numbers={3} />
+            </View>
+          }
+          className="px-4"
         >
-          {tracksOfSelectedGenre.map((track, i) => (
-            <TrackListItem
-              index={i}
-              key={track.id}
-              id={track.id}
-              title={track.title}
-              onPlayClick={() => {
-                if (isThisTrackPlaying(track.id)) {
-                  playPause();
-                  return;
-                }
-                updateTracks(tracksOfSelectedGenre);
-                setQueueId(tracksOfSelectedGenre?.[0]?.id);
-                playATrackById(track.id);
-              }}
-              isPlaying={isThisTrackPlaying(track.id)}
-              artistName={
-                track?.creator?.profile.name || track?.creator?.username
-              }
-              artistId={track?.creator?.id}
-              cover={track.cover}
-              duration={track.trackDuration}
-              isLiked={track?.isLiked}
-              isBuffering={isBuffering && currentTrack()?.id === track.id}
-              label={i + 1}
-            />
-          ))}
-        </View>
+          <GenreScrollView
+            genres={['All', ...genres.map((genre) => genre.name)]}
+            selectedGenre={selectedGenre}
+            onGenreChange={setSelectedGenre}
+          />
 
-        <View
-          className="flex flex-col w-full"
-          style={{
-            paddingHorizontal: 20,
-          }}
-        >
-          <StyledText weight="semibold" size="lg" className="my-3">
-            Trending Albums
-          </StyledText>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 10 }}
+          <View
+            style={{
+              paddingHorizontal: 15,
+            }}
+            className="flex flex-col"
           >
-            {popularAlbums.map((album, index) => (
-              <GenericSquareCard
-                key={album.id}
-                index={index}
-                image={album.cover || undefined}
-                title={album.title}
-                subtitle={`${album?.genre?.name}, ${album._count.tracks} tracks`}
-                onPress={() => {
-                  navigation.dispatch(
-                    CommonActions.navigate('AlbumPage', {
-                      id: album.id,
-                    })
-                  );
+            {tracksOfSelectedGenre.map((track, i) => (
+              <TrackListItem
+                index={i}
+                key={track.id}
+                id={track.id}
+                title={track.title}
+                onPlayClick={() => {
+                  if (isThisTrackPlaying(track.id)) {
+                    playPause();
+                    return;
+                  }
+                  updateTracks(tracksOfSelectedGenre);
+                  setQueueId(tracksOfSelectedGenre?.[0]?.id);
+                  playATrackById(track.id);
                 }}
+                isPlaying={isThisTrackPlaying(track.id)}
+                artistName={
+                  track?.creator?.profile.name || track?.creator?.username
+                }
+                artistId={track?.creator?.id}
+                cover={track.cover}
+                duration={track.trackDuration}
+                isLiked={track?.isLiked}
+                isBuffering={isBuffering && currentTrack()?.id === track.id}
+                label={i + 1}
               />
             ))}
-          </ScrollView>
-        </View>
+          </View>
 
-        <View
-          style={{
-            paddingHorizontal: 15,
-            marginTop: 10,
-          }}
-          className="flex flex-col"
-        >
-          <StyledText weight="semibold" size="lg" className="my-3">
-            Based on your listening
-          </StyledText>
-          {recommendations.map((track, i) => (
-            <TrackListItem
-              index={i}
-              key={track.id}
-              id={track.id}
-              title={track.title}
-              onPlayClick={() => {
-                if (isThisTrackPlaying(track.id)) {
-                  playPause();
-                  return;
+          <View
+            className="flex flex-col w-full"
+            style={{
+              paddingHorizontal: 20,
+            }}
+          >
+            <StyledText weight="semibold" size="lg" className="my-3">
+              Trending Albums
+            </StyledText>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 10 }}
+            >
+              {popularAlbums.map((album, index) => (
+                <GenericSquareCard
+                  key={album.id}
+                  index={index}
+                  image={album.cover || undefined}
+                  title={album.title}
+                  subtitle={`${album?.genre?.name}, ${album._count.tracks} tracks`}
+                  onPress={() => {
+                    navigation.dispatch(
+                      CommonActions.navigate('AlbumPage', {
+                        id: album.id,
+                      })
+                    );
+                  }}
+                />
+              ))}
+            </ScrollView>
+          </View>
+
+          <View
+            style={{
+              paddingHorizontal: 15,
+              marginTop: 10,
+            }}
+            className="flex flex-col"
+          >
+            <StyledText weight="semibold" size="lg" className="my-3">
+              Based on your listening
+            </StyledText>
+            {recommendations.map((track, i) => (
+              <TrackListItem
+                index={i}
+                key={track.id}
+                id={track.id}
+                title={track.title}
+                onPlayClick={() => {
+                  if (isThisTrackPlaying(track.id)) {
+                    playPause();
+                    return;
+                  }
+                  updateTracks(recommendations);
+                  setQueueId(recommendations?.[0]?.id);
+                  playATrackById(track.id);
+                }}
+                isPlaying={isThisTrackPlaying(track.id)}
+                artistName={
+                  track?.creator?.profile.name || track?.creator?.username
                 }
-                updateTracks(recommendations);
-                setQueueId(recommendations?.[0]?.id);
-                playATrackById(track.id);
-              }}
-              isPlaying={isThisTrackPlaying(track.id)}
-              artistName={
-                track?.creator?.profile.name || track?.creator?.username
-              }
-              artistId={track?.creator?.id}
-              cover={track.cover}
-              duration={track.trackDuration}
-              isLiked={track?.isLiked}
-              isBuffering={isBuffering && currentTrack()?.id === track.id}
-              label={i + 1}
-            />
-          ))}
-        </View>
+                artistId={track?.creator?.id}
+                cover={track.cover}
+                duration={track.trackDuration}
+                isLiked={track?.isLiked}
+                isBuffering={isBuffering && currentTrack()?.id === track.id}
+                label={i + 1}
+              />
+            ))}
+          </View>
+        </Skeleton>
       </ScrollView>
     </Container>
   );
@@ -252,22 +279,3 @@ const styles = StyleSheet.create({
     maxHeight: '100%',
   },
 });
-
-// export default function HomeStackScreen() {
-//   return (
-//     <Stack.Navigator
-//       screenOptions={{
-//         headerTransparent: true,
-//         headerBackTitleVisible: Platform.OS === 'ios' ? true : false,
-//       }}
-//     >
-//       <Stack.Screen
-//         name="HomeScreen"
-//         component={Home}
-//         options={{
-//           headerShown: false,
-//         }}
-//       />
-//     </Stack.Navigator>
-//   );
-// }

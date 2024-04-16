@@ -6,8 +6,8 @@ import StyledText from './StyledText';
 import COLORS from '@/constants/Colors';
 
 type ReusableAlertProps = {
-  cancelText: string;
-  confirmText: string;
+  cancelText?: string;
+  confirmText?: string;
   onConfirm: () => void;
   visible: boolean;
   children: React.ReactNode;

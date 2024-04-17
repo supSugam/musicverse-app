@@ -42,10 +42,13 @@ const AnimatedTouchable = ({
 }: IAnimatedTouchableProps) => {
   const translateX = useSharedValue(disableInitialAnimation ? 0 : 50); // Start position outside the screen
   const translateStyle = useAnimatedStyle(() => {
-    translateX.value = withTiming(0, { duration });
     return {
       transform: [{ translateX: translateX.value }],
     };
+  });
+
+  useEffect(() => {
+    translateX.value = withTiming(0, { duration });
   }, [duration]);
 
   const scale = useSharedValue(1);

@@ -21,6 +21,8 @@ import TrackListItem from './TrackListItem';
 import * as FileSystem from 'expo-file-system';
 import { useDownloadTrack } from '@/hooks/useDownloadTrack';
 import ProgressBar from '../reusables/ProgressBar';
+import { Skeleton, SkeletonLoader } from '../reusables/Skeleton/Skeleton';
+import ListSkeleton from '../reusables/Skeleton/ListSkeleton';
 const Tracks = () => {
   const navigation = useNavigation();
   const [ownedTracks, setOwnedTracks] = useState<ITrackDetails[]>([]);
@@ -29,7 +31,12 @@ const Tracks = () => {
   const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
 
   const {
-    getAllTracks: { data: ownedTracksData, refetch: refetchOwnedTracks },
+    getAllTracks: {
+      data: ownedTracksData,
+      refetch: refetchOwnedTracks,
+      isLoading: isLoadingOwnedTracks,
+      isRefetching: isRefetchingOwnedTracks,
+    },
     deleteTrackById,
   } = useTracksQuery({
     getAllTracksConfig: {
@@ -43,7 +50,12 @@ const Tracks = () => {
   });
 
   const {
-    getAllTracks: { data: likedTracksData, refetch: refetchLikedTracks },
+    getAllTracks: {
+      data: likedTracksData,
+      refetch: refetchLikedTracks,
+      isLoading: isLoadingLikedTracks,
+      isRefetching: isRefetchingLikedTracks,
+    },
   } = useTracksQuery({
     getAllTracksConfig: {
       params: {
@@ -200,67 +212,89 @@ const Tracks = () => {
           }}
           placeholder="Search Tracks"
         />
-        {ownedTracks.length > 0 && (
-          <View className="flex flex-col w-full overflow-visible flex-1">
-            <StyledText weight="semibold" size="xl" className="my-3">
-              Your Tracks
-            </StyledText>
+        <Skeleton
+          isLoading={
+            isRefetchingOwnedTracks ||
+            isRefetchingLikedTracks ||
+            isLoadingOwnedTracks ||
+            isLoadingLikedTracks
+          }
+          skeletonComponent={
+            <View className="flex flex-col w-full">
+              <View className="flex flex-col w-full mb-5 mt-5">
+                <SkeletonLoader type="rect" width="65%" height={15} />
+                <ListSkeleton numbers={3} />
+              </View>
+              <View className="flex flex-col w-full mb-5">
+                <SkeletonLoader type="rect" width="65%" height={15} />
+                <ListSkeleton numbers={3} />
+              </View>
+            </View>
+          }
+        >
+          {ownedTracks.length > 0 && (
+            <View className="flex flex-col w-full overflow-visible flex-1">
+              <StyledText weight="semibold" size="xl" className="my-3">
+                Your Tracks
+              </StyledText>
 
-            <ScrollView>
-              {ownedTracks.map((track, i) => (
-                <TrackListItem
-                  label={i + 1}
-                  key={`${track.id}owned`}
-                  id={track.id}
-                  title={track.title}
-                  artistName={
-                    track.creator?.profile.name || track?.creator?.username
-                  }
-                  options={trackOptions}
-                  onPlayClick={() => {
-                    updateTracks(ownedTracks);
-                    playATrackById(track.id);
-                  }}
-                  cover={track.cover}
-                  duration={track.trackDuration}
-                  onOptionsClick={() => {
-                    setSelectedTrack({ track, type: 'owned' });
-                    setIsTrackOptionsModalVisible(true);
-                  }}
-                />
-              ))}
-              {likedTracks.length > 0 && (
-                <>
-                  <StyledText size="xl" weight="semibold" className="my-3">
-                    Liked Tracks
-                  </StyledText>
-                  {likedTracks.map((track, i) => (
-                    <TrackListItem
-                      label={i + 1}
-                      key={`${track.id}liked`}
-                      id={track.id}
-                      title={track.title}
-                      artistName={
-                        track.creator?.profile.name || track?.creator?.username
-                      }
-                      options={trackOptions}
-                      onPlayClick={() => {
-                        updateTracks(likedTracks);
-                        playATrackById(track.id);
-                      }}
-                      cover={track.cover}
-                      duration={track.trackDuration}
-                      onOptionsClick={() => {
-                        setSelectedTrack({ track, type: 'liked' });
-                        setIsTrackOptionsModalVisible(true);
-                      }}
-                    />
-                  ))}
-                </>
-              )}
-            </ScrollView>
-          </View>
-        )}
+              <ScrollView>
+                {ownedTracks.map((track, i) => (
+                  <TrackListItem
+                    label={i + 1}
+                    key={`${track.id}owned`}
+                    id={track.id}
+                    title={track.title}
+                    artistName={
+                      track.creator?.profile.name || track?.creator?.username
+                    }
+                    options={trackOptions}
+                    onPlayClick={() => {
+                      updateTracks(ownedTracks);
+                      playATrackById(track.id);
+                    }}
+                    cover={track.cover}
+                    duration={track.trackDuration}
+                    onOptionsClick={() => {
+                      setSelectedTrack({ track, type: 'owned' });
+                      setIsTrackOptionsModalVisible(true);
+                    }}
+                  />
+                ))}
+                {likedTracks.length > 0 && (
+                  <>
+                    <StyledText size="xl" weight="semibold" className="my-3">
+                      Liked Tracks
+                    </StyledText>
+                    {likedTracks.map((track, i) => (
+                      <TrackListItem
+                        label={i + 1}
+                        key={`${track.id}liked`}
+                        id={track.id}
+                        title={track.title}
+                        artistName={
+                          track.creator?.profile.name ||
+                          track?.creator?.username
+                        }
+                        options={trackOptions}
+                        onPlayClick={() => {
+                          updateTracks(likedTracks);
+                          playATrackById(track.id);
+                        }}
+                        cover={track.cover}
+                        duration={track.trackDuration}
+                        onOptionsClick={() => {
+                          setSelectedTrack({ track, type: 'liked' });
+                          setIsTrackOptionsModalVisible(true);
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+              </ScrollView>
+            </View>
+          )}
+        </Skeleton>
       </ScrollView>
     </>
   );

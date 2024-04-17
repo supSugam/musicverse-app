@@ -6,6 +6,9 @@ import TrackListItem from '@/components/Tracks/TrackListItem';
 import TrackPreview from '@/components/Tracks/TrackPreview';
 import EmptyGhost from '@/components/reusables/Lottie/EmptyGhost';
 import SearchField from '@/components/reusables/SearchField';
+import ListSkeleton from '@/components/reusables/Skeleton/ListSkeleton';
+import { Skeleton } from '@/components/reusables/Skeleton/Skeleton';
+import SquareSkeleton from '@/components/reusables/Skeleton/SquareSkeleton';
 import StyledText from '@/components/reusables/StyledText';
 import COLORS from '@/constants/Colors';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
@@ -53,7 +56,7 @@ const SearchPage = () => {
   const { api } = useAuthStore();
   const { recentSearches, addRecentSearch, updateRecentSearches } =
     useAppState();
-  const { data, isRefetching, refetch } = useQuery<
+  const { data, isRefetching, refetch, isLoading } = useQuery<
     AxiosResponse<SuccessResponse<SearchResults>>
   >({
     queryKey: ['search', searchParams],
@@ -98,7 +101,7 @@ const SearchPage = () => {
           triggerMode="debounce"
         />
 
-        {!searchParams.search && (
+        {(!searchParams.search || !searchParams.search.length) && (
           <>
             {recentSearches.length === 0 ? (
               <EmptyGhost
@@ -147,118 +150,130 @@ const SearchPage = () => {
         )}
 
         <ScrollView className="w-full">
-          {/* Tracks */}
-          {allData?.tracks && allData?.tracks?.items.length > 0 && (
-            <View className="flex flex-col w-full">
-              <StyledText
-                weight="semibold"
-                size="lg"
-                opacity="high"
-                className="my-2"
-              >
-                Songs
-              </StyledText>
-              {allData?.tracks?.items?.map((track) => (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() =>
-                    addRecentSearch({ type: 'Track', data: track })
-                  }
-                  className="w-full"
+          <Skeleton
+            isLoading={isLoading || isRefetching}
+            skeletonComponent={
+              <View className="flex flex-col w-full">
+                <ListSkeleton numbers={3} />
+                <SquareSkeleton numbers={3} />
+                <ListSkeleton numbers={3} />
+              </View>
+            }
+            className="w-full"
+          >
+            {/* Tracks */}
+            {allData?.tracks && allData?.tracks?.items.length > 0 && (
+              <View className="flex flex-col w-full">
+                <StyledText
+                  weight="semibold"
+                  size="lg"
+                  opacity="high"
+                  className="my-2"
                 >
-                  <TrackListItem
-                    key={`${track.id}search`}
-                    id={track.id}
-                    title={track.title}
-                    artistName={track.creator?.username}
-                    cover={track.cover}
-                    duration={track.trackDuration}
-                    onPlayClick={() => {
-                      if (allData.tracks) {
-                        updateTracks(allData.tracks.items);
-                        playATrackById(track.id);
-                      }
-                    }}
-                  />
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* Playlists */}
-          {allData.playlists && allData.playlists?.items.length > 0 && (
-            <View className="flex flex-col w-full">
-              <StyledText
-                weight="semibold"
-                size="lg"
-                opacity="high"
-                className="my-2"
-              >
-                Playlists
-              </StyledText>
-
-              {allData.playlists?.items.map((playlist, i) => (
-                <PlaylistPreviewList
-                  key={playlist.id}
-                  cover={playlist.cover}
-                  onPress={() => {}}
-                  duration={i * 100}
-                  rightComponent={
-                    <MaterialIcons
-                      name={'more-vert'}
-                      size={28}
-                      color={COLORS.neutral.normal}
-                      style={{
-                        marginRight: 2,
+                  Songs
+                </StyledText>
+                {allData?.tracks?.items?.map((track) => (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      addRecentSearch({ type: 'Track', data: track })
+                    }
+                    className="w-full"
+                  >
+                    <TrackListItem
+                      key={`${track.id}search`}
+                      id={track.id}
+                      title={track.title}
+                      artistName={track.creator?.username}
+                      cover={track.cover}
+                      duration={track.trackDuration}
+                      onPlayClick={() => {
+                        if (allData.tracks) {
+                          updateTracks(allData.tracks.items);
+                          playATrackById(track.id);
+                        }
                       }}
                     />
-                  }
-                  subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
-                  title={playlist.title}
-                />
-              ))}
-            </View>
-          )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
-          {/* Albums */}
-          {allData.albums && allData.albums?.items.length > 0 && (
-            <View className="flex flex-col w-full overflow-visible flex-1">
-              <StyledText
-                weight="semibold"
-                size="lg"
-                opacity="high"
-                className="my-2"
-              >
-                Albums
-              </StyledText>
+            {/* Playlists */}
+            {allData.playlists && allData.playlists?.items.length > 0 && (
+              <View className="flex flex-col w-full">
+                <StyledText
+                  weight="semibold"
+                  size="lg"
+                  opacity="high"
+                  className="my-2"
+                >
+                  Playlists
+                </StyledText>
 
-              <Animated.FlatList
-                horizontal
-                data={allData.albums.items}
-                renderItem={({ item, index }) => (
-                  <AlbumCard
-                    key={item.id + index}
-                    cover={item.cover}
-                    title={item.title}
-                    subtitle={`${item._count.tracks} tracks • ${item._count.savedBy} saves`}
-                    genre={item.genre}
-                    id={`${item.id}owned-${index}`}
-                    onPlayClick={() => {
-                      if (item.tracks?.length) {
-                        updateTracks(item.tracks);
-                        playATrackById(item.tracks[0].id);
-                      }
-                    }}
-                    onOptionsClick={() => {
-                      // setSelectedAlbum({ album: item, type: 'owned' });
-                      // setIsAlbumOptionsModalVisible(true);
-                    }}
+                {allData.playlists?.items.map((playlist, i) => (
+                  <PlaylistPreviewList
+                    key={playlist.id}
+                    cover={playlist.cover}
+                    onPress={() => {}}
+                    duration={i * 100}
+                    rightComponent={
+                      <MaterialIcons
+                        name={'more-vert'}
+                        size={28}
+                        color={COLORS.neutral.normal}
+                        style={{
+                          marginRight: 2,
+                        }}
+                      />
+                    }
+                    subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
+                    title={playlist.title}
                   />
-                )}
-                keyExtractor={(item, i) => `${item.id}${i}owned`}
-              />
-            </View>
-          )}
+                ))}
+              </View>
+            )}
+
+            {/* Albums */}
+            {allData.albums && allData.albums?.items.length > 0 && (
+              <View className="flex flex-col w-full overflow-visible flex-1">
+                <StyledText
+                  weight="semibold"
+                  size="lg"
+                  opacity="high"
+                  className="my-2"
+                >
+                  Albums
+                </StyledText>
+
+                <Animated.FlatList
+                  horizontal
+                  data={allData.albums.items}
+                  renderItem={({ item, index }) => (
+                    <AlbumCard
+                      key={item.id + index}
+                      cover={item.cover}
+                      title={item.title}
+                      subtitle={`${item._count.tracks} tracks • ${item._count.savedBy} saves`}
+                      genre={item.genre}
+                      id={`${item.id}owned-${index}`}
+                      onPlayClick={() => {
+                        if (item.tracks?.length) {
+                          updateTracks(item.tracks);
+                          playATrackById(item.tracks[0].id);
+                        }
+                      }}
+                      onOptionsClick={() => {
+                        // setSelectedAlbum({ album: item, type: 'owned' });
+                        // setIsAlbumOptionsModalVisible(true);
+                      }}
+                    />
+                  )}
+                  keyExtractor={(item, i) => `${item.id}${i}owned`}
+                />
+              </View>
+            )}
+          </Skeleton>
         </ScrollView>
       </ScrollView>
     </Container>

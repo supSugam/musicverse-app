@@ -49,7 +49,7 @@ export const TRACK_PLACEHOLDER_IMAGE = require('@/assets/images/placeholder/trac
 export const PLAYLIST_PLACEHOLDER_IMAGE = require('@/assets/images/placeholder/track.jpg');
 export const ALBUM_PLACEHOLDER_IMAGE = require('@/assets/images/placeholder/track.jpg');
 export const DEFAULT_AVATAR = require('@/assets/images/avatar.jpeg');
-
+export const MEMBERSHIP_IMAGE = require('@/assets/images/membership.png');
 export const TAB_ROUTE_NAMES = [
   'Home',
   'Search',
@@ -124,3 +124,11 @@ export const getRoleLabel = (role: UserRole) => {
 };
 
 export const PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY = 15 as const;
+
+export const MEMBERSHIP_BENEFITS = [
+  'Enjoy unlimited downloads and plays.',
+  'Share your music publicly.',
+  'Artist Eligibility & Membership Badge.',
+  'Access exclusive player features.',
+  'Upload songs up to 200MB.',
+];

@@ -24,6 +24,9 @@ import { capitalizeFirstLetter } from '@/utils/helpers/string';
 import Capsule from '../reusables/Capsule';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import FadingDarkGradient from '../Playlist/FadingDarkGradient';
+import { Skeleton } from '../reusables/Skeleton/Skeleton';
+import ListSkeleton from '../reusables/Skeleton/ListSkeleton';
+import CapsuleSkeleton from '../reusables/Skeleton/CapsuleSkeleton';
 
 export interface INotificationsPaginationQueryParams
   extends IBasePaginationParams {
@@ -117,31 +120,42 @@ const Notifications = () => {
         }}
       />
       <View>
-        <FlatList
-          horizontal
-          renderItem={({ item: type, index }) => {
-            const isSelected = type === notificationsQueryParams.type;
-            return (
-              <Capsule
-                key={type + index}
-                text={capitalizeFirstLetter(type, true, '_')}
-                selected={isSelected}
-                onPress={() =>
-                  setNotificationsQueryParams((prev) => ({
-                    ...prev,
-                    type: isSelected ? undefined : type,
-                  }))
-                }
-              />
-            );
-          }}
-          data={Object.values(NotificationType)}
-          bounces
-          alwaysBounceHorizontal
-          contentContainerStyle={{
-            marginVertical: 8,
-          }}
-        />
+        <Skeleton
+          isLoading={isRefetching || isLoading}
+          skeletonComponent={
+            <View className="flex flex-col w-full">
+              <CapsuleSkeleton numbers={5} />
+              <ListSkeleton numbers={10} />
+            </View>
+          }
+          className="px-4"
+        >
+          <FlatList
+            horizontal
+            renderItem={({ item: type, index }) => {
+              const isSelected = type === notificationsQueryParams.type;
+              return (
+                <Capsule
+                  key={type + index}
+                  text={capitalizeFirstLetter(type, true, '_')}
+                  selected={isSelected}
+                  onPress={() =>
+                    setNotificationsQueryParams((prev) => ({
+                      ...prev,
+                      type: isSelected ? undefined : type,
+                    }))
+                  }
+                />
+              );
+            }}
+            data={Object.values(NotificationType)}
+            bounces
+            alwaysBounceHorizontal
+            contentContainerStyle={{
+              marginVertical: 8,
+            }}
+          />
+        </Skeleton>
       </View>
 
       <FlatList

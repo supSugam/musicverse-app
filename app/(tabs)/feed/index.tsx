@@ -14,13 +14,21 @@ import ArtistCard from '@/components/Feed/ArtistCard';
 import StyledText from '@/components/reusables/StyledText';
 import COLORS from '@/constants/Colors';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
+import { Skeleton } from '@/components/reusables/Skeleton/Skeleton';
+import CircleSkeleton from '@/components/reusables/Skeleton/CircleSkeleton';
+import PostSkeleton from '@/components/reusables/Skeleton/PostSkeleton';
 
 const Feed: React.FC = () => {
   const navigation = useNavigation();
   const [feedContent, setFeedContent] = useState<IFeedContent[]>([]);
   // Genres
   const {
-    getFeedContent: { data: feedContentData, refetch: refetchAllFeedContent },
+    getFeedContent: {
+      data: feedContentData,
+      refetch: refetchAllFeedContent,
+      isRefetching,
+      isLoading,
+    },
   } = useFollowQuery();
 
   const [topArtists, setTopArtists] = useState<IUserWithProfile[]>([]);
@@ -92,99 +100,110 @@ const Feed: React.FC = () => {
         scrollEnabled
         stickyHeaderIndices={[0]}
       >
-        <View
-          className="flex flex-col w-full"
-          style={{
-            paddingVertical: 10,
-            backgroundColor: COLORS.neutral.dense,
-            paddingHorizontal: 15,
-            paddingBottom: 18,
-            borderBottomColor: COLORS.neutral.semidark,
-            borderBottomWidth: 1,
-            marginBottom: 10,
-          }}
+        <Skeleton
+          isLoading={isRefetching || isLoading}
+          skeletonComponent={
+            <View className="flex flex-col w-full">
+              <CircleSkeleton numbers={5} />
+              <PostSkeleton numbers={4} />
+            </View>
+          }
+          className="px-4"
         >
-          <StyledText size="lg" weight="semibold" className="mb-4">
-            Popular Artists 🕺
-          </StyledText>
-          <ScrollView horizontal>
-            {[
-              ...topArtists,
-              ...topArtists,
-              ...topArtists,
-              ...topArtists,
-              ...topArtists,
-            ].map((artist, index) => (
-              <ArtistCard
-                index={index}
-                avatar={artist.profile.avatar}
-                name={artist.profile.name}
-                followers={artist._count?.followers}
-                id={artist.id}
-                key={artist.id + index}
-              />
-            ))}
-          </ScrollView>
-        </View>
+          <View
+            className="flex flex-col w-full"
+            style={{
+              paddingVertical: 10,
+              backgroundColor: COLORS.neutral.dense,
+              paddingHorizontal: 15,
+              paddingBottom: 18,
+              borderBottomColor: COLORS.neutral.semidark,
+              borderBottomWidth: 1,
+              marginBottom: 10,
+            }}
+          >
+            <StyledText size="lg" weight="semibold" className="mb-4">
+              Popular Artists 🕺
+            </StyledText>
+            <ScrollView horizontal>
+              {[
+                ...topArtists,
+                ...topArtists,
+                ...topArtists,
+                ...topArtists,
+                ...topArtists,
+              ].map((artist, index) => (
+                <ArtistCard
+                  index={index}
+                  avatar={artist.profile.avatar}
+                  name={artist.profile.name}
+                  followers={artist._count?.followers}
+                  id={artist.id}
+                  key={artist.id + index}
+                />
+              ))}
+            </ScrollView>
+          </View>
 
-        {/* <View
+          {/* <View
           style={{
             paddingHorizontal: 15,
           }}
           className="flex flex-col"
         ></View> */}
 
-        {feedContent.map((content, index) => (
-          <PostCard
-            key={content.id}
-            {...content}
-            index={index}
-            onPress={() => {
-              switch (content.type) {
-                case FeedContentType.ALBUM:
-                  navigation.dispatch(
-                    CommonActions.navigate({
-                      name: 'AlbumPage',
-                      params: {
-                        albumId: content.id,
-                      },
-                    })
-                  );
-                  break;
-                case FeedContentType.PLAYLIST:
-                  navigation.dispatch(
-                    CommonActions.navigate({
-                      name: 'PlaylistPage',
-                      params: {
-                        playlistId: content.id,
-                      },
-                    })
-                  );
-                  break;
-                case FeedContentType.TRACK:
-                  const track = feedContentData?.data?.result?.tracks?.find(
-                    (track) => track.id === content.id
-                  );
-                  updateTracks(track ? [track] : []);
-                  playATrackById(content.id);
-                  navigation.dispatch(
-                    CommonActions.navigate({
-                      name: 'TrackPlayer',
-                    })
-                  );
+          {feedContent.map((content, index) => (
+            <PostCard
+              key={content.id}
+              {...content}
+              index={index}
+              onPress={() => {
+                switch (content.type) {
+                  case FeedContentType.ALBUM:
+                    navigation.dispatch(
+                      CommonActions.navigate({
+                        name: 'AlbumPage',
+                        params: {
+                          albumId: content.id,
+                        },
+                      })
+                    );
+                    break;
+                  case FeedContentType.PLAYLIST:
+                    navigation.dispatch(
+                      CommonActions.navigate({
+                        name: 'PlaylistPage',
+                        params: {
+                          playlistId: content.id,
+                        },
+                      })
+                    );
+                    break;
+                  case FeedContentType.TRACK:
+                    const track = feedContentData?.data?.result?.tracks?.find(
+                      (track) => track.id === content.id
+                    );
+                    updateTracks(track ? [track] : []);
+                    playATrackById(content.id);
+                    navigation.dispatch(
+                      CommonActions.navigate({
+                        name: 'TrackPlayer',
+                      })
+                    );
 
-                  break;
-              }
+                    break;
+                }
+              }}
+            />
+          ))}
+
+          <View
+            className="flex flex-col w-full"
+            style={{
+              paddingHorizontal: 20,
             }}
-          />
-        ))}
-
-        <View
-          className="flex flex-col w-full"
-          style={{
-            paddingHorizontal: 20,
-          }}
-        ></View>
+          ></View>
+        </Skeleton>
       </ScrollView>
     </Container>
   );

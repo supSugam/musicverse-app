@@ -66,6 +66,18 @@ const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
       },
     },
     {
+      title: 'Become a Member',
+      icon: 'user-plus',
+      onPress: () => {
+        toggleAppSidebar();
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'Membership',
+          })
+        );
+      },
+    },
+    {
       title: 'Sign Out',
       icon: 'sign-out',
       onPress: () => {

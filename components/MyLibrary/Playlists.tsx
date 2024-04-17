@@ -13,6 +13,8 @@ import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
 import ReusableAlert from '../reusables/ReusableAlert';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
+import ListSkeleton from '../reusables/Skeleton/ListSkeleton';
+import { Skeleton, SkeletonLoader } from '../reusables/Skeleton/Skeleton';
 
 const Playlists = () => {
   const navigation = useNavigation();
@@ -28,6 +30,8 @@ const Playlists = () => {
     getAllPlaylists: {
       data: ownedPlaylistsData,
       refetch: refetchOwnedPlaylists,
+      isLoading: isLoadingOwnedPlaylists,
+      isRefetching: isRefetchingOwnedPlaylists,
     },
     deletePlaylistById,
   } = usePlaylistsQuery({
@@ -42,6 +46,8 @@ const Playlists = () => {
     getAllPlaylists: {
       data: collaboratedPlaylistsData,
       refetch: refetchCollaboratedPlaylists,
+      isLoading: isLoadingCollaboratedPlaylists,
+      isRefetching: isRefetchingCollaboratedPlaylists,
     },
   } = usePlaylistsQuery({
     getAllPlaylistsConfig: {
@@ -56,6 +62,8 @@ const Playlists = () => {
     getAllPlaylists: {
       data: savedPlaylistsData,
       refetch: refetchSavedPlaylists,
+      isLoading: isLoadingSavedPlaylists,
+      isRefetching: isRefetchingSavedPlaylists,
     },
   } = usePlaylistsQuery({
     getAllPlaylistsConfig: {
@@ -244,102 +252,129 @@ const Playlists = () => {
             </StyledText>
           </View>
         </AnimatedTouchable>
-        {ownedPlaylists.length > 0 && (
-          <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="lg" className="mt-4">
-              Owned Playlists
-            </StyledText>
-
-            {ownedPlaylists.map((playlist, i) => (
-              <PlaylistPreviewList
-                key={playlist.id}
-                cover={playlist.cover}
-                onPress={() => {
-                  setSelectedPlaylist({ playlist, type: 'owned' });
-                  setIsPlaylistOptionsModalVisible(true);
-                }}
-                duration={i * 100}
-                rightComponent={
-                  <MaterialIcons
-                    name={'more-vert'}
-                    size={28}
-                    color={COLORS.neutral.normal}
-                    style={{
-                      marginRight: 2,
-                    }}
-                  />
-                }
-                subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
-                title={playlist.title}
-              />
-            ))}
-          </View>
-        )}
-
-        {collaboratedPlaylists.length > 0 && (
-          <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="lg" className="mt-4">
-              Collaborated Playlists
-            </StyledText>
-
-            {collaboratedPlaylists.map((playlist, i) => (
-              <PlaylistPreviewList
-                key={playlist.id}
-                cover={playlist.cover}
-                onPress={() => {
-                  setSelectedPlaylist({ playlist, type: 'collaborated' });
-
-                  setIsPlaylistOptionsModalVisible(true);
-                }}
-                duration={i * 100}
-                rightComponent={
-                  <MaterialIcons
-                    name={'more-vert'}
-                    size={28}
-                    color={COLORS.neutral.normal}
-                    style={{
-                      marginRight: 2,
-                    }}
-                  />
-                }
-                subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
-                title={playlist.title}
-              />
-            ))}
-
-            {savedPlaylists.length > 0 && (
-              <View className="flex flex-col w-full">
-                <StyledText weight="semibold" size="lg" className="mt-4">
-                  Saved Playlists
-                </StyledText>
-
-                {savedPlaylists.map((playlist, i) => (
-                  <PlaylistPreviewList
-                    key={playlist.id}
-                    cover={playlist.cover}
-                    onPress={() => {
-                      setSelectedPlaylist({ playlist, type: 'saved' });
-                      setIsPlaylistOptionsModalVisible(true);
-                    }}
-                    duration={i * 100}
-                    rightComponent={
-                      <MaterialIcons
-                        name={'more-vert'}
-                        size={28}
-                        color={COLORS.neutral.normal}
-                        style={{
-                          marginRight: 2,
-                        }}
-                      />
-                    }
-                    subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
-                    title={playlist.title}
-                  />
-                ))}
+        <Skeleton
+          isLoading={
+            isRefetchingOwnedPlaylists ||
+            isRefetchingCollaboratedPlaylists ||
+            isRefetchingSavedPlaylists ||
+            isLoadingOwnedPlaylists ||
+            isLoadingCollaboratedPlaylists ||
+            isLoadingSavedPlaylists
+          }
+          skeletonComponent={
+            <View className="flex flex-col w-full">
+              <View className="flex flex-col w-full mb-5 mt-10">
+                <SkeletonLoader type="rect" width="65%" height={15} />
+                <ListSkeleton numbers={3} />
               </View>
-            )}
-          </View>
-        )}
+              <View className="flex flex-col w-full mb-5">
+                <SkeletonLoader type="rect" width="65%" height={15} />
+                <ListSkeleton numbers={3} />
+              </View>
+              <View className="flex flex-col w-full mb-5">
+                <SkeletonLoader type="rect" width="65%" height={15} />
+                <ListSkeleton numbers={3} />
+              </View>
+            </View>
+          }
+        >
+          {ownedPlaylists.length > 0 && (
+            <View className="flex flex-col w-full">
+              <StyledText weight="semibold" size="lg" className="mt-4">
+                Owned Playlists
+              </StyledText>
+
+              {ownedPlaylists.map((playlist, i) => (
+                <PlaylistPreviewList
+                  key={playlist.id}
+                  cover={playlist.cover}
+                  onPress={() => {
+                    setSelectedPlaylist({ playlist, type: 'owned' });
+                    setIsPlaylistOptionsModalVisible(true);
+                  }}
+                  duration={i * 100}
+                  rightComponent={
+                    <MaterialIcons
+                      name={'more-vert'}
+                      size={28}
+                      color={COLORS.neutral.normal}
+                      style={{
+                        marginRight: 2,
+                      }}
+                    />
+                  }
+                  subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
+                  title={playlist.title}
+                />
+              ))}
+            </View>
+          )}
+
+          {collaboratedPlaylists.length > 0 && (
+            <View className="flex flex-col w-full">
+              <StyledText weight="semibold" size="lg" className="mt-4">
+                Collaborated Playlists
+              </StyledText>
+
+              {collaboratedPlaylists.map((playlist, i) => (
+                <PlaylistPreviewList
+                  key={playlist.id}
+                  cover={playlist.cover}
+                  onPress={() => {
+                    setSelectedPlaylist({ playlist, type: 'collaborated' });
+
+                    setIsPlaylistOptionsModalVisible(true);
+                  }}
+                  duration={i * 100}
+                  rightComponent={
+                    <MaterialIcons
+                      name={'more-vert'}
+                      size={28}
+                      color={COLORS.neutral.normal}
+                      style={{
+                        marginRight: 2,
+                      }}
+                    />
+                  }
+                  subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
+                  title={playlist.title}
+                />
+              ))}
+
+              {savedPlaylists.length > 0 && (
+                <View className="flex flex-col w-full">
+                  <StyledText weight="semibold" size="lg" className="mt-4">
+                    Saved Playlists
+                  </StyledText>
+
+                  {savedPlaylists.map((playlist, i) => (
+                    <PlaylistPreviewList
+                      key={playlist.id}
+                      cover={playlist.cover}
+                      onPress={() => {
+                        setSelectedPlaylist({ playlist, type: 'saved' });
+                        setIsPlaylistOptionsModalVisible(true);
+                      }}
+                      duration={i * 100}
+                      rightComponent={
+                        <MaterialIcons
+                          name={'more-vert'}
+                          size={28}
+                          color={COLORS.neutral.normal}
+                          style={{
+                            marginRight: 2,
+                          }}
+                        />
+                      }
+                      subtitle={`${playlist._count.tracks} tracks • ${playlist._count.savedBy} saves`}
+                      title={playlist.title}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
+        </Skeleton>
       </ScrollView>
     </>
   );

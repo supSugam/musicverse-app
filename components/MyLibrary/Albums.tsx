@@ -17,6 +17,8 @@ import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
 import AlbumCard from '../Albums/AlbumCard';
 import Animated from 'react-native-reanimated';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
+import { Skeleton, SkeletonLoader } from '../reusables/Skeleton/Skeleton';
+import SquareSkeleton from '../reusables/Skeleton/SquareSkeleton';
 
 const Albums = () => {
   const navigation = useNavigation();
@@ -26,7 +28,12 @@ const Albums = () => {
   const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
 
   const {
-    getAllAlbums: { data: ownedAlbumsData, refetch: refetchOwnedAlbums },
+    getAllAlbums: {
+      data: ownedAlbumsData,
+      refetch: refetchOwnedAlbums,
+      isLoading: isLoadingOwnedAlbums,
+      isRefetching: isRefetchingOwnedAlbums,
+    },
     deleteAlbumById,
     toggleSaveAlbum,
   } = useAlbumsQuery({
@@ -41,7 +48,12 @@ const Albums = () => {
   });
 
   const {
-    getAllAlbums: { data: savedAlbumsData, refetch: refetchSavedAlbums },
+    getAllAlbums: {
+      data: savedAlbumsData,
+      refetch: refetchSavedAlbums,
+      isLoading: isLoadingSavedAlbums,
+      isRefetching: isRefetchingSavedAlbums,
+    },
   } = useAlbumsQuery({
     getAllAlbumsConfig: {
       params: {
@@ -206,86 +218,107 @@ const Albums = () => {
           }}
           placeholder="Search Albums"
         />
-        {ownedAlbums.length > 0 && (
-          <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="xl" className="my-3">
-              Owned Albums
-            </StyledText>
+        <Skeleton
+          isLoading={
+            isLoadingOwnedAlbums ||
+            isLoadingSavedAlbums ||
+            isRefetchingOwnedAlbums ||
+            isRefetchingSavedAlbums
+          }
+          skeletonComponent={
+            <View className="flex flex-col w-full">
+              <View className="flex flex-col w-full mb-5 mt-10">
+                <SkeletonLoader type="rect" width="65%" height={15} />
+                <SquareSkeleton numbers={5} />
+              </View>
+              <View className="flex flex-col w-full mb-5">
+                <SkeletonLoader type="rect" width="65%" height={15} />
+                <SquareSkeleton numbers={5} />
+              </View>
+            </View>
+          }
+        >
+          {ownedAlbums.length > 0 && (
+            <View className="flex flex-col w-full">
+              <StyledText weight="semibold" size="xl" className="my-3">
+                Owned Albums
+              </StyledText>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="flex flex-row w-full"
-              contentContainerStyle={{ paddingRight: 20 }}
-            >
-              {ownedAlbums.map((album, index) => (
-                <AlbumCard
-                  key={`${album.id}owned-${index}`}
-                  id={album.id}
-                  cover={album.cover}
-                  title={album.title}
-                  subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
-                  genre={album.genre}
-                  isCardViewable={
-                    viewableAlbumCardId.owned === album.id &&
-                    ownedAlbums.length > 1
-                  }
-                  onPlayClick={() => {
-                    if (album.tracks?.length) {
-                      updateTracks(album.tracks);
-                      setQueueId(album.id);
-                      playATrackById(album.tracks[0].id);
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                className="flex flex-row w-full"
+                contentContainerStyle={{ paddingRight: 20 }}
+              >
+                {ownedAlbums.map((album, index) => (
+                  <AlbumCard
+                    key={`${album.id}owned-${index}`}
+                    id={album.id}
+                    cover={album.cover}
+                    title={album.title}
+                    subtitle={`${album._count.tracks} tracks • ${album._count.savedBy} saves`}
+                    genre={album.genre}
+                    isCardViewable={
+                      viewableAlbumCardId.owned === album.id &&
+                      ownedAlbums.length > 1
                     }
-                  }}
-                  onOptionsClick={() => {
-                    setSelectedAlbum({ album, type: 'owned' });
-                    setIsAlbumOptionsModalVisible(true);
-                  }}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        )}
-        {savedAlbums.length > 0 && (
-          <View className="flex flex-col w-full">
-            <StyledText weight="semibold" size="xl" className="my-3">
-              Saved Albums
-            </StyledText>
+                    onPlayClick={() => {
+                      if (album.tracks?.length) {
+                        updateTracks(album.tracks);
+                        setQueueId(album.id);
+                        playATrackById(album.tracks[0].id);
+                      }
+                    }}
+                    onOptionsClick={() => {
+                      setSelectedAlbum({ album, type: 'owned' });
+                      setIsAlbumOptionsModalVisible(true);
+                    }}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          )}
+          {savedAlbums.length > 0 && (
+            <View className="flex flex-col w-full">
+              <StyledText weight="semibold" size="xl" className="my-3">
+                Saved Albums
+              </StyledText>
 
-            <Animated.FlatList
-              data={savedAlbums}
-              renderItem={({ item, index }) => (
-                <AlbumCard
-                  key={item.id + index}
-                  cover={item.cover}
-                  title={item.title}
-                  subtitle={`${item._count.tracks} tracks • ${item._count.savedBy} saves`}
-                  genre={item.genre}
-                  id={`${item.id}saved-${index}`}
-                  isCardViewable={
-                    viewableAlbumCardId.saved === item.id &&
-                    savedAlbums.length > 1
-                  }
-                  onPlayClick={() => {
-                    if (item.tracks?.length) {
-                      updateTracks(item.tracks);
-                      setQueueId(item.id);
-                      playATrackById(item.tracks[0].id);
+              <Animated.FlatList
+                data={savedAlbums}
+                renderItem={({ item, index }) => (
+                  <AlbumCard
+                    key={item.id + index}
+                    cover={item.cover}
+                    title={item.title}
+                    subtitle={`${item._count.tracks} tracks • ${item._count.savedBy} saves`}
+                    genre={item.genre}
+                    id={`${item.id}saved-${index}`}
+                    isCardViewable={
+                      viewableAlbumCardId.saved === item.id &&
+                      savedAlbums.length > 1
                     }
-                  }}
-                  onOptionsClick={() => {
-                    setSelectedAlbum({ album: item, type: 'saved' });
-                    setIsAlbumOptionsModalVisible(true);
-                  }}
-                />
-              )}
-              keyExtractor={(item, i) => `${item.id}${i}saved`}
-              viewabilityConfigCallbackPairs={
-                viewabilityConfigCallbackPairsSaved.current
-              }
-            />
-          </View>
-        )}
+                    onPlayClick={() => {
+                      if (item.tracks?.length) {
+                        updateTracks(item.tracks);
+                        setQueueId(item.id);
+                        playATrackById(item.tracks[0].id);
+                      }
+                    }}
+                    onOptionsClick={() => {
+                      setSelectedAlbum({ album: item, type: 'saved' });
+                      setIsAlbumOptionsModalVisible(true);
+                    }}
+                  />
+                )}
+                keyExtractor={(item, i) => `${item.id}${i}saved`}
+                viewabilityConfigCallbackPairs={
+                  viewabilityConfigCallbackPairsSaved.current
+                }
+              />
+            </View>
+          )}
+        </Skeleton>
       </ScrollView>
     </>
   );

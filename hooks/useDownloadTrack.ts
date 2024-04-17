@@ -16,18 +16,23 @@ export const useDownloadTrack = (searchTerm?: string) => {
   const [tracks, setTracks] = useState<ITrackDetails[]>([]);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
+  const [isLoadingDownloadedTracks, setIsLoadingDownloadedTracks] =
+    useState<boolean>(false);
+
   const { api } = useAuthStore();
   useEffect(() => {
     if (!searchTerm) {
       loadTracks();
       return;
     }
+    setIsLoadingDownloadedTracks(true);
     if (searchTerm) {
       const filteredTracks = tracks.filter((track) =>
         track.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setTracks(filteredTracks);
     }
+    setIsLoadingDownloadedTracks(false);
   }, [searchTerm]);
 
   const deleteEverything = () => {
@@ -141,6 +146,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
   }, []);
 
   const loadTracks = () => {
+    setIsLoadingDownloadedTracks(true);
     db.transaction((tx) => {
       tx.executeSql(
         `SELECT
@@ -223,9 +229,11 @@ export const useDownloadTrack = (searchTerm?: string) => {
           ) as ITrackDetails[];
 
           setTracks(loadedTracks as ITrackDetails[]);
+          setIsLoadingDownloadedTracks(false);
         },
         (_, error) => {
           console.error('Failed to load tracks: ', error);
+          setIsLoadingDownloadedTracks(false);
           return false;
         }
       );
@@ -565,5 +573,7 @@ export const useDownloadTrack = (searchTerm?: string) => {
     isTrackDownloaded,
     getTrackFilePath,
     deleteAllTracks,
+    isLoadingDownloadedTracks,
+    loadTracks,
   };
 };

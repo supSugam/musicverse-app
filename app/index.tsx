@@ -34,6 +34,7 @@ import FollowerFollowingTabs from '@/components/Follower/FollowerFollowingTabs';
 import ProfilePage from './(tabs)/profile';
 import AlbumPage from './(tabs)/album';
 import COLORS from '@/constants/Colors';
+import Membership from '@/components/Membership/Membership';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -258,6 +259,15 @@ export default function index() {
               <Stack.Screen
                 name="Notifications"
                 component={Notifications}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                }}
+              />
+
+              <Stack.Screen
+                name="Membership"
+                component={Membership}
                 options={{
                   headerShown: false,
                   animation: 'slide_from_right',

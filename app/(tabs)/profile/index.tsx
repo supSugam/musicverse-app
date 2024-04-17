@@ -6,6 +6,11 @@ import TrackListItem from '@/components/Tracks/TrackListItem';
 import AnimatedTouchable from '@/components/reusables/AnimatedTouchable';
 import BackNavigator from '@/components/reusables/BackNavigator';
 import ImageDisplay from '@/components/reusables/ImageDisplay';
+import ListSkeleton from '@/components/reusables/Skeleton/ListSkeleton';
+import {
+  Skeleton,
+  SkeletonLoader,
+} from '@/components/reusables/Skeleton/Skeleton';
 import StyledText from '@/components/reusables/StyledText';
 import TextContainer from '@/components/reusables/TextContainer';
 import TogglePlayButton from '@/components/reusables/TogglePlayButton';
@@ -47,6 +52,7 @@ const ProfilePage: React.FC = () => {
       data: userData,
       refetch: refetchProfile,
       isRefetching: isRefetchingProfile,
+      isLoading: isProfileLoading,
     },
   } = useProfileQuery({
     username,
@@ -66,6 +72,7 @@ const ProfilePage: React.FC = () => {
       data: userTracks,
       refetch: refetchTracks,
       isRefetching: isTracksRefetching,
+      isLoading: isTracksLoading,
     },
   } = useTracksQuery({
     getAllTracksConfig: {
@@ -140,42 +147,65 @@ const ProfilePage: React.FC = () => {
   };
   return (
     <Container statusBarPadding={false}>
-      <Animated.View
-        className="w-full h-full flex-grow absolute top-0 left-0"
-        style={[
-          backgroundViewAnimatedStyle,
-          { zIndex: 2, backgroundColor: COLORS.neutral.dense },
-        ]}
-      />
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFillObject,
-          { zIndex: 1 },
-          imageContainerAnimatedStyle,
-        ]}
-        onLayout={(event) => {
-          const { width } = event.nativeEvent.layout;
-          setProfileCoverWidth(width);
-        }}
-      >
-        {/* // Gradient */}
+      <Skeleton
+        isLoading={isProfileLoading || isTracksLoading || isRefetching}
+        skeletonComponent={
+          <View className="flex flex-col w-full mt-12 px-3">
+            <SkeletonLoader type="rect" height={250} width="100%" />
+            <SkeletonLoader
+              type="rect"
+              height={20}
+              width="65%"
+              marginTop={25}
+            />
+            <SkeletonLoader
+              type="rect"
+              height={15}
+              width="55%"
+              marginTop={12}
+              marginBottom={16}
+            />
 
-        <FadingDarkGradient
-          stops={[
-            [0, 0.9],
-            [0.3, 0.3],
-            [0.8, 0.9],
-            [1, 1],
+            <ListSkeleton numbers={6} />
+          </View>
+        }
+      >
+        <Animated.View
+          className="w-full h-full flex-grow absolute top-0 left-0"
+          style={[
+            backgroundViewAnimatedStyle,
+            { zIndex: 2, backgroundColor: COLORS.neutral.dense },
           ]}
         />
-        <ImageDisplay
-          placeholder="Cover Image"
-          width={'100%'}
-          height={profileCoverWidth * 0.8}
-          source={userProfile?.profile?.cover}
-        />
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFillObject,
+            { zIndex: 1 },
+            imageContainerAnimatedStyle,
+          ]}
+          onLayout={(event) => {
+            const { width } = event.nativeEvent.layout;
+            setProfileCoverWidth(width);
+          }}
+        >
+          {/* // Gradient */}
 
-        {/* <View className="absolute bottom-2 right-4 z-[2]">
+          <FadingDarkGradient
+            stops={[
+              [0, 0.9],
+              [0.3, 0.3],
+              [0.8, 0.9],
+              [1, 1],
+            ]}
+          />
+          <ImageDisplay
+            placeholder="Cover Image"
+            width={'100%'}
+            height={profileCoverWidth * 0.8}
+            source={userProfile?.profile?.cover}
+          />
+
+          {/* <View className="absolute bottom-2 right-4 z-[2]">
           <ImageDisplay
             placeholder={<StyledText>Avatar</StyledText>}
             width={profileCoverWidth * 0.18}
@@ -186,197 +216,201 @@ const ProfilePage: React.FC = () => {
             shadows
           />
         </View> */}
-      </Animated.View>
-      <Animated.View
-        style={{
-          position: 'absolute',
-          width: '100%',
-          top: 0,
-          zIndex: 15,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingTop: 32,
-          paddingBottom: 8,
-          paddingHorizontal: 2,
-        }}
-      >
+        </Animated.View>
         <Animated.View
-          style={[
-            backgroundViewAnimatedStyle,
-            {
-              backgroundColor: COLORS.neutral.dense,
-              zIndex: -1,
-              ...StyleSheet.absoluteFillObject,
-              borderBottomColor: COLORS.neutral.semidark,
-              borderBottomWidth: 1,
-            },
-          ]}
-        />
-        <BackNavigator showBackText />
-        <AnimatedTouchable
-          wrapperClassName="flex flex-row items-center px-4 py-1"
-          onPress={() => {}}
-        >
-          <MaterialIcons
-            name="more-vert"
-            size={30}
-            color={COLORS.neutral.light}
-          />
-        </AnimatedTouchable>
-      </Animated.View>
-      <View className="w-full z-10 flex-1 h-full">
-        <ScrollView
-          onScroll={(event) => {
-            // clo(event.nativeEvent.contentOffset.y);
-            const contentOffsetY = event.nativeEvent.contentOffset.y;
-
-            // Image Container Scale
-            const percentage = calculatePercentage(
-              contentOffsetY,
-              profileCoverWidth * 0.7
-            );
-
-            const newValue = percentage / 100;
-            bgOpacity.value = withSpring(newValue, {
-              damping: 10,
-              stiffness: 100,
-            });
-
-            imageContainerScale.value = withSpring(1 + newValue, {
-              damping: 20,
-              stiffness: 100,
-            });
+          style={{
+            position: 'absolute',
+            width: '100%',
+            top: 0,
+            zIndex: 15,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: 32,
+            paddingBottom: 8,
+            paddingHorizontal: 2,
           }}
-          style={styles.scrollView}
-          bouncesZoom
-          bounces
-          alwaysBounceVertical
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={() => {
-                refetchEverything();
-              }}
-            />
-          }
         >
-          {/* </GestureDetector> */}
-          {/* User's Public Contents */}
-
-          <View className="h-64 w-full" />
-
-          <View className="flex p-4 flex-row justify-between items-center">
-            <View className="flex flex-col">
-              <StyledText
-                size="4xl"
-                weight="bold"
-                tracking="tight"
-                color={COLORS.neutral.light}
-              >
-                {userProfile?.profile?.name}
-              </StyledText>
-              <StyledText
-                size="base"
-                weight="medium"
-                tracking="tight"
-                color={COLORS.neutral.normal}
-                className="mt-1"
-                onPress={onFollowersFollowingPress}
-              >
-                {`${formatNumber(
-                  userProfile?._count?.followers
-                )} Followers • ${formatNumber(
-                  userProfile?._count?.following
-                )} Following`}
-              </StyledText>
-            </View>
-            <TogglePlayButton
-              size={40}
-              onPress={() => {
-                if (isThisQueuePlaying(usersPopularTracks?.[0]?.id)) {
-                  playPause();
-                  return;
-                }
-                if (!usersPopularTracks?.length) return;
-                updateTracks(usersPopularTracks || []);
-                setQueueId(usersPopularTracks?.[0].id);
-                playATrackById(usersPopularTracks?.[0].id);
-              }}
-              isPlaying={isThisQueuePlaying(usersPopularTracks?.[0]?.id)}
-            />
-          </View>
-
-          <View
-            className="flex flex-1 relative"
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 4,
-            }}
+          <Animated.View
+            style={[
+              backgroundViewAnimatedStyle,
+              {
+                backgroundColor: COLORS.neutral.dense,
+                zIndex: -1,
+                ...StyleSheet.absoluteFillObject,
+                borderBottomColor: COLORS.neutral.semidark,
+                borderBottomWidth: 1,
+              },
+            ]}
+          />
+          <BackNavigator showBackText />
+          <AnimatedTouchable
+            wrapperClassName="flex flex-row items-center px-4 py-1"
+            onPress={() => {}}
           >
-            {!isOwnProfile && (
-              <ProfileName
-                fullWidth
-                name={userProfile?.username}
-                image={userProfile?.profile?.avatar}
-                id={userProfile?.id}
-                userRole={userProfile?.role}
-                width={36}
-                height={36}
-                rightComponent={
-                  <FollowButton
-                    isFollowing={userProfile?.isFollowing}
-                    onPress={onFollowPress}
-                  />
-                }
-                className="my-3"
+            <MaterialIcons
+              name="more-vert"
+              size={30}
+              color={COLORS.neutral.light}
+            />
+          </AnimatedTouchable>
+        </Animated.View>
+        <View className="w-full z-10 flex-1 h-full">
+          <ScrollView
+            onScroll={(event) => {
+              // clo(event.nativeEvent.contentOffset.y);
+              const contentOffsetY = event.nativeEvent.contentOffset.y;
+
+              // Image Container Scale
+              const percentage = calculatePercentage(
+                contentOffsetY,
+                profileCoverWidth * 0.7
+              );
+
+              const newValue = percentage / 100;
+              bgOpacity.value = withSpring(newValue, {
+                damping: 10,
+                stiffness: 100,
+              });
+
+              imageContainerScale.value = withSpring(1 + newValue, {
+                damping: 20,
+                stiffness: 100,
+              });
+            }}
+            style={styles.scrollView}
+            bouncesZoom
+            bounces
+            alwaysBounceVertical
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={() => {
+                  refetchEverything();
+                }}
               />
-            )}
+            }
+          >
+            {/* </GestureDetector> */}
+            {/* User's Public Contents */}
 
-            {/* Tracks */}
-            <View className="flex flex-col my-3">
-              <StyledText
-                size="lg"
-                weight="semibold"
-                tracking="tighter"
-                color={COLORS.neutral.light}
-              >
-                Popular Tracks
-              </StyledText>
-              <View className="flex flex-col mt-4">
-                {usersPopularTracks.map((track, i) => (
-                  <TrackListItem
-                    index={i}
-                    key={track.id + i}
-                    id={track.id}
-                    title={track.title}
-                    onPlayClick={() => {
-                      playATrackById(track.id);
-                    }}
-                    isPlaying={isThisTrackPlaying(track.id, true)}
-                    artistName={
-                      track?.creator?.profile?.name || track?.creator?.username
-                    }
-                    artistId={track?.creator?.id}
-                    cover={track.cover}
-                    duration={track.trackDuration}
-                    isLiked={track?.isLiked}
-                    isBuffering={isBuffering && currentTrack()?.id === track.id}
-                    label={i + 1}
-                  />
-                ))}
+            <View className="h-64 w-full" />
+
+            <View className="flex p-4 flex-row justify-between items-center">
+              <View className="flex flex-col">
+                <StyledText
+                  size="4xl"
+                  weight="bold"
+                  tracking="tight"
+                  color={COLORS.neutral.light}
+                >
+                  {userProfile?.profile?.name}
+                </StyledText>
+                <StyledText
+                  size="base"
+                  weight="medium"
+                  tracking="tight"
+                  color={COLORS.neutral.normal}
+                  className="mt-1"
+                  onPress={onFollowersFollowingPress}
+                >
+                  {`${formatNumber(
+                    userProfile?._count?.followers
+                  )} Followers • ${formatNumber(
+                    userProfile?._count?.following
+                  )} Following`}
+                </StyledText>
               </View>
-
-              <TextContainer
-                text={userProfile?.profile?.bio || 'No Bio'}
-                heading="Bio"
-                className="text-left"
+              <TogglePlayButton
+                size={40}
+                onPress={() => {
+                  if (isThisQueuePlaying(usersPopularTracks?.[0]?.id)) {
+                    playPause();
+                    return;
+                  }
+                  if (!usersPopularTracks?.length) return;
+                  updateTracks(usersPopularTracks || []);
+                  setQueueId(usersPopularTracks?.[0].id);
+                  playATrackById(usersPopularTracks?.[0].id);
+                }}
+                isPlaying={isThisQueuePlaying(usersPopularTracks?.[0]?.id)}
               />
             </View>
-          </View>
-        </ScrollView>
-      </View>
+
+            <View
+              className="flex flex-1 relative"
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 4,
+              }}
+            >
+              {!isOwnProfile && (
+                <ProfileName
+                  fullWidth
+                  name={userProfile?.username}
+                  image={userProfile?.profile?.avatar}
+                  id={userProfile?.id}
+                  userRole={userProfile?.role}
+                  width={36}
+                  height={36}
+                  rightComponent={
+                    <FollowButton
+                      isFollowing={userProfile?.isFollowing}
+                      onPress={onFollowPress}
+                    />
+                  }
+                  className="my-3"
+                />
+              )}
+
+              {/* Tracks */}
+              <View className="flex flex-col my-3">
+                <StyledText
+                  size="lg"
+                  weight="semibold"
+                  tracking="tighter"
+                  color={COLORS.neutral.light}
+                >
+                  Popular Tracks
+                </StyledText>
+                <View className="flex flex-col mt-4">
+                  {usersPopularTracks.map((track, i) => (
+                    <TrackListItem
+                      index={i}
+                      key={track.id + i}
+                      id={track.id}
+                      title={track.title}
+                      onPlayClick={() => {
+                        playATrackById(track.id);
+                      }}
+                      isPlaying={isThisTrackPlaying(track.id, true)}
+                      artistName={
+                        track?.creator?.profile?.name ||
+                        track?.creator?.username
+                      }
+                      artistId={track?.creator?.id}
+                      cover={track.cover}
+                      duration={track.trackDuration}
+                      isLiked={track?.isLiked}
+                      isBuffering={
+                        isBuffering && currentTrack()?.id === track.id
+                      }
+                      label={i + 1}
+                    />
+                  ))}
+                </View>
+
+                <TextContainer
+                  text={userProfile?.profile?.bio || 'No Bio'}
+                  heading="Bio"
+                  className="text-left"
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Skeleton>
     </Container>
   );
 };

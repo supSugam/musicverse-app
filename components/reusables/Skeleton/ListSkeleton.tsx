@@ -14,12 +14,11 @@ const ListSkeleton = ({ numbers = 1 }: { numbers: number }) => {
           <View className="flex flex-col ml-3 flex-1">
             <SkeletonLoader
               type="rect"
-              height={10}
-              flex={1}
+              height={25}
               opacity={0.3}
               marginBottom={12}
             />
-            <SkeletonLoader type="rect" height={25} flex={1} />
+            <SkeletonLoader type="rect" height={15} flex={1} />
           </View>
         </View>
       ))}

@@ -13,6 +13,9 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
+import { MembershipCrownLA } from '@/assets/lottie';
+import LottieView from 'lottie-react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface IProfileNameProps
   extends React.ComponentProps<typeof TouchableOpacity> {
@@ -76,6 +79,25 @@ const ProfileName = ({
       withTiming(1, { duration: 500 })
     );
   }, [index]);
+
+  const crownRotate = useSharedValue(0);
+  const crownScale = useSharedValue(0);
+
+  const crownAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { rotate: `${crownRotate.value}deg` },
+        { scale: crownScale.value },
+      ],
+    };
+  });
+
+  useEffect(() => {
+    if (userRole === UserRole.MEMBER || userRole === UserRole.ARTIST) {
+      crownRotate.value = withTiming(360 - 35, { duration: 1000 });
+      crownScale.value = withTiming(1.1, { duration: 1000 });
+    }
+  }, [userRole]);
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -84,9 +106,25 @@ const ProfileName = ({
       {...others}
     >
       <Animated.View
-        className={`w-full flex flex-row items-center justify-between ${className}`}
+        className={`w-full flex flex-row items-center justify-between relative ${className}`}
         style={[!!index && profileNameAnimatedStyle]}
       >
+        <Animated.View
+          className="absolute -top-2 -left-1 z-10"
+          style={crownAnimatedStyle}
+        >
+          <LottieView
+            source={MembershipCrownLA}
+            autoPlay
+            loop
+            speed={0.25}
+            style={{
+              width: width / 2 + 4,
+              height: width / 2 + 4,
+            }}
+          />
+        </Animated.View>
+
         <View className="flex flex-row items-center">
           <ImageDisplay
             source={image}
@@ -96,14 +134,29 @@ const ProfileName = ({
             borderRadius="full"
           />
           <View className="flex flex-col ml-3">
-            <StyledText
-              size="base"
-              weight="semibold"
-              tracking="tight"
-              color={COLORS.neutral.light}
-            >
-              {name}
-            </StyledText>
+            <View className="flex flex-row items-center">
+              <StyledText
+                size="base"
+                weight="semibold"
+                tracking="tight"
+                color={COLORS.neutral.light}
+                style={{
+                  marginRight: 2,
+                }}
+              >
+                {name}
+              </StyledText>
+              {userRole === UserRole.ARTIST && (
+                <MaterialIcons
+                  name="check-circle"
+                  size={width / 2.4}
+                  color={COLORS.neutral.white}
+                  style={{
+                    marginTop: 2,
+                  }}
+                />
+              )}
+            </View>
             {subtitle && (
               <StyledText
                 size="sm"

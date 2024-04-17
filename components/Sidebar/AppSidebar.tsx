@@ -1,5 +1,11 @@
 import { View } from 'react-native';
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import COLORS from '@/constants/Colors';
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 import { Drawer } from 'react-native-drawer-layout';
@@ -10,10 +16,18 @@ import StyledText from '../reusables/StyledText';
 import { capitalizeFirstLetter } from '@/utils/helpers/string';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import SidebarNavlink from './SidebarNavLink';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
 import ReusableAlert from '../reusables/ReusableAlert';
+import LottieView from 'lottie-react-native';
+import { MembershipCrownLA } from '@/assets/lottie';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { UserRole } from '@/utils/Interfaces/IUser';
 
 interface IAppSidebarLink {
   title: string;
@@ -21,9 +35,39 @@ interface IAppSidebarLink {
   onPress?: () => void;
 }
 
-const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
+const AppSidebar = ({
+  toggleAppSidebar,
+  appSidebarOpen,
+}: AppSidebarContextType & { appSidebarOpen: boolean }) => {
   const { currentUserProfile, currentUser, logout } = useAuthStore();
   const navigation = useNavigation();
+
+  const crownRotate = useSharedValue(0);
+  const crownScale = useSharedValue(0);
+
+  const crownAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { rotate: `${crownRotate.value}deg` },
+        { scale: crownScale.value },
+      ],
+    };
+  });
+
+  useEffect(() => {
+    if (
+      currentUser?.role === UserRole.MEMBER ||
+      currentUser?.role === UserRole.ARTIST
+    ) {
+      if (appSidebarOpen) {
+        crownRotate.value = withTiming(360 - 35, { duration: 1000 });
+        crownScale.value = withTiming(1.1, { duration: 1000 });
+      } else {
+        crownRotate.value = withTiming(0, { duration: 1000 });
+        crownScale.value = withTiming(0, { duration: 1000 });
+      }
+    }
+  }, [appSidebarOpen, currentUser]);
 
   const [logOutAlert, setLogOutAlert] = useState<boolean>(false);
   // profile,settings, notifications, logout,
@@ -116,11 +160,27 @@ const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
       <PrimaryGradient opacity={0.05} />
       <View className="flex flex-col w-full h-full px-4 py-20">
         <AnimatedTouchable
-          wrapperClassName="w-full flex flex-row items-center py-6"
+          wrapperClassName="w-full flex flex-row items-center py-6 relative"
           style={{
             width: '100%',
           }}
         >
+          <Animated.View
+            className="absolute top-2 -left-1 z-10"
+            style={crownAnimatedStyle}
+          >
+            <LottieView
+              source={MembershipCrownLA}
+              autoPlay
+              loop
+              speed={0.25}
+              style={{
+                width: 30,
+                height: 30,
+              }}
+            />
+          </Animated.View>
+
           <ImageDisplay
             source={
               currentUserProfile?.avatar
@@ -132,9 +192,26 @@ const AppSidebar = ({ toggleAppSidebar }: AppSidebarContextType) => {
             borderRadius="full"
           />
           <View className="flex flex-col ml-4">
-            <StyledText size="base" weight="semibold" tracking="tighter">
-              {currentUserProfile?.name}
-            </StyledText>
+            <View className="flex flex-row items-center">
+              <StyledText
+                size="base"
+                weight="semibold"
+                tracking="tight"
+                style={{
+                  marginRight: 3,
+                }}
+              >
+                {currentUserProfile?.name}
+              </StyledText>
+              {currentUser?.role === UserRole.ARTIST && (
+                <MaterialIcons
+                  name="check-circle"
+                  size={16}
+                  color={COLORS.neutral.white}
+                />
+              )}
+            </View>
+
             <StyledText
               size="base"
               color={COLORS.neutral.light}
@@ -203,7 +280,9 @@ const AppSidebarDrawer: React.FC<{ children: React.ReactNode }> = ({
       onOpen={() => setAppSidebarOpen(true)}
       onClose={() => setAppSidebarOpen(false)}
       drawerPosition="left"
-      renderDrawerContent={() => <AppSidebar {...value} />}
+      renderDrawerContent={() => (
+        <AppSidebar {...{ ...value, appSidebarOpen }} />
+      )}
       drawerType="slide"
     >
       <AppSiderbarContext.Provider value={value}>

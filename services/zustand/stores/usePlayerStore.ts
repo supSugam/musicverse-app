@@ -101,10 +101,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       );
 
       if (oldPercentagePlayed >= PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY) {
-        console.log('MS Played', msPlayed);
-        console.log(
-          `Returned because:${oldPercentagePlayed} is greater/equal than ${PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY}`
-        );
+        // console.log('MS Played', msPlayed);
+        // console.log(
+        //   `Returned because:${oldPercentagePlayed} is greater/equal than ${PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY}`
+        // );
         return { msPlayed };
       }
 
@@ -117,8 +117,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       if (newPercentagePlayed >= PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY) {
         try {
-          // api().post(`/tracks/play/${currentTrack()?.id}`);
-          console.log('API Call to increase play count');
+          api().post(`/tracks/play/${currentTrack()?.id}`);
+          // console.log('API Call to increase play count');
         } catch (error) {
           console.log('Error playing track', error);
         }

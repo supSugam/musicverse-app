@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { toastResponseMessage } from '@/utils/toast';
 import Share, { ShareOptions } from 'react-native-share';
 import * as Linking from 'expo-linking';
+import * as Network from 'expo-network';
 
 export type RecentSearch =
   | RecentSearchUtility<ITrackDetails, 'Track'>
@@ -28,10 +29,14 @@ interface IAppGlobalState {
   updateRecentSearches: () => void;
   share: (options: ShareOptions) => void;
   createUrl: (path: string, options?: Linking.CreateURLOptions) => string;
+  getNetworkStateAsync: () => Promise<Network.NetworkState>;
 }
 
 export const useAppState = create<IAppGlobalState>((set, get) => ({
   isLoading: false,
+  getNetworkStateAsync: async () => {
+    return await Network.getNetworkStateAsync();
+  },
   setIsLoading: (isLoading: boolean) => {
     set({ isLoading });
 

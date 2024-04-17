@@ -2,11 +2,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
@@ -19,10 +15,6 @@ import {
 import ToastInstance from '@/components/ToastInstance';
 import LoadingModal from '@/components/global/LoadingModal';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import messaging from '@react-native-firebase/messaging';
-import * as Notifications from 'expo-notifications';
-import { PermissionsAndroid, Platform } from 'react-native';
-import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
 export {

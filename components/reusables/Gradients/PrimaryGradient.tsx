@@ -25,7 +25,7 @@ const PrimaryGradient = ({
           position: 'absolute',
           zIndex: -1,
           opacity,
-          flex: 1,
+          flexGrow: 1,
           top: 0,
           left: 0,
         },

@@ -3,7 +3,7 @@ import Welcome from './screens/get-started/Welcome';
 import Register from './screens/get-started/Register';
 import OTPVerification from './screens/get-started/OTPVerification';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import TabsLayout from './(tabs)/_layout';
 import Login from './screens/Login';
 import { LogBox } from 'react-native';
@@ -45,7 +45,8 @@ RNTrackPlayer.registerPlaybackService(() => require('./service'));
 
 export default function index() {
   const { setFcmDeviceToken, currentUser } = useAuthStore();
-  const { isLoading } = useAppState();
+  const { isLoading, getNetworkStateAsync } = useAppState();
+  const [internetAvailable, setInternetAvailable] = useState<boolean>(false);
 
   // Notifications
 
@@ -191,6 +192,9 @@ export default function index() {
     };
 
     setupPlayer();
+    getNetworkStateAsync().then((networkState) => {
+      setInternetAvailable(networkState.isInternetReachable || false);
+    });
   }, []);
 
   useEffect(() => {
@@ -203,9 +207,6 @@ export default function index() {
     };
   }, [Linking]);
 
-  useEffect(() => {
-    console.log('currentUser', currentUser);
-  }, [currentUser]);
   return (
     <Stack.Navigator
       screenOptions={{
@@ -231,7 +232,7 @@ export default function index() {
         />
       ) : (
         <>
-          {currentUser ? (
+          {currentUser || !internetAvailable ? (
             <>
               <Stack.Screen
                 name="TabsLayout"

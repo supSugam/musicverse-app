@@ -20,6 +20,97 @@ export const useDownloadTrack = (searchTerm?: string) => {
     useState<boolean>(false);
 
   const { api } = useAuthStore();
+  const loadTracks = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `SELECT
+            t.id,
+            t.title,
+            t.description,
+            t.src,
+            t.cover,
+            t.lyrics,
+            t.publicStatus,
+            t.trackDuration,
+            t.trackSize,
+            t.creatorId,
+            t.plays,
+            t.createdAt,
+            t.downloaded,
+            t.downloadedAt,
+            u.email AS creatorEmail,
+            u.username AS creatorUsername,
+            u.role AS creatorRole,
+            u.isVerified AS creatorIsVerified,
+            p.id AS profileId,
+            p.name AS profileName,
+            p.avatar AS profileAvatar,
+            p.cover AS profileCover,
+            p.createdAt AS profileCreatedAt,
+            c.plays AS plays,
+            c.playlists AS playlists,
+            c.albums AS albums,
+            c.tags AS tags,
+            c.likedBy AS likedBy,
+            c.downloads AS downloads
+            FROM tracks t
+            INNER JOIN users u ON t.creatorId = u.id
+            LEFT JOIN userProfiles p ON u.id = p.userId
+            LEFT JOIN counts c ON t.id = c.trackId
+            `,
+        [],
+        (_, { rows }) => {
+          const loadedTracks: Partial<ITrackDetails>[] = rows._array.map(
+            (row) => ({
+              id: row.id,
+              title: row.title,
+              description: row.description || null,
+              src: row.src,
+              cover: row.cover || null,
+              lyrics: row.lyrics || null,
+              publicStatus: row.publicStatus,
+              trackDuration: row.trackDuration,
+              trackSize: row.trackSize,
+              creator: {
+                id: row.creatorId,
+                email: row.creatorEmail,
+                username: row.creatorUsername,
+                role: row.creatorRole as UserRole,
+                isVerified: !!row.creatorIsVerified,
+                profile: row.profileId
+                  ? {
+                      id: row.profileId,
+                      userId: row.creatorId,
+                      name: row.profileName,
+                      avatar: row.profileAvatar || null,
+                      cover: row.profileCover || null,
+                      createdAt: row.profileCreatedAt,
+                    }
+                  : null,
+              },
+              createdAt: row.createdAt,
+              downloaded: !!row.downloaded,
+              downloadedAt: row.downloadedAt || null,
+              _count: {
+                plays: row.plays,
+                playlists: row.playlists,
+                albums: row.albums,
+                tags: row.tags,
+                likedBy: row.likedBy,
+                downloads: row.downloads,
+              },
+            })
+          ) as ITrackDetails[];
+          setTracks(loadedTracks as ITrackDetails[]);
+        },
+        (_, error) => {
+          console.error('Failed to load tracks: ', error);
+          return false;
+        }
+      );
+    });
+  };
+
   useEffect(() => {
     if (!searchTerm) {
       loadTracks();
@@ -141,104 +232,11 @@ export const useDownloadTrack = (searchTerm?: string) => {
     };
 
     createTables();
+    setIsLoadingDownloadedTracks(true);
     loadTracks();
+    setIsLoadingDownloadedTracks(false);
     // deleteEverything();
   }, []);
-
-  const loadTracks = () => {
-    setIsLoadingDownloadedTracks(true);
-    db.transaction((tx) => {
-      tx.executeSql(
-        `SELECT
-            t.id,
-            t.title,
-            t.description,
-            t.src,
-            t.cover,
-            t.lyrics,
-            t.publicStatus,
-            t.trackDuration,
-            t.trackSize,
-            t.creatorId,
-            t.plays,
-            t.createdAt,
-            t.downloaded,
-            t.downloadedAt,
-            u.email AS creatorEmail,
-            u.username AS creatorUsername,
-            u.role AS creatorRole,
-            u.isVerified AS creatorIsVerified,
-            p.id AS profileId,
-            p.name AS profileName,
-            p.avatar AS profileAvatar,
-            p.cover AS profileCover,
-            p.createdAt AS profileCreatedAt,
-            c.plays AS plays,
-            c.playlists AS playlists,
-            c.albums AS albums,
-            c.tags AS tags,
-            c.likedBy AS likedBy,
-            c.downloads AS downloads
-            FROM tracks t
-            INNER JOIN users u ON t.creatorId = u.id
-            LEFT JOIN userProfiles p ON u.id = p.userId
-            LEFT JOIN counts c ON t.id = c.trackId
-            `,
-        [],
-        (_, { rows }) => {
-          const loadedTracks: Partial<ITrackDetails>[] = rows._array.map(
-            (row) => ({
-              id: row.id,
-              title: row.title,
-              description: row.description || null,
-              src: row.src,
-              cover: row.cover || null,
-              lyrics: row.lyrics || null,
-              publicStatus: row.publicStatus,
-              trackDuration: row.trackDuration,
-              trackSize: row.trackSize,
-              creator: {
-                id: row.creatorId,
-                email: row.creatorEmail,
-                username: row.creatorUsername,
-                role: row.creatorRole as UserRole,
-                isVerified: !!row.creatorIsVerified,
-                profile: row.profileId
-                  ? {
-                      id: row.profileId,
-                      userId: row.creatorId,
-                      name: row.profileName,
-                      avatar: row.profileAvatar || null,
-                      cover: row.profileCover || null,
-                      createdAt: row.profileCreatedAt,
-                    }
-                  : null,
-              },
-              createdAt: row.createdAt,
-              downloaded: !!row.downloaded,
-              downloadedAt: row.downloadedAt || null,
-              _count: {
-                plays: row.plays,
-                playlists: row.playlists,
-                albums: row.albums,
-                tags: row.tags,
-                likedBy: row.likedBy,
-                downloads: row.downloads,
-              },
-            })
-          ) as ITrackDetails[];
-
-          setTracks(loadedTracks as ITrackDetails[]);
-          setIsLoadingDownloadedTracks(false);
-        },
-        (_, error) => {
-          console.error('Failed to load tracks: ', error);
-          setIsLoadingDownloadedTracks(false);
-          return false;
-        }
-      );
-    });
-  };
 
   const downloadAndSaveTrack = async (
     track: Partial<ITrackDetails> | string

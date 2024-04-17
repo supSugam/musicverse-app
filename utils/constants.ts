@@ -125,10 +125,11 @@ export const getRoleLabel = (role: UserRole) => {
 
 export const PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY = 15 as const;
 
-export const MEMBERSHIP_BENEFITS = [
+export const MEMBERSHIP_BENEFITS = (forArtist = false) => [
   'Enjoy unlimited downloads and plays.',
   'Share your music publicly.',
   'Artist Eligibility & Membership Badge.',
   'Access exclusive player features.',
   'Upload songs up to 200MB.',
+  ...(forArtist ? ['Upload Albums + Verified Badge'] : []),
 ];

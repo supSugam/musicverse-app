@@ -7,12 +7,15 @@ import StyledText from '@/components/reusables/StyledText';
 import UploadStackScreen from '../screens/upload';
 import { GLOBAL_STYLES, TAB_ROUTE_NAMES } from '@/utils/constants';
 import MiniPlayer from '@/components/Player/MiniPlayer';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TabRouteName } from '@/utils/helpers/types';
 import MyLibrary from './library';
 import SearchPage from './search';
 import HomeStackScreen from './home';
 import Feed from './feed';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
+import { useNavigation } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
@@ -60,7 +63,21 @@ const TabBarIcon = ({ focused, route }: { focused: boolean; route: any }) => {
 
 export default function TabsLayout() {
   const [activeTab, setActiveTab] = useState<TabRouteName | null>('Home');
-
+  const { getNetworkStateAsync } = useAppState();
+  const [isInternetReachable, setIsInternetReachable] = useState<boolean>(true);
+  const navigation = useNavigation();
+  useEffect(() => {
+    getNetworkStateAsync().then((state) => {
+      setIsInternetReachable(state.isInternetReachable ?? false);
+      if (!state.isInternetReachable) {
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'MyLibrary',
+          })
+        );
+      }
+    });
+  }, []);
   return (
     <>
       <Tab.Navigator
@@ -115,7 +132,8 @@ export default function TabsLayout() {
               backgroundColor: 'transparent',
               borderTopWidth: 0,
               elevation: 0,
-              ...(!TAB_ROUTE_NAMES.includes(routeName as TabRouteName) && {
+              ...((!TAB_ROUTE_NAMES.includes(routeName as TabRouteName) ||
+                !isInternetReachable) && {
                 display: 'none',
               }),
             },

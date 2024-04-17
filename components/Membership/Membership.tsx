@@ -1,9 +1,13 @@
-import { StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Touchable } from 'react-native';
 import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 import COLORS from '@/constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackNavigator from '../reusables/BackNavigator';
-import Animated from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { MEMBERSHIP_BENEFITS, MEMBERSHIP_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import { View } from 'react-native';
@@ -11,18 +15,83 @@ import { MembershipCrownLA } from '@/assets/lottie';
 import LottieView from 'lottie-react-native';
 import { StyledButton } from '../reusables/StyledButton';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useMutation } from '@tanstack/react-query';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { AxiosResponse } from 'axios';
+import { toastResponseMessage } from '@/utils/toast';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useState } from 'react';
+import { capitalizeFirstLetter } from '@/utils/helpers/string';
+import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 
+type PurchaseMode = 'Member' | 'Artist';
 const Membership = () => {
+  const { api, refreshToken } = useAuthStore();
+
+  // purchase-membership
+  const purchaseMembershipMutation = useMutation<
+    AxiosResponse<SuccessResponse<{ message: string; membership: any }>>
+  >({
+    mutationFn: async () => await api.post('/users/purchase-membership'),
+    onSuccess: (data) => {
+      toastResponseMessage({
+        type: 'success',
+        content:
+          data.data.result.message || 'Membership purchased successfully!',
+      });
+      refreshToken();
+    },
+    onError: (error) => {
+      toastResponseMessage({
+        type: 'error',
+        content: error,
+      });
+    },
+  });
+
+  const applyToBecomeArtistMutation = useMutation<
+    AxiosResponse<SuccessResponse<{ message: string }>>
+  >({
+    mutationFn: async () => await api.post('/users/apply-artist'),
+    onSuccess: (data) => {
+      toastResponseMessage({
+        type: 'success',
+        content: data.data.message || 'Application submitted successfully!',
+      });
+    },
+    onError: (error) => {
+      toastResponseMessage({
+        type: 'error',
+        content: error,
+      });
+    },
+  });
+
+  const [purchaseMode, setPurchaseMode] = useState<PurchaseMode>('Member');
+
   const onMembershipPress = async () => {
-    try {
-    } catch (e) {
-      console.log({ e });
+    if (purchaseMode === 'Artist') {
+      applyToBecomeArtistMutation.mutate();
+    } else {
+      purchaseMembershipMutation.mutate();
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <PrimaryGradient opacity={0.15} />
+    <SafeAreaView
+      style={{
+        backgroundColor: COLORS.neutral.dense,
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+      }}
+    >
+      <PrimaryGradient
+        style={{
+          height: '150%',
+        }}
+      />
       <BackNavigator
         title="Membership"
         backgroundColor={COLORS.neutral.dense}
@@ -31,14 +100,70 @@ const Membership = () => {
           borderBottomWidth: 1,
         }}
       />
-      <Animated.Image
-        source={MEMBERSHIP_IMAGE}
+      <View
         style={{
-          width: '100%',
           height: 160,
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
-      />
-      <View className="w-full px-6 py-3 flex flex-col items-center">
+      >
+        <Animated.Image
+          source={MEMBERSHIP_IMAGE}
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
+        />
+
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 10,
+            borderRadius: 4,
+            backgroundColor: COLORS.neutral.semidark,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 6,
+          }}
+        >
+          {['Member', 'Artist'].map((type, index) => (
+            <Pressable
+              key={index}
+              onPress={(e) => {
+                setPurchaseMode(type as PurchaseMode);
+              }}
+              style={{
+                marginRight: index === 0 ? 10 : 0,
+                paddingHorizontal: 10,
+                paddingVertical: 3,
+                borderBottomWidth: 1,
+                ...(purchaseMode === type && {
+                  backgroundColor: COLORS.neutral.light,
+                }),
+                borderRadius: 4,
+              }}
+            >
+              <StyledText
+                size="base"
+                weight={purchaseMode === type ? 'extrabold' : 'normal'}
+                color={
+                  purchaseMode === type
+                    ? COLORS.primary.purple
+                    : COLORS.neutral.light
+                }
+              >
+                {capitalizeFirstLetter(type)}
+              </StyledText>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      <View className="w-full px-4 pt-3 flex flex-col items-center">
         <LottieView
           source={MembershipCrownLA}
           autoPlay
@@ -81,12 +206,18 @@ const Membership = () => {
         </View>
 
         <View className="w-full flex flex-col items-center justify-center mt-4">
-          {MEMBERSHIP_BENEFITS.map((benefit, index) => (
-            <MembershipBenefit key={index} benefit={benefit} />
-          ))}
+          {MEMBERSHIP_BENEFITS(purchaseMode === 'Artist').map(
+            (benefit, index) => (
+              <MembershipBenefit key={index} benefit={benefit} />
+            )
+          )}
         </View>
 
-        <StyledButton onPress={onMembershipPress} fullWidth className="mt-4">
+        <StyledButton
+          onPress={onMembershipPress}
+          fullWidth
+          className="mt-4 self-end"
+        >
           <StyledText size="xl" weight="semibold">
             Upgrade Now
           </StyledText>
@@ -95,16 +226,6 @@ const Membership = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: 'relative',
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-    backgroundColor: COLORS.neutral.dense,
-  },
-});
 
 export default Membership;
 

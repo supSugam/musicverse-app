@@ -61,8 +61,9 @@ const Downloads = () => {
   }, [selectedTrack, downloadedTracks]);
 
   useEffect(() => {
+    console.log(downloadedTracks, 'isLoadingDownloadedTracks');
     loadTracks();
-  }, [loadTracks]);
+  }, []);
 
   return (
     <>

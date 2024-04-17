@@ -205,7 +205,7 @@ const MyLibrary = () => {
   return (
     <Container includeNavBar navbarTitle="My Library">
       <Tab.Navigator
-        initialRouteName="Playlists"
+        initialRouteName="Downloads"
         screenOptions={{
           swipeEnabled: true,
           animationEnabled: true,

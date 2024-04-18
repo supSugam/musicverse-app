@@ -13,6 +13,8 @@ import { isValidNumber } from '@/utils/helpers/string';
 import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useMutation } from '@tanstack/react-query';
+import { toastResponseMessage } from '@/utils/toast';
+import { CallbackType } from '@/utils/enums/CallbackType';
 
 export default function OTPVerification({
   route,
@@ -24,7 +26,7 @@ export default function OTPVerification({
   const [otpCode, setOtpCode] = useState<string>('');
   const { SCREEN_WIDTH, SCREEN_HEIGHT } = useScreenDimensions();
   const [loading, setLoading] = useState<boolean>(false);
-  const { email } = route.params;
+  const { email, onVerifiedCallback } = route.params;
   const WaitingForCodeJSON = useMemo(() => WaitingForCodeLA, []);
   const { resendOtp, verifyOtp } = useAuthStore((state) => state);
   const [resendTimer, setResendTimer] = useState<number>(60);
@@ -40,15 +42,15 @@ export default function OTPVerification({
   const resendOtpMutation = useMutation({
     mutationFn: resendOtp,
     onSuccess: (data: any) => {
-      Toast.show({
+      toastResponseMessage({
         type: 'success',
-        text1: 'OTP Resent Successfully.',
+        content: 'OTP Resent Successfully.',
       });
     },
     onError: (error: any) => {
-      Toast.show({
+      toastResponseMessage({
         type: 'error',
-        text1: error?.response?.data?.message[0] || 'Something went wrong.',
+        content: error,
       });
     },
   });
@@ -56,18 +58,25 @@ export default function OTPVerification({
   const verifyOtpMutation = useMutation({
     mutationFn: verifyOtp,
     onSuccess: (data: any) => {
-      Toast.show({
+      toastResponseMessage({
         type: 'success',
-        text1: 'OTP Verified Successfully.',
+        content: 'OTP Verified Successfully.',
       });
       setLoading(false);
-      navigation.navigate('Login');
+      switch (onVerifiedCallback) {
+        case CallbackType.LOGIN:
+          navigation.navigate('Login');
+          break;
+        case CallbackType.RESET_PASSWORD:
+          navigation.navigate('ResetPassword', { email });
+          break;
+      }
     },
     onError: (error: any) => {
       setLoading(false);
-      Toast.show({
+      toastResponseMessage({
         type: 'error',
-        text1: error?.response?.data?.message[0] || 'Something went wrong.',
+        content: error,
       });
     },
   });
@@ -75,9 +84,9 @@ export default function OTPVerification({
   const onOTPSubmit = () => {
     setLoading(true);
     if (otpCode.length !== 6 || !isValidNumber(otpCode)) {
-      Toast.show({
+      toastResponseMessage({
         type: 'error',
-        text1: 'Invalid OTP, Please try again.',
+        content: 'Invalid OTP, Please try again.',
       });
       setLoading(false);
       return;

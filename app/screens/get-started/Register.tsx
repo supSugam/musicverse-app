@@ -15,6 +15,7 @@ import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
 import { useMutation } from '@tanstack/react-query';
 import { IRegisterUserDTO } from '@/services/auth/IAuth';
 import Toast from 'react-native-toast-message';
+import { CallbackType } from '@/utils/enums/CallbackType';
 
 const schema = yup.object().shape({
   email: yup
@@ -25,7 +26,8 @@ const schema = yup.object().shape({
     .string()
     .required('Please enter a valid username.')
     .min(4, 'Username must be at least 4 characters.')
-    .matches(/^\S*$/, 'Username cannot contain spaces.'),
+    .matches(/^\S*$/, 'Username cannot contain spaces.')
+    .matches(/^[^@]+$/, 'Username cannot contain @'),
   password: yup
     .string()
     .required('Password is required.')
@@ -54,6 +56,7 @@ export default function Register({ navigation }: { navigation: any }) {
       setLoading(false);
       navigation.navigate('OTPVerification', {
         email: data.data.result.email,
+        onVerifiedCallback: CallbackType.LOGIN,
       });
     },
     onError: (error: any) => {
@@ -91,6 +94,7 @@ export default function Register({ navigation }: { navigation: any }) {
             width: '100%',
             height: '100%',
           }}
+          keyboardShouldPersistTaps="handled"
         >
           <View
             style={{

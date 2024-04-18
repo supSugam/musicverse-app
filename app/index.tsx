@@ -35,6 +35,7 @@ import ProfilePage from './(tabs)/profile';
 import AlbumPage from './(tabs)/album';
 import COLORS from '@/constants/Colors';
 import Membership from '@/components/Membership/Membership';
+import ResetPassword from '@/components/ResetPassword/ResetPassword';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -385,13 +386,6 @@ export default function index() {
               />
 
               <Stack.Screen
-                name="OTPVerification"
-                component={OTPVerification}
-                options={{
-                  headerShown: false,
-                }}
-              />
-              <Stack.Screen
                 name="Login"
                 component={Login}
                 options={{
@@ -410,6 +404,21 @@ export default function index() {
           )}
         </>
       )}
+
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPassword}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="OTPVerification"
+        component={OTPVerification}
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   );
 }

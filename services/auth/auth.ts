@@ -2,6 +2,7 @@ import { api } from '@/utils/constants';
 import { AxiosResponse } from 'axios';
 
 import { ILoginDTO, IRegisterUserDTO, IVerifyOtpDTO } from './IAuth';
+import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 
 export const login = async (
   credentials: ILoginDTO
@@ -23,10 +24,12 @@ export const registerUser = async (
 
 export const verifyOtp = async (
   payload: IVerifyOtpDTO
-): Promise<AxiosResponse<any>> => {
+): Promise<AxiosResponse<SuccessResponse<{ message: string }>>> => {
   return await api.post('/auth/verify-otp', payload);
 };
 
-export const resendOtp = async (email: string): Promise<AxiosResponse<any>> => {
+export const resendOtp = async (
+  email: string
+): Promise<AxiosResponse<SuccessResponse<{ message: string }>>> => {
   return await api.post('/auth/resend-otp', { email });
 };

@@ -38,6 +38,7 @@ const Tracks = () => {
       isRefetching: isRefetchingOwnedTracks,
     },
     deleteTrackById,
+    toggleLike,
   } = useTracksQuery({
     getAllTracksConfig: {
       params: {
@@ -68,11 +69,7 @@ const Tracks = () => {
   });
 
   useEffect(() => {
-    const tracks = ownedTracksData?.data?.result?.items;
-
-    if (tracks) {
-      setOwnedTracks(tracks);
-    }
+    setOwnedTracks(ownedTracksData?.data?.result?.items ?? []);
   }, [ownedTracksData]);
 
   useEffect(() => {
@@ -163,7 +160,10 @@ const Tracks = () => {
       case 'liked':
         options.push({
           label: 'Unlike',
-          onPress: () => {},
+          onPress: () => {
+            setIsTrackOptionsModalVisible(false);
+            toggleLike.mutate(trackId);
+          },
           icon: 'favorite-border',
         });
         break;

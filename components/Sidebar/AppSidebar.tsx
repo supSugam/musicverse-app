@@ -28,18 +28,22 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { UserRole } from '@/utils/Interfaces/IUser';
+import { CallbackType } from '@/utils/enums/CallbackType';
+import { toastResponseMessage } from '@/utils/toast';
 
-interface IAppSidebarLink {
+export interface IAppSidebarLink {
   title: string;
-  icon: keyof (typeof FontAwesome)['glyphMap'];
+  icon?: keyof (typeof FontAwesome)['glyphMap'];
   onPress?: () => void;
+  options?: IAppSidebarLink[];
 }
 
 const AppSidebar = ({
   toggleAppSidebar,
   appSidebarOpen,
 }: AppSidebarContextType & { appSidebarOpen: boolean }) => {
-  const { currentUserProfile, currentUser, logout } = useAuthStore();
+  const { currentUserProfile, currentUser, logout, initiateResetPassword } =
+    useAuthStore();
   const navigation = useNavigation();
 
   const crownRotate = useSharedValue(0);
@@ -89,13 +93,31 @@ const AppSidebar = ({
       title: 'Settings',
       icon: 'cog',
       onPress: () => {
-        toggleAppSidebar();
-        navigation.dispatch(
-          CommonActions.navigate({
-            name: 'SettingsPage',
-          })
-        );
+        // toggleAppSidebar();
+        // navigation.dispatch(
+        //   CommonActions.navigate({
+        //     name: 'SettingsPage',
+        //   })
+        // );
       },
+      options: [
+        {
+          title: 'Reset Password',
+          onPress: () => {
+            if (!currentUser?.email) return;
+            toggleAppSidebar();
+            initiateResetPassword(currentUser?.email);
+            toastResponseMessage({
+              type: 'info',
+              content: 'Please check your email for the OTP.',
+            });
+            (navigation as any).navigate('OTPVerification', {
+              email: currentUser?.email,
+              onVerifiedCallback: CallbackType.RESET_PASSWORD,
+            });
+          },
+        },
+      ],
     },
     {
       title: 'Notifications',
@@ -149,7 +171,11 @@ const AppSidebar = ({
         confirmText="Sign Out"
         visible={logOutAlert}
         onClose={() => setLogOutAlert(false)}
-        onConfirm={logout}
+        onConfirm={() => {
+          setLogOutAlert(false);
+          toggleAppSidebar();
+          logout();
+        }}
         type="alert"
         header="Sign Out"
       >

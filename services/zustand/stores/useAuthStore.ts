@@ -14,6 +14,7 @@ import 'core-js/stable/atob'; // <- polyfill here
 import { BASE_URL } from '@env';
 import { toastResponseMessage } from '@/utils/toast';
 import { clo } from '@/utils/helpers/Object';
+import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
 interface AuthStore {
   fcmDeviceToken: string | null;
   setFcmDeviceToken: (fcmDeviceToken: string | null) => void;
@@ -35,6 +36,9 @@ interface AuthStore {
   initialize: () => Promise<boolean>;
   isApiAuthorized: () => boolean;
   refreshToken: () => Promise<void>;
+  initiateResetPassword: (
+    email: string
+  ) => Promise<AxiosResponse<SuccessResponse<{ message: string }>>>;
 }
 
 export const useAuthStore = create<AuthStore>(
@@ -178,6 +182,9 @@ export const useAuthStore = create<AuthStore>(
         setCurrentUser(null);
       }
       return true;
+    },
+    initiateResetPassword: async (email: string) => {
+      return await api.post(`/auth/initiate-reset-password/${email}`);
     },
   })
 );

@@ -61,7 +61,6 @@ export default function StyledTextField({
     };
   });
   useEffect(() => {
-    console.log(inputWrapperHeight);
     errorMessageHeight.value = withTiming(errorMessage ? 35 : 0);
   }, [errorMessage]);
 
@@ -135,7 +134,7 @@ export default function StyledTextField({
                   style={{
                     position: 'absolute',
                     right: 0,
-                    top: 20,
+                    top: 16,
                     paddingHorizontal: 16,
                   }}
                   activeOpacity={0.8}

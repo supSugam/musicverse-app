@@ -73,10 +73,12 @@ export default function Login({ navigation }: { navigation: any }) {
         type: 'info',
         content: 'Please check your email for the OTP.',
       });
-      (navigation as any).navigate('OTPVerification', {
-        email,
-        onVerifiedCallback: CallbackType.RESET_PASSWORD,
-      });
+      navigation.dispatch(
+        CommonActions.navigate('OTPVerification', {
+          email,
+          onVerifiedCallback: CallbackType.RESET_PASSWORD,
+        })
+      );
     } else {
       toastResponseMessage({
         type: 'error',

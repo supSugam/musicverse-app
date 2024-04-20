@@ -92,7 +92,7 @@ export default function Home() {
       const { items: tracks } = data.data.result;
       setTracksOfSelectedGenre(tracks);
     }
-  }, [data, playerTracks]);
+  }, [data]);
 
   // Popular Albums
 
@@ -129,7 +129,6 @@ export default function Home() {
   return (
     <Container includeNavBar navbarTitle="Home">
       <ScrollView
-        style={styles.scrollView}
         refreshControl={
           <RefreshControl
             refreshing={isGenresLoading}
@@ -138,8 +137,6 @@ export default function Home() {
             }}
           />
         }
-        scrollEnabled
-        stickyHeaderIndices={[0]}
       >
         <Skeleton
           isLoading={
@@ -170,7 +167,7 @@ export default function Home() {
             {tracksOfSelectedGenre.map((track, i) => (
               <TrackListItem
                 index={i}
-                key={track.id}
+                key={track.id + i}
                 id={track.id}
                 title={track.title}
                 onPlayClick={() => {
@@ -179,7 +176,6 @@ export default function Home() {
                     return;
                   }
                   updateTracks(tracksOfSelectedGenre);
-                  setQueueId(tracksOfSelectedGenre?.[0]?.id);
                   playATrackById(track.id);
                 }}
                 isPlaying={isThisTrackPlaying(track.id)}
@@ -224,58 +220,55 @@ export default function Home() {
                       })
                     );
                   }}
+                  style={{ marginRight: 20 }}
                 />
               ))}
             </ScrollView>
           </View>
 
-          <View
-            style={{
-              paddingHorizontal: 15,
-              marginTop: 10,
-            }}
-            className="flex flex-col"
-          >
-            <StyledText weight="semibold" size="lg" className="my-3">
-              Based on your listening
-            </StyledText>
-            {recommendations.map((track, i) => (
-              <TrackListItem
-                index={i}
-                key={track.id}
-                id={track.id}
-                title={track.title}
-                onPlayClick={() => {
-                  if (isThisTrackPlaying(track.id)) {
-                    playPause();
-                    return;
+          {recommendations.length > 0 && (
+            <View
+              style={{
+                paddingHorizontal: 15,
+                marginTop: 10,
+              }}
+              className="flex flex-col"
+            >
+              <StyledText weight="semibold" size="lg" className="my-3">
+                Based on your listening
+              </StyledText>
+              {recommendations.map((track, i) => (
+                <TrackListItem
+                  index={i}
+                  key={track.id}
+                  id={track.id}
+                  title={track.title}
+                  onPlayClick={() => {
+                    if (isThisTrackPlaying(track.id)) {
+                      playPause();
+                      return;
+                    }
+                    updateTracks(recommendations);
+                    setQueueId(recommendations?.[0]?.id);
+                    playATrackById(track.id);
+                  }}
+                  isPlaying={isThisTrackPlaying(track.id)}
+                  artistName={
+                    track?.creator?.profile.name || track?.creator?.username
                   }
-                  updateTracks(recommendations);
-                  setQueueId(recommendations?.[0]?.id);
-                  playATrackById(track.id);
-                }}
-                isPlaying={isThisTrackPlaying(track.id)}
-                artistName={
-                  track?.creator?.profile.name || track?.creator?.username
-                }
-                artistId={track?.creator?.id}
-                cover={track.cover}
-                duration={track.trackDuration}
-                isLiked={track?.isLiked}
-                isBuffering={isBuffering && currentTrack()?.id === track.id}
-                label={i + 1}
-              />
-            ))}
-          </View>
+                  artistId={track?.creator?.id}
+                  cover={track.cover}
+                  duration={track.trackDuration}
+                  isLiked={track?.isLiked}
+                  isBuffering={isBuffering && currentTrack()?.id === track.id}
+                  label={i + 1}
+                />
+              ))}
+            </View>
+          )}
+          <View className="mb-16" />
         </Skeleton>
       </ScrollView>
     </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-    maxHeight: '100%',
-  },
-});

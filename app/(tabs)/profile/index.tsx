@@ -89,7 +89,7 @@ const ProfilePage: React.FC = () => {
   });
 
   useEffect(() => {
-    setUsersPopularTracks(userTracks?.data.result.items ?? []);
+    setUsersPopularTracks(userTracks?.data.result?.items ?? []);
   }, [userTracks]);
 
   // Refetch

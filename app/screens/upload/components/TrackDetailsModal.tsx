@@ -15,17 +15,10 @@ import { ActionsEnum } from '@/utils/enums/Action';
 import { toastResponseMessage } from '@/utils/toast';
 import { MaterialIcons } from '@expo/vector-icons';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { MediaType } from 'expo-media-library';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import {
-  FlatList,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
-import { View, Text } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 
 import * as yup from 'yup';
 import AudioDetailsCard from './AudioDetailsCard';
@@ -48,8 +41,6 @@ import { USER_LIMITS, USER_PERMISSIONS, uuid } from '@/utils/constants';
 import Switch from '@/components/reusables/StyledSwitch';
 import { ReviewStatus } from '@/utils/enums/ReviewStatus';
 import { cleanObject } from '@/utils/helpers/Object';
-import { IAlbum } from '@/utils/Interfaces/IAlbum';
-import AnimatedTouchable from '@/components/reusables/AnimatedTouchable';
 
 const schema = yup.object().shape({
   title: yup
@@ -481,9 +472,6 @@ const TrackDetailsModal = ({
               textSize="xl"
               fontWeight="bold"
               autoCapitalize="words"
-              onBlur={() => {
-                setFocus('description');
-              }}
             />
             <StyledTextField
               variant="default"

@@ -66,18 +66,11 @@ const Albums = () => {
   });
 
   useEffect(() => {
-    const albums = ownedAlbumsData?.data?.result?.items;
-
-    if (albums) {
-      setOwnedAlbums(albums);
-    }
+    setOwnedAlbums(ownedAlbumsData?.data?.result?.items ?? []);
   }, [ownedAlbumsData]);
 
   useEffect(() => {
-    const albums = savedAlbumsData?.data?.result?.items;
-    if (albums) {
-      setSavedAlbums(albums);
-    }
+    setSavedAlbums(savedAlbumsData?.data?.result?.items ?? []);
   }, [savedAlbumsData]);
 
   const refetchAllAlbums = () => {

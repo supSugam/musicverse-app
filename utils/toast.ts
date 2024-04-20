@@ -14,7 +14,7 @@ export const toastResponseMessage = ({
     const errorMessage =
       typeof content === 'string'
         ? content
-        : content.response.data.message instanceof Array
+        : Array.isArray(content.response.data.message)
         ? content.response.data.message[0]
         : content.response.data.message ||
           content.response.message ||

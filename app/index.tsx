@@ -36,6 +36,7 @@ import AlbumPage from './(tabs)/album';
 import COLORS from '@/constants/Colors';
 import Membership from '@/components/Membership/Membership';
 import ResetPassword from '@/components/ResetPassword/ResetPassword';
+import UpdateTrack from '@/components/Tracks/UpdateTrack';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -134,65 +135,67 @@ export default function index() {
     seekBackward,
   } = usePlayerStore();
 
+  const setupPlayer = async () => {
+    RNTrackPlayer.addEventListener(Event.RemotePlay, () => playPause(true));
+    RNTrackPlayer.addEventListener(Event.RemotePause, () => playPause(false));
+    RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
+    RNTrackPlayer.addEventListener(Event.RemoteNext, () => nextTrack());
+    RNTrackPlayer.addEventListener(Event.RemotePrevious, () => prevTrack());
+    RNTrackPlayer.addEventListener(Event.RemoteSeek, (data) =>
+      seek(data.position)
+    );
+    RNTrackPlayer.addEventListener(Event.RemoteJumpForward, () =>
+      seekForward(10)
+    );
+    RNTrackPlayer.addEventListener(Event.RemoteJumpBackward, () =>
+      seekBackward(10)
+    );
+    RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
+    await RNTrackPlayer.setupPlayer({
+      maxCacheSize: 1024 * 5, // 5 mb
+    });
+
+    await RNTrackPlayer.updateOptions({
+      android: {
+        appKilledPlaybackBehavior:
+          AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+      },
+      backwardJumpInterval: 10,
+      forwardJumpInterval: 10,
+      progressUpdateEventInterval: 2,
+      notificationCapabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.SeekTo,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+        Capability.JumpForward,
+        Capability.JumpBackward,
+        Capability.Stop,
+      ],
+      capabilities: [
+        Capability.SeekTo,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+        Capability.JumpForward,
+        Capability.JumpBackward,
+        Capability.Stop,
+      ],
+      compactCapabilities: [
+        Capability.SeekTo,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+        Capability.JumpForward,
+        Capability.JumpBackward,
+        Capability.Stop,
+      ],
+    });
+  };
+
   useEffect(() => {
-    const setupPlayer = async () => {
-      RNTrackPlayer.addEventListener(Event.RemotePlay, () => playPause(true));
-      RNTrackPlayer.addEventListener(Event.RemotePause, () => playPause(false));
-      RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
-      RNTrackPlayer.addEventListener(Event.RemoteNext, () => nextTrack());
-      RNTrackPlayer.addEventListener(Event.RemotePrevious, () => prevTrack());
-      RNTrackPlayer.addEventListener(Event.RemoteSeek, (data) =>
-        seek(data.position)
-      );
-      RNTrackPlayer.addEventListener(Event.RemoteJumpForward, () =>
-        seekForward(10)
-      );
-      RNTrackPlayer.addEventListener(Event.RemoteJumpBackward, () =>
-        seekBackward(10)
-      );
-      RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
-      await RNTrackPlayer.setupPlayer({
-        maxCacheSize: 1024 * 5, // 5 mb
-      });
-
-      await RNTrackPlayer.updateOptions({
-        android: {
-          appKilledPlaybackBehavior:
-            AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-        },
-        backwardJumpInterval: 10,
-        forwardJumpInterval: 10,
-        progressUpdateEventInterval: 2,
-        notificationCapabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.SeekTo,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-          Capability.JumpForward,
-          Capability.JumpBackward,
-          Capability.Stop,
-        ],
-        capabilities: [
-          Capability.SeekTo,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-          Capability.JumpForward,
-          Capability.JumpBackward,
-          Capability.Stop,
-        ],
-        compactCapabilities: [
-          Capability.SeekTo,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-          Capability.JumpForward,
-          Capability.JumpBackward,
-          Capability.Stop,
-        ],
-      });
-    };
-
-    setupPlayer();
+    setupPlayer().then(() => {
+      console.log('RN Player Setup');
+    });
     getNetworkStateAsync().then((networkState) => {
       setInternetAvailable(networkState.isInternetReachable || false);
     });
@@ -282,6 +285,7 @@ export default function index() {
                 options={{
                   headerShown: false,
                   animation: 'slide_from_bottom',
+                  animationDuration: 0,
                 }}
               />
               <Stack.Screen
@@ -319,6 +323,20 @@ export default function index() {
               <Stack.Screen
                 name="UpdateAlbum"
                 component={UpdateAlbum}
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                  contentStyle: {
+                    display: 'flex',
+                    width: '100%',
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="UpdateTrack"
+                component={UpdateTrack}
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_bottom',

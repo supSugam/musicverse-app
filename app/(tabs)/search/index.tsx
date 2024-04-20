@@ -189,7 +189,7 @@ const SearchPage = () => {
                       duration={track.trackDuration}
                       onPlayClick={() => {
                         if (allData.tracks) {
-                          updateTracks(allData.tracks.items);
+                          updateTracks(allData?.tracks?.items);
                           playATrackById(track.id);
                         }
                       }}
@@ -235,7 +235,7 @@ const SearchPage = () => {
             )}
 
             {/* Albums */}
-            {allData.albums && allData.albums?.items.length > 0 && (
+            {allData.albums && allData?.albums?.items.length > 0 && (
               <View className="flex flex-col w-full overflow-visible flex-1">
                 <StyledText
                   weight="semibold"
@@ -248,7 +248,7 @@ const SearchPage = () => {
 
                 <Animated.FlatList
                   horizontal
-                  data={allData.albums.items}
+                  data={allData?.albums?.items ?? []}
                   renderItem={({ item, index }) => (
                     <AlbumCard
                       key={item.id + index}

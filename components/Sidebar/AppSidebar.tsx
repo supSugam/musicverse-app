@@ -175,6 +175,12 @@ const AppSidebar = ({
           setLogOutAlert(false);
           toggleAppSidebar();
           logout();
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Welcome' }],
+            })
+          );
         }}
         type="alert"
         header="Sign Out"

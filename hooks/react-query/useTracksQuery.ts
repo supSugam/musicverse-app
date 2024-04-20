@@ -45,6 +45,12 @@ type TracksQuery<T extends string | undefined = undefined> = {
     unknown
   >;
   getTrackById: UseQueryResult<AxiosResponse<any, any>, Error>;
+  updateTrack: UseMutationResult<
+    AxiosResponse<any, any>,
+    Error,
+    FormData,
+    unknown
+  >;
 };
 
 export const useTracksQuery = ({
@@ -117,10 +123,31 @@ export const useTracksQuery = ({
     },
   });
 
+  const updateTrack = useMutation({
+    mutationKey: [TRACK_QUERY_KEY],
+    mutationFn: async (data: FormData) => await api.patch('/tracks', data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [TRACK_QUERY_KEY],
+      });
+      toastResponseMessage({
+        content: 'Track Updated',
+        type: 'success',
+      });
+    },
+    onError: (error) => {
+      toastResponseMessage({
+        content: error,
+        type: 'error',
+      });
+    },
+  });
+
   return {
     getAllTracks,
     getTrackById,
     deleteTrackById,
     toggleLike,
+    updateTrack,
   };
 };

@@ -175,13 +175,6 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
               }}
               numberOfLines={1}
               ellipsizeMode="tail"
-              onPress={() => {
-                navigation.dispatch(
-                  CommonActions.navigate('Profile', {
-                    id: currentTrack?.creator?.id,
-                  })
-                );
-              }}
             >
               {currentTrack?.creator?.profile?.name ||
                 currentTrack?.creator?.username ||
@@ -248,7 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.neutral.dark,
     borderRadius: 4,
     alignSelf: 'center',
-    zIndex: 1,
+    zIndex: 1000,
   },
   wrapper: {
     width: '100%',

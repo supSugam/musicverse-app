@@ -195,12 +195,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       title: track.title,
       artwork: track.cover || undefined,
       artist: track.creator?.profile?.name || track.creator?.username,
-      duration: track.trackDuration / 1000, //track.trackDuration is in milliseconds
+      duration: track.trackDuration / 1000,
       id: track.id,
     }));
     TrackPlayer.setQueue(tracksToAdd);
     set({ tracks, queueId: tracks[0].id });
     const { playbackInstance, currentTrack } = get();
+    if (!playbackInstance || !currentTrack()) return;
     tracks.forEach((track) => {
       if (track.id === currentTrack()?.id) {
         playbackInstance?.loadAsync({ uri: track.src }, {}, false);
@@ -332,27 +333,31 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         playbackError: null,
       });
     } catch (error) {
+      TrackPlayer.reset();
+      console.log('Error loading track', error);
       set({ playbackError: error as string });
     }
   },
 
-  playPause: (play = false) => {
-    const { isPlaying, playbackInstance, didJustFinish, playbackPosition } =
-      get();
-    if (!playbackInstance) return;
+  playPause: async (play = false) => {
+    const start = Date.now();
+    const { isPlaying, playbackInstance, didJustFinish } = get();
 
     if (isPlaying && !play) {
-      playbackInstance.pauseAsync();
-      playbackInstance.setStatusAsync({ shouldPlay: false });
+      playbackInstance?.pauseAsync().finally(() => {
+        console.log('Pausing took', Date.now() - start, 'ms');
+      });
     } else {
       if (didJustFinish) {
-        playbackInstance.replayAsync();
-        playbackInstance.playAsync();
+        playbackInstance?.replayAsync({
+          shouldPlay: true,
+          positionMillis: 0,
+        });
         return;
       }
-
-      playbackInstance.setStatusAsync({ shouldPlay: true });
-      playbackInstance.playAsync();
+      playbackInstance?.playAsync().finally(() => {
+        console.log('Playing took', Date.now() - start, 'ms');
+      });
     }
   },
 
@@ -366,7 +371,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
     const index = tracks.findIndex((track) => track.id === id);
     if (index === -1) return;
-    await loadTrack(index).then(() => playPause(true));
+    loadTrack(index).then(() => playPause(true));
   },
 
   nextTrack: async () => {

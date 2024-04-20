@@ -73,10 +73,7 @@ const Tracks = () => {
   }, [ownedTracksData]);
 
   useEffect(() => {
-    const tracks = likedTracksData?.data?.result?.items;
-    if (tracks) {
-      setLikedTracks(tracks);
-    }
+    setLikedTracks(likedTracksData?.data?.result?.items ?? []);
   }, [likedTracksData]);
 
   const refetchAllTracks = () => {

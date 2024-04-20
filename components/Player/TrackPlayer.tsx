@@ -18,7 +18,6 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import useScreenDimensions from '@/hooks/useScreenDimensions';
 import SliderInput from '../reusables/SliderInput';
 import {
   GestureHandlerRootView,

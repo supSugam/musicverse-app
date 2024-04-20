@@ -75,24 +75,17 @@ const Playlists = () => {
   });
 
   useEffect(() => {
-    const playlists = ownedPlaylistsData?.data?.result?.items;
-    if (playlists) {
-      setOwnedPlaylists(playlists);
-    }
+    setOwnedPlaylists(ownedPlaylistsData?.data?.result?.items ?? []);
   }, [ownedPlaylistsData]);
 
   useEffect(() => {
-    const playlists = collaboratedPlaylistsData?.data?.result?.items;
-    if (playlists) {
-      setCollaboratedPlaylists(playlists);
-    }
+    setCollaboratedPlaylists(
+      collaboratedPlaylistsData?.data?.result?.items ?? []
+    );
   }, [collaboratedPlaylistsData]);
 
   useEffect(() => {
-    const playlists = savedPlaylistsData?.data?.result?.items;
-    if (playlists) {
-      setSavedPlaylists(playlists);
-    }
+    setSavedPlaylists(savedPlaylistsData?.data?.result?.items ?? []);
   }, [savedPlaylistsData]);
 
   const refetchAllPlaylists = () => {

@@ -195,7 +195,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
     <Container includeNavBar navbarTitle="Upload">
       <View className="flex justify-between items-center mt-12 px-6">
         <StyledText weight="bold" size="2xl">
-          {isUploadTypeSingle ? 'Upload your track here' : 'Upload tracks for'}
+          {isUploadTypeSingle ? 'Upload your track here' : 'Upload tracks for '}
           {!isUploadTypeSingle && (
             <StyledText
               weight="extrabold"
@@ -256,7 +256,7 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
           padding: 10,
           backgroundColor: COLORS.neutral.dark,
           marginTop: 6,
-          height: '100%',
+          maxHeight: 400,
         }}
         showsVerticalScrollIndicator
         persistentScrollbar

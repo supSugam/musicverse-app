@@ -161,11 +161,11 @@ const useUploadAssets = ({
         onUploadStart?.();
         return response.data;
       } catch (error) {
+        console.error('Error uploading asset', error);
         setProgressDetails((prev) => ({
           ...prev,
           [uploadKey]: { progress: 0, uploadStatus: UploadStatus.FAILED },
         }));
-        throw error;
       }
     },
     onError: (error: AxiosError) => {
@@ -177,11 +177,19 @@ const useUploadAssets = ({
       }
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: [TRACK_QUERY_KEY],
-      });
-      resetUploadStatus(UploadStatus.SUCCESS);
-      onUploadSuccess?.(data);
+      const allUploaded = Object.values(progressDetails).every(
+        (item) => item.uploadStatus === UploadStatus.SUCCESS
+      );
+      if (allUploaded) {
+        resetUploadStatus(UploadStatus.SUCCESS);
+        onUploadSuccess?.(data);
+      }
+
+      if (!multiple) {
+        queryClient.invalidateQueries({
+          queryKey: [TRACK_QUERY_KEY],
+        });
+      }
     },
   });
 

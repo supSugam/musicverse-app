@@ -1,9 +1,9 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { useEffect } from 'react';
 import Container from '@/components/Container';
 import {
-  MaterialTopTabBarProps,
-  createMaterialTopTabNavigator,
-} from '@react-navigation/material-top-tabs';
+  createBottomTabNavigator,
+  BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import Playlists from '@/components/MyLibrary/Playlists';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -20,7 +20,7 @@ import Albums from '@/components/MyLibrary/Albums';
 import Tracks from '@/components/Tracks/Tracks';
 import Downloads from '@/components/MyLibrary/Downloads';
 
-const Tab = createMaterialTopTabNavigator();
+const Tab = createBottomTabNavigator();
 
 const TabBarIndicator = ({
   state,
@@ -127,10 +127,7 @@ const TabBar = ({
   state,
   descriptors,
   navigation,
-  jumpTo,
-  layout,
-  position,
-}: MaterialTopTabBarProps): React.ReactNode => {
+}: BottomTabBarProps): React.ReactNode => {
   return (
     <View style={styles.tabBarRoot}>
       {/* <TabBarIndicator state={state} layout={layout} /> */}
@@ -206,12 +203,6 @@ const MyLibrary = () => {
     <Container includeNavBar navbarTitle="My Library">
       <Tab.Navigator
         initialRouteName="Downloads"
-        screenOptions={{
-          swipeEnabled: true,
-          animationEnabled: true,
-          tabBarBounces: true,
-          lazy: true,
-        }}
         tabBar={(props) => <TabBar {...props} />}
       >
         <Tab.Screen name="Playlists" component={Playlists} />

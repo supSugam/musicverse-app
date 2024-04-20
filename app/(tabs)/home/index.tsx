@@ -26,6 +26,8 @@ import {
 import ListSkeleton from '@/components/reusables/Skeleton/ListSkeleton';
 import CapsuleSkeleton from '@/components/reusables/Skeleton/CapsuleSkeleton';
 import SquareSkeleton from '@/components/reusables/Skeleton/SquareSkeleton';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import AnimatedTouchable from '@/components/reusables/AnimatedTouchable';
 
 export default function Home() {
   const navigation = useNavigation();
@@ -204,7 +206,8 @@ export default function Home() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 10 }}
+              className="flex flex-row w-full"
+              contentContainerStyle={{ paddingRight: 20 }}
             >
               {popularAlbums.map((album, index) => (
                 <GenericSquareCard
@@ -266,7 +269,6 @@ export default function Home() {
               ))}
             </View>
           )}
-          <View className="mb-16" />
         </Skeleton>
       </ScrollView>
     </Container>

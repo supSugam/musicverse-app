@@ -169,7 +169,7 @@ const NotificationCard = ({
                 ellipsizeMode={expandNotificationCard ? 'clip' : 'tail'}
                 numberOfLines={expandNotificationCard ? 5 : 1}
               >
-                {new Array(5).fill(body).join(', ')}
+                {body}
               </StyledText>
             </View>
           </Animated.View>

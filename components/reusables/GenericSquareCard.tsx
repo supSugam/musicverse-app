@@ -9,6 +9,7 @@ import StyledText from './StyledText';
 import { View } from 'react-native';
 import COLORS from '@/constants/Colors';
 import { ALBUM_PLACEHOLDER_IMAGE } from '@/utils/constants';
+import AnimatedTouchable from './AnimatedTouchable';
 
 interface IGenericSquareCardProps extends React.ComponentProps<typeof View> {
   index: number;
@@ -37,7 +38,7 @@ const GenericSquareCard = ({
   }, [index]);
 
   return (
-    <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
+    <AnimatedTouchable onPress={onPress}>
       <Animated.View
         style={[
           squareCardAnimatedStyle,
@@ -73,7 +74,7 @@ const GenericSquareCard = ({
           </StyledText>
         </View>
       </Animated.View>
-    </TouchableOpacity>
+    </AnimatedTouchable>
   );
 };
 

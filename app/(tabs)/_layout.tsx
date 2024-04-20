@@ -84,9 +84,6 @@ export default function TabsLayout() {
         initialRouteName="Home"
         screenListeners={({ navigation, route }) => ({
           tabPress: (e) => {
-            if (route.name === 'Home') {
-              navigation.navigate('HomeScreen');
-            }
             setActiveTab(route.name as TabRouteName);
           },
           blur: () => {

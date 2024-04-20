@@ -54,8 +54,8 @@ export const formatBytes = (bytes?: number, decimals = 2): string => {
 };
 
 // Tranform seconds to formatted duration ie. 3600 -> 1:00:00, 120 -> 2:00, 60 -> 1:00
-export const formatDuration = (seconds?: number, ms = false): string => {
-  if (seconds === undefined) return '';
+export const formatDuration = (seconds?: number | null, ms = false): string => {
+  if (seconds === undefined || seconds === null) return '';
   if (ms) {
     seconds = seconds / 1000;
   }

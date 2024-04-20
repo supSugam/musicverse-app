@@ -7,6 +7,8 @@ import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import {
   GLOBAL_STYLES,
   PLAYBACK_SPEEDS,
+  SLEEP_TIMER_OPTIONS,
+  SleepTimerLabel,
   TRACK_PLACEHOLDER_IMAGE,
 } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
@@ -59,6 +61,9 @@ const TrackPlayer = () => {
     stopAfterCurrentTrack,
     setSpeed,
     playbackSpeed,
+    setTimerLabel,
+    timerLabel,
+    timeRemaining,
   } = usePlayerStore();
 
   const track = currentTrack();
@@ -70,6 +75,9 @@ const TrackPlayer = () => {
   // Modals
 
   const [speedOptionsModalVisible, setSpeedOptionsModalVisible] =
+    useState<boolean>(false);
+
+  const [timerOptionsModalVisible, setTimerOptionsModalVisible] =
     useState<boolean>(false);
 
   const [optionsMenuVisible, setOptionsMenuVisible] = useState<boolean>(false);
@@ -421,6 +429,18 @@ const TrackPlayer = () => {
                         x
                       </StyledText>
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => setTimerOptionsModalVisible(true)}
+                      className="mr-2"
+                    >
+                      <MaterialIcons
+                        name="timer"
+                        size={24}
+                        color={COLORS.neutral.light}
+                      />
+                    </TouchableOpacity>
                   </View>
 
                   <View className="flex flex-row items-center justify-center">
@@ -516,6 +536,33 @@ const TrackPlayer = () => {
                 setSpeedOptionsModalVisible(false);
               },
               icon: 'speed',
+            };
+          })}
+        />
+
+        <MenuModal
+          visible={timerOptionsModalVisible}
+          onClose={() => setTimerOptionsModalVisible(false)}
+          header="Timer"
+          items={Object.keys(SLEEP_TIMER_OPTIONS).map((speed) => {
+            return {
+              label: speed,
+              onPress: () => {
+                setTimerLabel(speed as SleepTimerLabel);
+                setTimerOptionsModalVisible(false);
+              },
+              icon: 'timer',
+              rightComponent:
+                speed === timerLabel ? (
+                  <StyledText
+                    size="sm"
+                    weight="light"
+                    opacity="medium"
+                    className="leading-none"
+                  >
+                    {formatDuration(timeRemaining)}
+                  </StyledText>
+                ) : undefined,
             };
           })}
         />

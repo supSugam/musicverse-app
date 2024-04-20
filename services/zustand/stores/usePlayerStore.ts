@@ -6,7 +6,11 @@ import { useAuthStore } from './useAuthStore';
 import { AxiosInstance } from 'axios';
 import TrackPlayer from 'react-native-track-player';
 import { calculatePercentage } from '@/utils/helpers/number';
-import { PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY } from '@/utils/constants';
+import {
+  PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY,
+  SLEEP_TIMER_OPTIONS,
+  SleepTimerLabel,
+} from '@/utils/constants';
 
 const InitialState = {
   isPlaying: false,
@@ -26,6 +30,8 @@ const InitialState = {
   playbackError: null,
   queueId: null,
   msPlayed: 0,
+  timeRemaining: SLEEP_TIMER_OPTIONS['None'],
+  timerLabel: 'None' as SleepTimerLabel,
 };
 
 interface PlayerState {
@@ -80,12 +86,34 @@ interface PlayerState {
   msPlayed: number;
   setMsPlayed: (ms: number) => void;
   increaseMsPlayed: () => void;
+  timeRemaining: number | null;
+  timerLabel: SleepTimerLabel;
+  setTimerSeconds: (seconds: number | null) => void;
+  setTimerLabel: (timerType: SleepTimerLabel) => void;
 }
 
 // TODO : Sleep Timer
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
+  setTimerSeconds: (seconds: number | null) => {
+    set({ timeRemaining: seconds });
+    const interval = setInterval(() => {
+      const { timeRemaining, playbackInstance } = get();
+      if (timeRemaining && timeRemaining > 0) {
+        set({ timeRemaining: timeRemaining - 1 });
+      } else {
+        clearInterval(interval);
+        playbackInstance?.pauseAsync();
+        set({ timeRemaining: null });
+      }
+    }, 1000);
+  },
+  setTimerLabel: (timerLabel: SleepTimerLabel) => {
+    const { setTimerSeconds } = get();
+    setTimerSeconds(SLEEP_TIMER_OPTIONS[timerLabel]);
+    set({ timerLabel });
+  },
   volume: 1,
   api: () => useAuthStore.getState().api,
   setMsPlayed: (ms: number) => {
@@ -101,10 +129,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       );
 
       if (oldPercentagePlayed >= PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY) {
-        // console.log('MS Played', msPlayed);
-        // console.log(
-        //   `Returned because:${oldPercentagePlayed} is greater/equal than ${PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY}`
-        // );
         return { msPlayed };
       }
 
@@ -196,9 +220,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         nextTrack,
         volume,
         playbackSpeed,
-        api,
         increaseMsPlayed,
-        msPlayed,
       } = get();
 
       if (playbackInstance) {

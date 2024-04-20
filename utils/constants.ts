@@ -97,6 +97,16 @@ export const PLAYBACK_SPEEDS: { label: string; value: number }[] = [
   },
 ];
 
+export const SLEEP_TIMER_OPTIONS = {
+  None: null,
+  '15 Minutes': 15,
+  '30 Minutes': 30,
+  '45 Minutes': 45,
+  '1 Hour': 60,
+} as const;
+
+export type SleepTimerLabel = keyof typeof SLEEP_TIMER_OPTIONS;
+
 export const Downloaded_Tracks_Paths = {
   TRACKS_DIR: `${FileSystem.documentDirectory}Music`,
   TRACK_DIR: (id: string) => `${FileSystem.documentDirectory}Music/${id}`,

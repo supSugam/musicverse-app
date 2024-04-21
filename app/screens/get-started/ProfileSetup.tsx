@@ -179,7 +179,7 @@ export default function ProfileSetup({ navigation }: { navigation: any }) {
 
             <View className="flex mt-auto mb-4 flex-col w-full">
               <StyledButton
-                // loading={loading}
+                loading={loading}
                 onPress={handleSubmit(onSubmit)}
                 className="w-full"
               >

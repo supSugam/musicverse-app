@@ -85,6 +85,7 @@ export default function index() {
       try {
         const token = await messaging().getToken();
         setFcmDeviceToken(token);
+        console.log('FCM TOKEN', token);
       } catch (e) {
         setFcmDeviceToken(null);
         console.log('error', e);
@@ -99,6 +100,7 @@ export default function index() {
       });
 
       const handleNotificationClick = async (response: any) => {
+        console.log('NOTIFICATION CLICK', response);
         navigation.dispatch(
           CommonActions.navigate({
             name: 'Notifications',
@@ -112,6 +114,7 @@ export default function index() {
         );
 
       messaging().onNotificationOpenedApp((remoteMessage) => {
+        console.log('NOTIFICATION OPENED', remoteMessage);
         navigation.dispatch(
           CommonActions.navigate({
             name: 'Notifications',
@@ -122,6 +125,7 @@ export default function index() {
       messaging()
         .getInitialNotification()
         .then((remoteMessage) => {
+          console.log('INITIAL NOTIFICATION', remoteMessage);
           navigation.dispatch(
             CommonActions.navigate({
               name: 'Notifications',
@@ -146,6 +150,8 @@ export default function index() {
       });
 
       const handlePushNotification = async (remoteMessage: any) => {
+        console.log('------ The app is running! ------');
+        console.log('PUSH NOTIFICATION', remoteMessage);
         queryClient.invalidateQueries({ queryKey: ['notifications'] });
         queryClient.refetchQueries({
           queryKey: ['notificationsCount'],

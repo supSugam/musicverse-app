@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
     isApiAuthorized: () => !!get().api.defaults.headers?.['Authorization'],
     refreshToken: async () => {
-      const { api, isApiAuthorized, setCurrentUser } = get();
+      const { api, isApiAuthorized, setCurrentUser, registerFcmToken } = get();
       if (!isApiAuthorized()) return;
       const response = await api.post('/auth/refresh-token');
       const { access_token: accessToken } = response.data.result;
@@ -76,12 +76,13 @@ export const useAuthStore = create<AuthStore>(
       set(() => ({ api }));
     },
     registerFcmToken: async () => {
-      const { currentUser, fcmDeviceToken } = get();
+      const { fcmDeviceToken, api, currentUser } = get();
       if (!currentUser || !fcmDeviceToken) return;
+
       await api.post(`/users/register-device/${fcmDeviceToken}`);
     },
     deregisterFcmToken: async () => {
-      const { currentUser, fcmDeviceToken } = get();
+      const { currentUser, fcmDeviceToken, api } = get();
       if (!currentUser || !fcmDeviceToken) return;
       await api.post(`/users/deregister-device/${fcmDeviceToken}`);
     },
@@ -160,7 +161,12 @@ export const useAuthStore = create<AuthStore>(
     verifyOtp: async (payload: IVerifyOtpDTO) => await verifyOtp(payload),
     resendOtp: async (email: string) => await resendOtp(email),
     initialize: async (): Promise<true> => {
-      const { setCurrentUser, deregisterFcmToken, refreshToken } = get();
+      const {
+        setCurrentUser,
+        deregisterFcmToken,
+        refreshToken,
+        registerFcmToken,
+      } = get();
       const userJson = await AsyncStorage.getItem('current-user');
       if (userJson) {
         const user = JSON.parse(userJson) as ICurrentUser;
@@ -176,7 +182,7 @@ export const useAuthStore = create<AuthStore>(
           setCurrentUser(null);
           deregisterFcmToken();
         } else {
-          await refreshToken();
+          await refreshToken().then(() => registerFcmToken());
         }
       } else {
         setCurrentUser(null);

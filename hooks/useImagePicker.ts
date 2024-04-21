@@ -11,6 +11,7 @@ interface IImagePickerProps {
   mediaTypes?: ImagePicker.MediaTypeOptions;
   onImageSelected?: (image: ImageWithRotation[]) => void;
   initialImages?: ImageWithRotation[];
+  maxFileSize?: number;
 }
 
 export type ImageWithRotation = ImagePicker.ImagePickerAsset & {
@@ -25,6 +26,7 @@ export const useImagePicker = ({
   mediaTypes = ImagePicker.MediaTypeOptions.Images,
   onImageSelected,
   initialImages,
+  maxFileSize = 2 * 1024 * 1024, // 2MB
 }: IImagePickerProps) => {
   const [image, setImage] = useState<ImageWithRotation[] | null>(
     initialImages || null
@@ -58,6 +60,14 @@ export const useImagePicker = ({
       ) {
         toastResponseMessage({
           content: `Only png, jpg, jpeg images are allowed`,
+          type: 'error',
+        });
+        return;
+      }
+
+      if (!result.assets.every((image) => image?.fileSize! <= maxFileSize)) {
+        toastResponseMessage({
+          content: `Image size must be less than 2MB`,
           type: 'error',
         });
         return;

@@ -1,9 +1,6 @@
 import React, { useEffect } from 'react';
 import Container from '@/components/Container';
-import {
-  createBottomTabNavigator,
-  BottomTabBarProps,
-} from '@react-navigation/bottom-tabs';
+
 import Playlists from '@/components/MyLibrary/Playlists';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -19,8 +16,12 @@ import { ParamListBase, TabNavigationState } from '@react-navigation/native';
 import Albums from '@/components/MyLibrary/Albums';
 import Tracks from '@/components/Tracks/Tracks';
 import Downloads from '@/components/MyLibrary/Downloads';
+import {
+  createMaterialTopTabNavigator,
+  MaterialTopTabBarProps,
+} from '@react-navigation/material-top-tabs';
 
-const Tab = createBottomTabNavigator();
+const Tab = createMaterialTopTabNavigator();
 
 const TabBarIndicator = ({
   state,
@@ -127,7 +128,7 @@ const TabBar = ({
   state,
   descriptors,
   navigation,
-}: BottomTabBarProps): React.ReactNode => {
+}: MaterialTopTabBarProps): React.ReactNode => {
   return (
     <View style={styles.tabBarRoot}>
       {/* <TabBarIndicator state={state} layout={layout} /> */}
@@ -204,6 +205,10 @@ const MyLibrary = () => {
       <Tab.Navigator
         initialRouteName="Downloads"
         tabBar={(props) => <TabBar {...props} />}
+        screenOptions={{
+          animationEnabled: true,
+          lazy: true,
+        }}
       >
         <Tab.Screen name="Playlists" component={Playlists} />
         <Tab.Screen name="Albums" component={Albums} />

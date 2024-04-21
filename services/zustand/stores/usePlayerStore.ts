@@ -222,6 +222,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         volume,
         playbackSpeed,
         increaseMsPlayed,
+        setMsPlayed,
       } = get();
 
       if (playbackInstance) {
@@ -267,6 +268,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         },
         false
       );
+      setMsPlayed(0);
 
       newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
@@ -308,9 +310,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             TrackPlayer.pause();
           }
           if (status.didJustFinish) {
-            if (isLoopingSingle || stopAfterCurrentTrack) {
-              TrackPlayer.skipToNext();
-              TrackPlayer.pause();
+            if (isLoopingSingle) {
+              TrackPlayer.seekTo(0);
+              return;
+            }
+            if (stopAfterCurrentTrack) {
+              TrackPlayer.stop();
+              set({ currentTrackIndex: null });
               return;
             }
             if (isLoopingQueue) {
@@ -321,6 +327,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
             if (playUntilLastTrack && index !== tracks.length - 1) {
               nextTrack();
               TrackPlayer.skipToNext();
+              return;
+            } else {
+              TrackPlayer.stop();
+              set({ currentTrackIndex: null });
               return;
             }
           }

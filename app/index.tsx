@@ -73,6 +73,7 @@ export default function index() {
   useEffect(() => {
     const setupNotifications = async () => {
       const permission = await requestUserPermission();
+      console.log(permission, 'PERMISSION');
 
       if (!permission) {
         toastResponseMessage({
@@ -81,7 +82,6 @@ export default function index() {
         });
         return;
       }
-
       try {
         const token = await messaging().getToken();
         setFcmDeviceToken(token);
@@ -98,32 +98,83 @@ export default function index() {
         }),
       });
 
-      const messageSubscription = messaging().onMessage(async (message) => {
-        console.log(message);
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
-        queryClient.refetchQueries({
-          queryKey: ['notificationsCount'],
-        });
+      const handleNotificationClick = async (response: any) => {
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'Notifications',
+          })
+        );
+      };
+
+      const notificationClickSubscription =
+        ExpoNotifications.addNotificationResponseReceivedListener(
+          handleNotificationClick
+        );
+
+      messaging().onNotificationOpenedApp((remoteMessage) => {
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'Notifications',
+          })
+        );
       });
 
-      const notificationSubscription = messaging().onNotificationOpenedApp(
-        async (notification) => {
-          console.log(notification);
-          // Redirect to the notification page
+      messaging()
+        .getInitialNotification()
+        .then((remoteMessage) => {
           navigation.dispatch(
             CommonActions.navigate({
               name: 'Notifications',
             })
           );
-        }
-      );
+          // if (remoteMessage && remoteMessage?.data?.screen) {
+          //   // navigation.navigate(`${remoteMessage.data.screen}`);
+          // }
+        });
+
+      messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+        const notification = {
+          title: remoteMessage.notification?.title,
+          body: remoteMessage.notification?.body,
+          data: remoteMessage.data, // optional data payload
+        };
+
+        await ExpoNotifications.scheduleNotificationAsync({
+          content: notification,
+          trigger: null,
+        });
+      });
+
+      const handlePushNotification = async (remoteMessage: any) => {
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        queryClient.refetchQueries({
+          queryKey: ['notificationsCount'],
+        });
+        const notification = {
+          title: remoteMessage.notification?.title,
+          body: remoteMessage.notification?.body,
+          data: remoteMessage.data, // optional data payload
+        };
+
+        await ExpoNotifications.scheduleNotificationAsync({
+          content: notification,
+          trigger: null,
+        });
+      };
+
+      const unsubscribe = messaging().onMessage(handlePushNotification);
+
+      return () => {
+        unsubscribe();
+        notificationClickSubscription.remove();
+      };
     };
 
     setupNotifications();
 
     // Clean up
     return () => {};
-  }, [navigation, queryClient, setFcmDeviceToken]);
+  }, []);
 
   const {
     playPause,

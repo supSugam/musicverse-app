@@ -83,6 +83,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@types/jest": "^29.5.12",
     "@types/react": "~18.2.45",
     "@types/react-native-dotenv": "^0.2.2",
     "@types/uuid": "^9.0.8",

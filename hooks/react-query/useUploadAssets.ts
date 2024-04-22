@@ -157,11 +157,14 @@ const useUploadAssets = ({
             }));
           },
         };
-        const response = await api(config);
         onUploadStart?.();
+        const response = await api(config);
         return response.data;
       } catch (error) {
-        console.error('Error uploading asset', error);
+        toastResponseMessage({
+          type: 'error',
+          content: error,
+        });
         setProgressDetails((prev) => ({
           ...prev,
           [uploadKey]: { progress: 0, uploadStatus: UploadStatus.FAILED },
@@ -170,6 +173,10 @@ const useUploadAssets = ({
     },
     onError: (error: AxiosError) => {
       resetUploadStatus(UploadStatus.FAILED);
+      toastResponseMessage({
+        type: 'error',
+        content: error,
+      });
       if (axios.isCancel(error)) {
         onUploadCancel?.();
       } else {

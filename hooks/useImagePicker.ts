@@ -64,14 +64,15 @@ export const useImagePicker = ({
         });
         return;
       }
+      // console.log(result.assets.map((image) => image.).join(', '));
 
-      if (!result.assets.every((image) => image?.fileSize! <= maxFileSize)) {
-        toastResponseMessage({
-          content: `Image size must be less than 2MB`,
-          type: 'error',
-        });
-        return;
-      }
+      // if (!result.assets.every((image) => image?.fileSize! <= maxFileSize)) {
+      //   toastResponseMessage({
+      //     content: `Image size must be less than 2MB`,
+      //     type: 'error',
+      //   });
+      //   return;
+      // }
       setImage(result.assets);
       onImageSelected?.(result.assets);
     }

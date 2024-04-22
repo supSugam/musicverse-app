@@ -46,8 +46,8 @@ const Stack = createNativeStackNavigator();
 RNTrackPlayer.registerPlaybackService(() => require('./service'));
 
 export default function index() {
-  const { setFcmDeviceToken, currentUser } = useAuthStore();
-  const { isLoading, getNetworkStateAsync } = useAppState();
+  const { setFcmDeviceToken, currentUser, initialize } = useAuthStore();
+  const { isLoading, getNetworkStateAsync, setIsLoading } = useAppState();
   const [internetAvailable, setInternetAvailable] = useState<boolean>(false);
 
   // Notifications
@@ -126,11 +126,6 @@ export default function index() {
         .getInitialNotification()
         .then((remoteMessage) => {
           console.log('INITIAL NOTIFICATION', remoteMessage);
-          navigation.dispatch(
-            CommonActions.navigate({
-              name: 'Notifications',
-            })
-          );
           // if (remoteMessage && remoteMessage?.data?.screen) {
           //   // navigation.navigate(`${remoteMessage.data.screen}`);
           // }
@@ -176,11 +171,14 @@ export default function index() {
       };
     };
 
-    setupNotifications();
+    setIsLoading(true);
+    initialize().finally(() => {
+      setIsLoading(false);
+      setupNotifications();
 
-    // Clean up
-    return () => {};
-  }, []);
+      return () => {};
+    });
+  }, [initialize]);
 
   const {
     playPause,

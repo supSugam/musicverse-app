@@ -3,7 +3,7 @@ import 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack, useNavigation } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { AppSidebarDrawer } from '@/components/Sidebar/AppSidebar';
@@ -15,8 +15,6 @@ import {
 import ToastInstance from '@/components/ToastInstance';
 import LoadingModal from '@/components/global/LoadingModal';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { useAppState } from '@/services/zustand/stores/useAppStore';
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -64,12 +62,6 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { initialize } = useAuthStore();
-  const { setIsLoading } = useAppState();
-  useEffect(() => {
-    setIsLoading(true);
-    initialize().finally(() => setIsLoading(false));
-  }, [initialize]);
 
   return (
     <ThemeProvider value={DarkTheme}>

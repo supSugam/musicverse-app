@@ -7,7 +7,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api"
+        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api",
+        "KHALTI_TEST_SECRET_KEY": "test_public_key_3ee0f2b3529c42578f864578ce92c271"
       }
     },
     "preview": {
@@ -15,12 +16,14 @@
         "buildType": "apk"
       },
       "env": {
-        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api"
+        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api",
+        "KHALTI_TEST_SECRET_KEY": "test_public_key_3ee0f2b3529c42578f864578ce92c271"
       }
     },
     "production": {
       "env": {
-        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api"
+        "BASE_URL": "https://uajgu6utdks5.share.zrok.io/api",
+        "KHALTI_TEST_SECRET_KEY": "test_public_key_3ee0f2b3529c42578f864578ce92c271"
       }
     }
   },

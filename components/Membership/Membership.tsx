@@ -3,11 +3,7 @@ import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 import COLORS from '@/constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackNavigator from '../reusables/BackNavigator';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { MEMBERSHIP_BENEFITS, MEMBERSHIP_IMAGE } from '@/utils/constants';
 import StyledText from '../reusables/StyledText';
 import { View } from 'react-native';
@@ -17,17 +13,37 @@ import { StyledButton } from '../reusables/StyledButton';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { toastResponseMessage } from '@/utils/toast';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useState } from 'react';
 import { capitalizeFirstLetter } from '@/utils/helpers/string';
 import { SuccessResponse } from '@/utils/Interfaces/IApiResponse';
-
+// @ts-ignore
+import { KhatiSdk } from 'rn-all-nepal-payment';
 type PurchaseMode = 'Member' | 'Artist';
 const Membership = () => {
   const { api, refreshToken } = useAuthStore();
+  const [isPaymentModalVisible, setIsPaymentModalVisible] =
+    useState<boolean>(false);
 
+  const _onPaymentComplete = (data: any) => {
+    setIsPaymentModalVisible(false);
+    const str = data.nativeEvent.data;
+    const resp = JSON.parse(str);
+    if (resp.event === 'CLOSED') {
+      console.log(data, 'CLOSED');
+      console.log({ data: resp.data });
+    } else if (resp.event === 'SUCCESS') {
+      purchaseMembershipMutation.mutate();
+      console.log(data, 'SUCCESS');
+      console.log({ data: resp.data });
+    } else if (resp.event === 'ERROR') {
+      console.log(data, 'ERROR');
+      console.log({ error: resp.data });
+    }
+    return;
+  };
   // purchase-membership
   const purchaseMembershipMutation = useMutation<
     AxiosResponse<SuccessResponse<{ message: string; membership: any }>>
@@ -73,7 +89,7 @@ const Membership = () => {
     if (purchaseMode === 'Artist') {
       applyToBecomeArtistMutation.mutate();
     } else {
-      purchaseMembershipMutation.mutate();
+      setIsPaymentModalVisible(true);
     }
   };
 
@@ -223,6 +239,19 @@ const Membership = () => {
           </StyledText>
         </StyledButton>
       </View>
+      <KhatiSdk
+        amount={100} // Number in paisa
+        isVisible={isPaymentModalVisible}
+        paymentPreference={[
+          // Array of services needed from Khalti
+          'KHALTI',
+        ]}
+        productName={'MusicVerse Membership'} // Name of product
+        productIdentity={'1234567890'} // Unique id of product
+        onPaymentComplete={_onPaymentComplete} // Callback from Khalti Web Sdk
+        productUrl={'http://gameofthrones.wikia.com/wiki/Dragons'} // Url of product
+        publicKey={'test_public_key_3ee0f2b3529c42578f864578ce92c271'} // Test or live public key which identifies the merchant
+      />
     </SafeAreaView>
   );
 };

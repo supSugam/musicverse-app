@@ -5,18 +5,7 @@ import { ImageColorsResult, getColors } from 'react-native-image-colors';
 const useImageColors = (imageSrc?: string | null) => {
   const [colors, setColors] = useState<ImageColorsResult | null>(null);
 
-  const averageColor = useMemo(() => {
-    switch (colors?.platform) {
-      case 'android':
-        return colors.average;
-      case 'web':
-        return colors.vibrant;
-      case 'ios':
-        return colors.primary;
-      default:
-        return COLORS.neutral.semidark;
-    }
-  }, [colors]);
+  const [averageColor, setAverageColor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!imageSrc) return;
@@ -28,6 +17,20 @@ const useImageColors = (imageSrc?: string | null) => {
       setColors(colors);
     });
   }, [imageSrc]);
+
+  useEffect(() => {
+    if (!colors) return;
+    switch (colors?.platform) {
+      case 'android':
+        setAverageColor(colors.average);
+      case 'web':
+        setAverageColor(colors.vibrant);
+      case 'ios':
+      // setAverageColor(colors?.primary);
+      default:
+        setAverageColor(COLORS.neutral.semidark);
+    }
+  }, [colors]);
 
   return { colors, averageColor };
 };

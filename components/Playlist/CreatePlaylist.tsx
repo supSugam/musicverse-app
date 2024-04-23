@@ -16,6 +16,8 @@ import { imageAssetToFile } from '@/utils/helpers/file';
 import { toastResponseMessage } from '@/utils/toast';
 import { useNavigation } from 'expo-router';
 import { convertObjectToFormData } from '@/utils/helpers/Object';
+import { ReviewStatus } from '@/utils/enums/ReviewStatus';
+import Switch from '@/components/reusables/StyledSwitch';
 
 const schema = yup.object().shape({
   title: yup.string().required('Playlist Name is Required'),
@@ -27,7 +29,7 @@ const schema = yup.object().shape({
 });
 const CreatePlaylist = () => {
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [makePlaylistPublic, setMakePlaylistPublic] = useState<boolean>(false);
   const { createPlaylist } = usePlaylistsQuery({});
   const navigation = useNavigation();
 
@@ -46,6 +48,9 @@ const CreatePlaylist = () => {
       description: data.description,
       tags: playlistTags,
       cover: coverFile,
+      publicStatus: makePlaylistPublic
+        ? ReviewStatus.APPROVED
+        : ReviewStatus.NOT_REQUESTED,
     });
 
     await createPlaylist
@@ -161,6 +166,12 @@ const CreatePlaylist = () => {
           onChange={onSelectedTagsChange}
           minSelection={0}
           maxSelection={3}
+        />
+        <Switch
+          value={makePlaylistPublic}
+          onToggle={() => setMakePlaylistPublic((prev) => !prev)}
+          label="Make Playlist Public"
+          className="mt-2"
         />
         <StyledButton
           variant="primary"

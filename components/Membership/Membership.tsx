@@ -33,6 +33,10 @@ const Membership = () => {
     const resp = JSON.parse(str);
     if (resp.event === 'CLOSED') {
       console.log(data, 'CLOSED');
+      toastResponseMessage({
+        type: 'error',
+        content: 'Payment was closed!',
+      });
       console.log({ data: resp.data });
     } else if (resp.event === 'SUCCESS') {
       purchaseMembershipMutation.mutate();
@@ -41,7 +45,12 @@ const Membership = () => {
     } else if (resp.event === 'ERROR') {
       console.log(data, 'ERROR');
       console.log({ error: resp.data });
+      toastResponseMessage({
+        type: 'error',
+        content: 'Payment failed!',
+      });
     }
+    // purchaseMembershipMutation.mutate();
     return;
   };
   // purchase-membership
@@ -249,8 +258,8 @@ const Membership = () => {
         productName={'MusicVerse Membership'} // Name of product
         productIdentity={'1234567890'} // Unique id of product
         onPaymentComplete={_onPaymentComplete} // Callback from Khalti Web Sdk
-        productUrl={'http://gameofthrones.wikia.com/wiki/Dragons'} // Url of product
-        publicKey={'test_public_key_3ee0f2b3529c42578f864578ce92c271'} // Test or live public key which identifies the merchant
+        productUrl={'https://i.imgur.com/bSkAvKX.png'} // Url of product
+        publicKey={'test_public_key_ab25d0c93b6448099ab84da8ef40ac7e'}
       />
     </SafeAreaView>
   );

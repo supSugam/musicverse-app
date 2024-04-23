@@ -16,6 +16,7 @@ import { PlayingMusicLA } from '@/assets/lottie';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePlayerStore } from '@/services/zustand/stores/usePlayerStore';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
+import HorizontalMarquee from '../reusables/HorizontalMarquee';
 
 interface ITrackPreviewProps
   extends React.ComponentProps<typeof AnimatedTouchable> {
@@ -135,15 +136,18 @@ const TrackPreview = ({
           </View>
 
           <View className="flex flex-col mx-4 mr-5 flex-1">
-            <StyledText
-              size="base"
-              weight="semibold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              className="leading-7"
-            >
-              {title}
-            </StyledText>
+            <HorizontalMarquee>
+              <StyledText
+                size="base"
+                weight="semibold"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className="leading-7"
+              >
+                {title}
+              </StyledText>
+            </HorizontalMarquee>
+
             <StyledText
               size="sm"
               weight="light"

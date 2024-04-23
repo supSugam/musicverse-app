@@ -23,7 +23,7 @@ import {
   GestureHandlerRootView,
   ScrollView,
 } from 'react-native-gesture-handler';
-import { formatDuration } from '@/utils/helpers/string';
+import { formatDuration, hexToRgba } from '@/utils/helpers/string';
 import SkipIcon from '@/lib/svgs/SkipIcon';
 import LoopIcon from '@/lib/svgs/LoopIcon';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
@@ -35,6 +35,9 @@ import DarkGradient from '../Playlist/DarkGradient';
 import { useTracksQuery } from '@/hooks/react-query/useTracksQuery';
 import TrackPreview from '../Tracks/TrackPreview';
 import { getFormattedCount } from '@/utils/helpers/number';
+import useImageColors from '@/hooks/useColorExtractor';
+import FadingDarkGradient from '../Playlist/FadingDarkGradient';
+import { toastResponseMessage } from '@/utils/toast';
 
 const TrackPlayer = () => {
   // Player Store
@@ -121,12 +124,28 @@ const TrackPlayer = () => {
   useEffect(() => {
     setIsTrackLiked(track?.isLiked || false);
   }, []);
-
+  const { averageColor } = useImageColors(track?.cover);
   return (
     <>
       <GestureHandlerRootView style={{ width: '100%' }}>
-        <Animated.View style={[styles.rootContainer]}>
-          <PrimaryGradient />
+        <Animated.View
+          style={[
+            styles.rootContainer,
+            {
+              backgroundColor: averageColor || COLORS.neutral.dense,
+            },
+          ]}
+        >
+          <FadingDarkGradient
+            stops={[
+              [0, 0.1],
+              [0.7, 0.2],
+              [1, 0.6],
+            ]}
+            style={{
+              zIndex: 1,
+            }}
+          />
           <ScrollView style={styles.rootWrapper}>
             <View className="flex flex-row justify-between items-center mt-4">
               {/* NavBar */}
@@ -531,8 +550,8 @@ const TrackPlayer = () => {
             return {
               label: speed.label,
               onPress: () => {
-                setSpeed(speed.value);
                 setSpeedOptionsModalVisible(false);
+                setSpeed(speed.value);
               },
               icon: 'speed',
             };
@@ -543,21 +562,28 @@ const TrackPlayer = () => {
           visible={timerOptionsModalVisible}
           onClose={() => setTimerOptionsModalVisible(false)}
           header="Timer"
-          items={Object.keys(SLEEP_TIMER_OPTIONS).map((speed) => {
+          items={Object.keys(SLEEP_TIMER_OPTIONS).map((timer) => {
             return {
-              label: speed,
+              label: timer,
               onPress: () => {
-                setTimerLabel(speed as SleepTimerLabel);
                 setTimerOptionsModalVisible(false);
+                toastResponseMessage({
+                  type: 'info',
+                  content: `${
+                    timer! == 'None'
+                      ? `Sleep timer set for ${timer}`
+                      : 'Sleep timer disabled'
+                  }`,
+                });
+                setTimerLabel(timer as SleepTimerLabel);
               },
               icon: 'timer',
               rightComponent:
-                speed === timerLabel ? (
+                timer === timerLabel ? (
                   <StyledText
                     size="sm"
-                    weight="light"
-                    opacity="medium"
                     className="leading-none"
+                    color={hexToRgba(COLORS.neutral.light, 0.5)}
                   >
                     {formatDuration(timeRemaining)}
                   </StyledText>
@@ -622,6 +648,7 @@ const styles = StyleSheet.create({
     width: '100%',
     minHeight: '100%',
     backgroundColor: COLORS.neutral.dense,
+    position: 'relative',
   },
 
   trackInfoWrapper: {
@@ -630,6 +657,7 @@ const styles = StyleSheet.create({
 
   rootWrapper: {
     padding: 16,
+    zIndex: 10,
   },
 });
 

@@ -36,7 +36,7 @@ type AlbumsQuery<T extends string | undefined = undefined> = {
   updateAlbum: UseMutationResult<
     AxiosResponse<any, any>,
     Error,
-    FormData,
+    { data: FormData; id: string },
     unknown
   >;
   toggleSaveAlbum: UseMutationResult<
@@ -125,7 +125,12 @@ export const useAlbumsQuery = <T extends string | undefined = undefined>({
 
   const updateAlbum = useMutation({
     mutationKey: albumKeyFactory.updateAlbum(),
-    mutationFn: async (data: FormData) => await api.patch('/albums', data),
+    mutationFn: async ({ data, id }: { data: FormData; id: string }) =>
+      await api.patch('/albums/${id}', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: albumKeyFactory.updateAlbum(),

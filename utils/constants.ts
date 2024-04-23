@@ -99,10 +99,10 @@ export const PLAYBACK_SPEEDS: { label: string; value: number }[] = [
 
 export const SLEEP_TIMER_OPTIONS = {
   None: null,
-  '15 Minutes': 15,
-  '30 Minutes': 30,
-  '45 Minutes': 45,
-  '1 Hour': 60,
+  '15 Minutes': 15 * 60,
+  '30 Minutes': 30 * 60,
+  '45 Minutes': 45 * 60,
+  '1 Hour': 60 * 60,
 } as const;
 
 export type SleepTimerLabel = keyof typeof SLEEP_TIMER_OPTIONS;
@@ -133,7 +133,7 @@ export const getRoleLabel = (role: UserRole) => {
   }
 };
 
-export const PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY = 15 as const;
+export const PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY = 10 as const;
 
 export const MEMBERSHIP_BENEFITS = (forArtist = false) => [
   'Enjoy unlimited downloads and plays.',

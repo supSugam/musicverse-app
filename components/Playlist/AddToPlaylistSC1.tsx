@@ -262,6 +262,7 @@ const AddToPlaylistSC1 = () => {
               <>
                 {playlistsContainingThisTrack.map((playlist) => (
                   <PlaylistPreviewList
+                    key={`playlist-${playlist.id}`}
                     cover={playlist.cover}
                     onPress={() => onOldPlaylistSelectClick(playlist.id)}
                     rightComponent={
@@ -285,6 +286,7 @@ const AddToPlaylistSC1 = () => {
 
                 {userPlaylists.map((playlist) => (
                   <PlaylistPreviewList
+                    key={`playlist-${playlist.id}`}
                     cover={playlist.cover}
                     onPress={() => onNewPlaylistSelectClick(playlist.id)}
                     rightComponent={

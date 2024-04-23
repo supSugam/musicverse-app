@@ -1,16 +1,22 @@
-import { View, Text } from 'react-native';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import COLORS from '@/constants/Colors';
 import StyledText from '../reusables/StyledText';
 import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/services/zustand/stores/useAuthStore';
+import { toastResponseMessage } from '@/utils/toast';
 
 interface IFollowButtonProps {
   onPress: () => void;
   isFollowing?: boolean;
+  id?: string;
 }
-const FollowButton = ({ isFollowing = false, onPress }: IFollowButtonProps) => {
+const FollowButton = ({
+  isFollowing = false,
+  onPress,
+  id,
+}: IFollowButtonProps) => {
   const [following, setFollowing] = useState<boolean>(isFollowing);
-
+  const { currentUser } = useAuthStore();
   useEffect(() => {
     setFollowing(isFollowing);
   }, [isFollowing]);
@@ -30,6 +36,13 @@ const FollowButton = ({ isFollowing = false, onPress }: IFollowButtonProps) => {
       }}
       activeOpacity={0.85}
       onPress={() => {
+        if (currentUser?.id === id) {
+          toastResponseMessage({
+            type: 'error',
+            content: 'You cannot follow yourself!',
+          });
+          return;
+        }
         setFollowing((prev) => !prev);
         onPress();
       }}

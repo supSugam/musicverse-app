@@ -14,6 +14,7 @@ import { PLAYLIST_QUERY_KEY, playlistKeyFactory } from '@/services/key-factory';
 import { toastResponseMessage } from '@/utils/toast';
 import {
   GetAllPlaylistsResponse,
+  IInvitationToken,
   IPlaylistDetails,
 } from '@/utils/Interfaces/IPlaylist';
 import { BaseResponse, SuccessResponse } from '@/utils/Interfaces/IApiResponse';
@@ -66,6 +67,12 @@ type PlaylistsQuery<T extends string | undefined = undefined> = {
   >;
   deletePlaylistById: UseMutationResult<
     AxiosResponse<any, any>,
+    Error,
+    string,
+    unknown
+  >;
+  generatePlaylistInvitation: UseMutationResult<
+    AxiosResponse<SuccessResponse<IInvitationToken>, any>,
     Error,
     string,
     unknown
@@ -271,6 +278,31 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     },
   });
 
+  const generatePlaylistInvitation = useMutation<
+    AxiosResponse<SuccessResponse<IInvitationToken>, any>,
+    Error,
+    string
+  >({
+    mutationFn: async (playlistId: string) =>
+      await api.post(`/playlists/invitation/${playlistId}`),
+    onSuccess: () => {
+      toastResponseMessage({
+        content: 'Invitation Link (7 Days) Copied to Clipboard',
+        type: 'success',
+      });
+      toastResponseMessage({
+        content: 'This will only work after custom domain is set up',
+        type: 'info',
+      });
+    },
+    onError: (error) => {
+      toastResponseMessage({
+        content: error,
+        type: 'error',
+      });
+    },
+  });
+
   return {
     getAllPlaylists,
     getPlaylistById,
@@ -281,5 +313,6 @@ export const usePlaylistsQuery = <T extends string | undefined = undefined>({
     updatePlaylist,
     removeTrackFromPlaylists,
     removeTracksFromPlaylist,
+    generatePlaylistInvitation,
   };
 };

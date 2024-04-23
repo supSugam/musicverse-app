@@ -120,7 +120,8 @@ export default function Home() {
 
   // Recommended Tracks
 
-  const { data: recommendedTracksData } = useRecommendations();
+  const { data: recommendedTracksData, refetch: refetchRecommendations } =
+    useRecommendations();
 
   const [recommendations, setRecommendations] = useState<ITrackDetails[]>([]);
 
@@ -136,6 +137,8 @@ export default function Home() {
             refreshing={isGenresLoading}
             onRefresh={() => {
               refetchAllTracks();
+              refetchpopularAlbums();
+              refetchRecommendations();
             }}
           />
         }

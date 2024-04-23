@@ -194,11 +194,3 @@ export const useAuthStore = create<AuthStore>(
     },
   })
 );
-
-//   {
-//     name: 'auth-storage',
-//     getStorage: () => AsyncStorage,
-//     serialize: JSON.stringify,
-//     deserialize: JSON.parse,
-//   }
-// );

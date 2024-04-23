@@ -15,9 +15,12 @@ import ReusableAlert from '../reusables/ReusableAlert';
 import AnimatedTouchable from '../reusables/AnimatedTouchable';
 import ListSkeleton from '../reusables/Skeleton/ListSkeleton';
 import { Skeleton, SkeletonLoader } from '../reusables/Skeleton/Skeleton';
-
+import { toastResponseMessage } from '@/utils/toast';
+import { useAppState } from '@/services/zustand/stores/useAppStore';
+import * as ExpoClipboard from 'expo-clipboard';
 const Playlists = () => {
   const navigation = useNavigation();
+  const { share, createUrl } = useAppState();
   const [ownedPlaylists, setOwnedPlaylists] = useState<IPlaylistDetails[]>([]);
   const [collaboratedPlaylists, setCollaboratedPlaylists] = useState<
     IPlaylistDetails[]
@@ -34,6 +37,7 @@ const Playlists = () => {
       isRefetching: isRefetchingOwnedPlaylists,
     },
     deletePlaylistById,
+    generatePlaylistInvitation,
   } = usePlaylistsQuery({
     getAllPlaylistsConfig: {
       params: {
@@ -128,8 +132,32 @@ const Playlists = () => {
         });
         options.push({
           label: 'Manage Collaborators',
-          onPress: () => {},
+          onPress: () => {
+            toastResponseMessage({
+              type: 'info',
+              content:
+                'Feature not available yet due to lack of custom domain support.',
+            });
+          },
           icon: 'group',
+        });
+
+        options.push({
+          label: 'Invite Collaborators',
+          onPress: async () => {
+            await generatePlaylistInvitation.mutateAsync(playlistId, {
+              onSuccess: (data) => {
+                const url = createUrl(`/invite/${data.data.result.token}`);
+                ExpoClipboard.setUrlAsync(url);
+              },
+            });
+            toastResponseMessage({
+              type: 'info',
+              content:
+                'Feature not available yet due to lack of custom domain support.',
+            });
+          },
+          icon: 'link',
         });
 
         options.push({

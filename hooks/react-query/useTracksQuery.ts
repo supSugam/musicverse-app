@@ -48,7 +48,10 @@ type TracksQuery<T extends string | undefined = undefined> = {
   updateTrack: UseMutationResult<
     AxiosResponse<any, any>,
     Error,
-    FormData,
+    {
+      data: FormData;
+      id: string;
+    },
     unknown
   >;
 };
@@ -125,7 +128,12 @@ export const useTracksQuery = ({
 
   const updateTrack = useMutation({
     mutationKey: [TRACK_QUERY_KEY],
-    mutationFn: async (data: FormData) => await api.patch('/tracks', data),
+    mutationFn: async ({ data, id }: { data: FormData; id: string }) =>
+      await api.patch(`/tracks/${id}`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: [TRACK_QUERY_KEY],

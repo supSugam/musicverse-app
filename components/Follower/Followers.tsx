@@ -46,17 +46,7 @@ const Followers = () => {
   };
   return (
     <FlatList
-      data={[
-        ...followers,
-        ...followers,
-        ...followers,
-        ...followers,
-        ...followers,
-        ...followers,
-        ...followers,
-        ...followers,
-        ...followers,
-      ]}
+      data={followers}
       renderItem={({ item: follower, index }) => (
         <ProfileName
           index={index}

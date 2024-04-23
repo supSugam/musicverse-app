@@ -358,6 +358,7 @@ const ProfilePage: React.FC = () => {
                     <FollowButton
                       isFollowing={userProfile?.isFollowing}
                       onPress={onFollowPress}
+                      id={userProfile?.id}
                     />
                   }
                   className="my-3"

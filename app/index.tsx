@@ -37,6 +37,7 @@ import COLORS from '@/constants/Colors';
 import Membership from '@/components/Membership/Membership';
 import ResetPassword from '@/components/ResetPassword/ResetPassword';
 import UpdateTrack from '@/components/Tracks/UpdateTrack';
+import PlaylistPage from './(tabs)/playlist';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -423,6 +424,15 @@ export default function index() {
               <Stack.Screen
                 name="AlbumPage"
                 component={AlbumPage}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                }}
+              />
+
+              <Stack.Screen
+                name="PlaylistPage"
+                component={PlaylistPage}
                 options={{
                   headerShown: false,
                   animation: 'slide_from_right',

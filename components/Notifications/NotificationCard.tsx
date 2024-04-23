@@ -79,6 +79,8 @@ const NotificationCard = ({
       return 'offline-pin';
     } else if (type === NotificationType.LIKE_TRACK) {
       return 'favorite';
+    } else if (type === NotificationType.TRACK_PUBLIC_APPROVED) {
+      return 'public';
     }
     return 'home';
   }, [type]);
@@ -179,7 +181,7 @@ const NotificationCard = ({
           <View
             style={[
               styles.dot,
-              !read && { backgroundColor: COLORS.neutral.gray },
+              read && { backgroundColor: COLORS.neutral.gray },
             ]}
           />
           <StyledText
@@ -240,7 +242,7 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 99,
     position: 'relative',
-    backgroundColor: COLORS.neutral.gray,
+    backgroundColor: COLORS.primary.light,
     overflow: 'hidden',
   },
 });

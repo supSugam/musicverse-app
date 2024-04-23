@@ -3,7 +3,6 @@ import Container from '@/components/Container';
 import PlaylistPreviewList from '@/components/Playlist/PlaylistPreviewList';
 import RecentSearchCard from '@/components/Search/RecentSearchCard';
 import TrackListItem from '@/components/Tracks/TrackListItem';
-import TrackPreview from '@/components/Tracks/TrackPreview';
 import EmptyGhost from '@/components/reusables/Lottie/EmptyGhost';
 import SearchField from '@/components/reusables/SearchField';
 import ListSkeleton from '@/components/reusables/Skeleton/ListSkeleton';
@@ -25,11 +24,13 @@ import { GenericPaginationResponse } from '@/utils/helpers/ts-utilities';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
-import { UIImagePickerPreferredAssetRepresentationMode } from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
+import { CommonActions } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
+import { Keyboard } from 'react-native';
 
 interface SearchPaginationParams extends IBasePaginationParams {
   type?: SearchType;
@@ -45,6 +46,7 @@ interface SearchResults {
 }
 
 const SearchPage = () => {
+  const navigation = useNavigation();
   const [searchParams, setSearchParams] = useState<SearchPaginationParams>({
     page: 1,
     pageSize: 5,
@@ -97,13 +99,13 @@ const SearchPage = () => {
             setSearchParams((prev) => ({ ...prev, search }));
           }}
           placeholder="Search..."
-          delay={500}
+          delay={200}
           triggerMode="debounce"
         />
 
         {(!searchParams.search || !searchParams.search.length) && (
           <>
-            {recentSearches.length === 0 ? (
+            {recentSearches.length === 0 && Keyboard.isVisible() ? (
               <EmptyGhost
                 caption="Search for tracks, albums, artists, playlists or users"
                 wrapperStyles={{
@@ -175,10 +177,13 @@ const SearchPage = () => {
                 {allData?.tracks?.items?.map((track) => (
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() =>
-                      addRecentSearch({ type: 'Track', data: track })
-                    }
+                    onPress={() => {
+                      addRecentSearch({ type: 'Track', data: track });
+                      updateTracks(allData?.tracks?.items ?? []);
+                      playATrackById(track.id);
+                    }}
                     className="w-full"
+                    key={track.id}
                   >
                     <TrackListItem
                       key={`${track.id}search`}
@@ -215,7 +220,16 @@ const SearchPage = () => {
                   <PlaylistPreviewList
                     key={playlist.id}
                     cover={playlist.cover}
-                    onPress={() => {}}
+                    onPress={() => {
+                      navigation.dispatch(
+                        CommonActions.navigate({
+                          name: 'PlaylistPage',
+                          params: {
+                            playlistId: playlist.id,
+                          },
+                        })
+                      );
+                    }}
                     duration={i * 100}
                     rightComponent={
                       <MaterialIcons
@@ -258,14 +272,14 @@ const SearchPage = () => {
                       genre={item.genre}
                       id={`${item.id}owned-${index}`}
                       onPlayClick={() => {
-                        if (item.tracks?.length) {
-                          updateTracks(item.tracks);
-                          playATrackById(item.tracks[0].id);
-                        }
-                      }}
-                      onOptionsClick={() => {
-                        // setSelectedAlbum({ album: item, type: 'owned' });
-                        // setIsAlbumOptionsModalVisible(true);
+                        navigation.dispatch(
+                          CommonActions.navigate({
+                            name: 'AlbumPage',
+                            params: {
+                              albumId: item.id,
+                            },
+                          })
+                        );
                       }}
                     />
                   )}

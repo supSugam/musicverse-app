@@ -113,7 +113,10 @@ const UpdateAlbum = () => {
     }
     const formPayload = convertObjectToFormData(payload) as FormData;
 
-    await updateAlbum.mutateAsync(formPayload);
+    await updateAlbum.mutateAsync({
+      data: formPayload,
+      id: album.id,
+    });
 
     setLoading(false);
     navigation.goBack();
@@ -242,6 +245,7 @@ const UpdateAlbum = () => {
                   artistName={
                     track.creator?.profile?.name ||
                     track.creator?.username ||
+                    album?.creator?.profile?.name ||
                     ''
                   }
                   key={`album-track-${track.id}`}

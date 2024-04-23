@@ -20,11 +20,11 @@ import ImageDisplay from '../reusables/ImageDisplay';
 import { useImagePicker } from '@/hooks/useImagePicker';
 import { parseStringToNullUndefined } from '@/utils/helpers/string';
 import { imageAssetToFile } from '@/utils/helpers/file';
-import { getObjectAsFormData } from '@/utils/helpers/ts-utilities';
 import { cleanArray, convertObjectToFormData } from '@/utils/helpers/Object';
 import { useTagsQuery } from '@/hooks/react-query/useTagsQuery';
 import SelectOption from '../reusables/SelectOption';
-
+import { ReviewStatus } from '@/utils/enums/ReviewStatus';
+import Switch from '@/components/reusables/StyledSwitch';
 const playlistUpdateSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
   description: yup
@@ -37,6 +37,8 @@ const playlistUpdateSchema = yup.object().shape({
 const UpdatePlaylist = () => {
   const { params } = useRoute();
   const navigation = useNavigation();
+  const [makePlaylistPublic, setMakePlaylistPublic] = useState<boolean>(false);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [playlist, setPlaylist] = useState<IPlaylistDetails | undefined>();
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
@@ -96,6 +98,8 @@ const UpdatePlaylist = () => {
       );
       if (playlist.tracks)
         setSelectedTracks(playlist.tracks?.map((track) => track.id));
+
+      setMakePlaylistPublic(playlist.publicStatus === ReviewStatus.APPROVED);
     }
   }, [playlistData]);
 
@@ -119,6 +123,9 @@ const UpdatePlaylist = () => {
       title: data.title,
       description: data.description,
       ...(updatedTags && { tags: updatedTags }),
+      publicStatus: makePlaylistPublic
+        ? ReviewStatus.APPROVED
+        : ReviewStatus.NOT_REQUESTED,
     } as any;
 
     if (newCover?.length) {
@@ -267,6 +274,12 @@ const UpdatePlaylist = () => {
               />
             ))}
           </ScrollView>
+          <Switch
+            value={makePlaylistPublic}
+            onToggle={() => setMakePlaylistPublic((prev) => !prev)}
+            label="Make Playlist Public"
+            className="mt-2"
+          />
           <StyledButton
             onPress={handleSubmit(onSaveClick)}
             className="w-full my-2"

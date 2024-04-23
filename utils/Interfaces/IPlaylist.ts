@@ -1,8 +1,8 @@
 import { SuccessResponse } from './IApiResponse';
-import { IGenre } from './IGenre';
 import { ITag } from './ITag';
 import { ITrackDetails } from './ITrack';
 import { IUserWithProfile } from './IUser';
+import { ReviewStatus } from '../enums/ReviewStatus';
 
 export interface IGetAllPlaylistsResponse {
   items: IPlaylistDetails[];
@@ -19,7 +19,7 @@ export interface IPlaylistDetails {
   createdAt: string;
   updatedAt: string;
   creatorId: string;
-  publicStatus: string;
+  publicStatus: ReviewStatus;
   creator?: IUserWithProfile;
   tags?: ITag[];
   _count: Counts;
@@ -35,4 +35,13 @@ export interface Counts {
   savedBy: number;
   collaborators: number;
   tracks: number;
+}
+
+export interface IInvitationToken {
+  id: string;
+  playlistId: string;
+  token: string;
+  expiresAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

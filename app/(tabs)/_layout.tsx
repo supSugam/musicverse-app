@@ -69,15 +69,18 @@ export default function TabsLayout() {
   useEffect(() => {
     getNetworkStateAsync().then((state) => {
       setIsInternetReachable(state.isInternetReachable ?? false);
-      if (!state.isInternetReachable) {
-        navigation.dispatch(
-          CommonActions.navigate({
-            name: 'MyLibrary',
-          })
-        );
-      }
     });
-  }, []);
+  }, [getNetworkStateAsync]);
+
+  useEffect(() => {
+    if (!isInternetReachable) {
+      navigation.dispatch(
+        CommonActions.navigate({
+          name: 'MyLibrary',
+        })
+      );
+    }
+  }, [isInternetReachable]);
   return (
     <>
       <Tab.Navigator

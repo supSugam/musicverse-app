@@ -114,7 +114,7 @@ const Downloads = () => {
             </View>
           }
         >
-          {downloadedTracks.length > 0 && (
+          {downloadedTracks.length > 0 ? (
             <View className="flex flex-col w-full overflow-visible flex-1">
               <View className="flex justify-between items-center w-full flex-row">
                 <StyledText weight="semibold" size="xl" className="my-3">
@@ -243,6 +243,16 @@ const Downloads = () => {
                   </AnimatedTouchable>
                 </View>
               )}
+            </View>
+          ) : (
+            <View className="flex flex-col w-full items-center justify-center flex-1 h-full">
+              <StyledText
+                size="base"
+                className="text-center"
+                color={COLORS.neutral.light}
+              >
+                No Downloads Found
+              </StyledText>
             </View>
           )}
         </Skeleton>

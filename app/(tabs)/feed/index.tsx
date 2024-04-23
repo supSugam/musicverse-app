@@ -126,13 +126,7 @@ const Feed: React.FC = () => {
               Popular Artists 🕺
             </StyledText>
             <ScrollView horizontal>
-              {[
-                ...topArtists,
-                ...topArtists,
-                ...topArtists,
-                ...topArtists,
-                ...topArtists,
-              ].map((artist, index) => (
+              {(topArtists ?? []).map((artist, index) => (
                 <ArtistCard
                   index={index}
                   avatar={artist.profile.avatar}

@@ -10,6 +10,7 @@ export enum NotificationType {
   NEW_TRACK = 'NEW_TRACK',
   NEW_ALBUM = 'NEW_ALBUM',
   NEW_PLAYLIST = 'NEW_PLAYLIST',
+  TRACK_PUBLIC_APPROVED = 'TRACK_PUBLIC_APPROVED',
 }
 
 export interface INotification {

@@ -11,6 +11,7 @@ import {
   SLEEP_TIMER_OPTIONS,
   SleepTimerLabel,
 } from '@/utils/constants';
+import { formatDuration } from '@/utils/helpers/string';
 
 const InitialState = {
   isPlaying: false,
@@ -241,23 +242,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       const newPlaybackInstance = new Audio.Sound();
 
       const { src, id, ...rest } = tracks[index];
-      const {
-        title,
-        creator,
-        albums,
-        genre,
-        trackDuration,
-        description,
-        createdAt,
-        cover,
-        _count,
-      } = rest;
+      const { title, creator, albums, genre, createdAt, cover } = rest;
 
       // Play
-
       if (!src || !id) return;
 
-      await newPlaybackInstance.loadAsync(
+      newPlaybackInstance.loadAsync(
         { uri: src },
         {
           progressUpdateIntervalMillis: 1000,
@@ -266,7 +256,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
           isLooping: isLoopingSingle,
           rate: playbackSpeed,
         },
-        false
+        true
       );
       setMsPlayed(0);
 
@@ -350,13 +340,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   playPause: async (play = false) => {
-    const start = Date.now();
     const { isPlaying, playbackInstance, didJustFinish } = get();
-
     if (isPlaying && !play) {
-      playbackInstance?.pauseAsync().finally(() => {
-        console.log('Pausing took', Date.now() - start, 'ms');
-      });
+      playbackInstance?.setStatusAsync({ shouldPlay: false });
     } else {
       if (didJustFinish) {
         playbackInstance?.replayAsync({
@@ -365,9 +351,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         });
         return;
       }
-      playbackInstance?.playAsync().finally(() => {
-        console.log('Playing took', Date.now() - start, 'ms');
-      });
+      playbackInstance?.setStatusAsync({ shouldPlay: true });
     }
   },
 
@@ -381,7 +365,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
     const index = tracks.findIndex((track) => track.id === id);
     if (index === -1) return;
-    loadTrack(index).then(() => playPause(true));
+    loadTrack(index);
+    setTimeout(() => {
+      playPause(true);
+    }, 1000);
   },
 
   nextTrack: async () => {
@@ -395,7 +382,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
     if (!isNextTrackAvailable(true) || currentTrackIndex === null) return;
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
-    await loadTrack(nextIndex);
+    loadTrack(nextIndex);
   },
 
   prevTrack: async () => {
@@ -408,7 +395,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     } = get();
     if (!isPrevTrackAvailable(true) || currentTrackIndex === null) return;
     const prevIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-    await loadTrack(prevIndex);
+    loadTrack(prevIndex);
   },
 
   seek: async (position: number) => {

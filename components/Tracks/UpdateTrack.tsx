@@ -107,7 +107,10 @@ const UpdateTrack = () => {
     }
     const formPayload = convertObjectToFormData(payload) as FormData;
 
-    await updateTrack.mutateAsync(formPayload);
+    await updateTrack.mutateAsync({
+      data: formPayload,
+      id: track.id,
+    });
 
     setLoading(false);
     navigation.goBack();

@@ -239,6 +239,7 @@ const Tracks = () => {
                 {ownedTracks.map((track, i) => (
                   <TrackListItem
                     label={i + 1}
+                    optionsVisible={isTrackOptionsModalVisible}
                     key={`${track.id}owned`}
                     id={track.id}
                     title={track.title}

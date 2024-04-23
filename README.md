@@ -79,7 +79,7 @@ This will generate a reserved token, which you can use to forward the `musicvers
 "start:dev": "nest start --watch --port 5984",
 "start:zrok": "zrok share reserved {zrok_reserved_token}",
 "start:both": "concurrently \"npm:start:dev\" \"npm:start:zrok\""
-
+```
 
 Replace "{zrok_reserved_token}" with your own token and execute npm run start:both.
 
@@ -96,4 +96,7 @@ Run npm run dev in musicverse-app to run the React Native app in development mod
 Open the SDK emulator or your phone, launch Expo, and run the app.
 
 ©️ Copyright Sugam Subedi [https://www.github.com/supSugam](https://www.github.com/supSugam)
+
+```
+
 ```

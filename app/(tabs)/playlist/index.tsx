@@ -41,7 +41,7 @@ const PlaylistPage: React.FC = () => {
 
   // For Playlist Data
   const { currentUser } = useAuthStore();
-  const { id } = useLocalSearchParams();
+  const { playlistId } = useLocalSearchParams();
   const [playlistDetails, setPlaylistDetails] = useState<
     IPlaylistDetails | undefined
   >();
@@ -55,7 +55,7 @@ const PlaylistPage: React.FC = () => {
     toggleSavePlaylist,
     deletePlaylistById,
   } = usePlaylistsQuery({
-    id: id as string,
+    id: playlistId as string,
   });
 
   useEffect(() => {
@@ -476,7 +476,6 @@ const PlaylistPage: React.FC = () => {
                   }}
                 >
                   {[
-                    playlistDetails?.genre,
                     ...(playlistDetails?.tags ? playlistDetails?.tags : []),
                   ].map((tag, index) => (
                     <Capsule

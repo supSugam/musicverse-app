@@ -166,7 +166,7 @@ const Playlists = () => {
             navigation.dispatch(
               CommonActions.navigate({
                 name: 'PlaylistPage',
-                params: { id: playlistId },
+                params: { playlistId },
               })
             );
           },

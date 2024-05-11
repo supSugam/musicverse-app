@@ -28,8 +28,6 @@ import RNTrackPlayer, {
   Capability,
   Event,
   State,
-  usePlaybackState,
-  useTrackPlayerEvents,
 } from 'react-native-track-player';
 import * as Linking from 'expo-linking';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
@@ -41,9 +39,11 @@ import Membership from '@/components/Membership/Membership';
 import ResetPassword from '@/components/ResetPassword/ResetPassword';
 import UpdateTrack from '@/components/Tracks/UpdateTrack';
 import PlaylistPage from './(tabs)/playlist';
-
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
+
+import { createStackNavigator } from '@react-navigation/stack';
+const RootStack = createStackNavigator();
 
 const Stack = createNativeStackNavigator();
 
@@ -200,7 +200,6 @@ export default function index() {
     RNTrackPlayer.addEventListener(
       Event.PlaybackProgressUpdated,
       async ({ position }) => {
-        console.log('POSITION', position);
         setPlaybackPosition(position * 1000);
       }
     );
@@ -210,17 +209,25 @@ export default function index() {
     RNTrackPlayer.addEventListener(Event.RemoteNext, () => nextTrack());
     RNTrackPlayer.addEventListener(Event.RemotePrevious, () => prevTrack());
     RNTrackPlayer.addEventListener(Event.RemoteSeek, (data) =>
-      seek(data.position)
+      RNTrackPlayer.seekTo(data.position)
     );
     RNTrackPlayer.addEventListener(Event.RemoteJumpForward, () =>
-      seekForward(10)
+      RNTrackPlayer.seekBy(10)
     );
     RNTrackPlayer.addEventListener(Event.RemoteJumpBackward, () =>
-      seekBackward(10)
+      RNTrackPlayer.seekBy(-10)
     );
     RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
     await RNTrackPlayer.setupPlayer({
-      maxCacheSize: 1024 * 5, // 5 mb
+      maxCacheSize: 1024 * 1024 * 1000,
+    });
+
+    RNTrackPlayer.addEventListener(Event.PlaybackState, ({ state }) => {
+      setIsPlaying(
+        state === State.Playing ||
+          state === State.Buffering ||
+          state === State.Loading
+      );
     });
 
     await RNTrackPlayer.updateOptions({
@@ -230,7 +237,7 @@ export default function index() {
       },
       backwardJumpInterval: 10,
       forwardJumpInterval: 10,
-      progressUpdateEventInterval: 2,
+      progressUpdateEventInterval: 1,
       notificationCapabilities: [
         Capability.Play,
         Capability.Pause,
@@ -271,7 +278,11 @@ export default function index() {
 
   useEffect(() => {
     const subscribeLink = Linking.addEventListener('url', (event) => {
-      console.log(event);
+      if (event.url === 'trackplayer://notification.click') {
+        navigation.dispatch(CommonActions.navigate('TrackPlayer'));
+      } else {
+        navigation.dispatch(CommonActions.navigate('Notifications'));
+      }
     });
 
     return () => {
@@ -279,30 +290,12 @@ export default function index() {
     };
   }, [Linking]);
 
-  const { state } = usePlaybackState();
-
-  useEffect(() => {
-    if (!state) {
-      setIsPlaying(false);
-      return;
-    }
-    setIsPlaying(state === State.Playing || state === State.Buffering);
-  }, [state]);
-
   return (
-    <Stack.Navigator
+    <RootStack.Navigator
       screenOptions={{
         headerShown: false,
       }}
     >
-      {/* <Stack.Screen
-              name="Settings"
-              component={() => <></>}
-              options={{
-                headerShown: false,
-              }}
-            /> */}
-
       {/* No Auth Group */}
       {isLoading ? (
         <Stack.Screen
@@ -524,6 +517,6 @@ export default function index() {
           headerShown: false,
         }}
       />
-    </Stack.Navigator>
+    </RootStack.Navigator>
   );
 }

@@ -336,23 +336,16 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   playPause: async (play = false) => {
-    const { isPlaying, playbackInstance, didJustFinish } = get();
-    if (isPlaying && !play) {
-      // playbackInstance?.setStatusAsync({ shouldPlay: false });
-      TrackPlayer.pause();
-    } else {
-      if (didJustFinish) {
-        // playbackInstance?.replayAsync({
-        //   shouldPlay: true,
-        //   positionMillis: 0,
-        // });
-        // return;
-        TrackPlayer.seekTo(0);
-        TrackPlayer.play();
-        return;
-      }
-      // playbackInstance?.setStatusAsync({ shouldPlay: true });
+    const { isPlaying } = get();
+
+    if (play) {
       TrackPlayer.play();
+    } else {
+      if (isPlaying) {
+        TrackPlayer.pause();
+      } else {
+        TrackPlayer.play();
+      }
     }
   },
 

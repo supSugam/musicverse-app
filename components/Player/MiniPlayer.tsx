@@ -24,6 +24,7 @@ import { useNavigation } from 'expo-router';
 import { TabRouteName } from '@/utils/helpers/types';
 import useKeyboardListener from '@/hooks/useKeyboardListener';
 import { CommonActions } from '@react-navigation/native';
+import TrackPlayer from 'react-native-track-player';
 
 const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
   const translateY = useSharedValue(GLOBAL_STYLES.BOTTOM_TAB_BAR_HEIGHT * 5);
@@ -100,6 +101,8 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
     setIsTrackLiked(currentTrack?.isLiked || false);
   }, []);
 
+  const navigation = useNavigation();
+
   const changeTrackGesture = useSwipeGesture({
     onSwipeLeft: () => {
       console.log('swiped left');
@@ -110,7 +113,6 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
     onSwipeDown: () => console.log('Swiped down'),
   });
 
-  const navigation = useNavigation();
   return (
     <Animated.View
       style={[styles.container, containerAnimatedStyle]}
@@ -207,7 +209,16 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
               </Animated.View>
             </Pressable>
 
-            <TouchableOpacity onPress={() => playPause()} activeOpacity={0.8}>
+            <TouchableOpacity
+              onPress={() => {
+                if (isPlaying) {
+                  TrackPlayer.pause();
+                } else {
+                  TrackPlayer.play();
+                }
+              }}
+              activeOpacity={0.8}
+            >
               <MaterialIcons
                 name={isPlaying ? 'pause' : 'play-arrow'}
                 size={28}

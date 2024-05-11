@@ -38,7 +38,7 @@ import { getFormattedCount } from '@/utils/helpers/number';
 import useImageColors from '@/hooks/useColorExtractor';
 import FadingDarkGradient from '../Playlist/FadingDarkGradient';
 import { toastResponseMessage } from '@/utils/toast';
-
+import RNTrackPlayer from 'react-native-track-player';
 const TrackPlayer = () => {
   // Player Store
   const {
@@ -241,7 +241,9 @@ const TrackPlayer = () => {
                   minimumValue={0}
                   maximumValue={track?.trackDuration || 0}
                   allowChange={!isAsyncOperationPending}
-                  onValueChange={(ms: number) => seek(ms / 1000)}
+                  onValueChange={(ms: number) =>
+                    RNTrackPlayer.seekTo(ms / 1000)
+                  }
                   roundedTrack
                   showDot
                   trackHeight={4}
@@ -274,7 +276,7 @@ const TrackPlayer = () => {
                 <View className="flex flex-row justify-between items-center mt-3 px-2">
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => seekBackward(10)}
+                    onPress={() => RNTrackPlayer.seekBy(-10)}
                   >
                     <SkipIcon skipSeconds="10s" skipType="backward" />
                   </TouchableOpacity>
@@ -295,7 +297,13 @@ const TrackPlayer = () => {
 
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => playPause()}
+                    onPress={() => {
+                      if (isPlaying) {
+                        RNTrackPlayer.pause();
+                      } else {
+                        RNTrackPlayer.play();
+                      }
+                    }}
                   >
                     <MaterialIcons
                       name={
@@ -321,7 +329,7 @@ const TrackPlayer = () => {
 
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => seekForward(10)}
+                    onPress={() => RNTrackPlayer.seekBy(10)}
                   >
                     <SkipIcon skipSeconds="10s" skipType="forward" />
                   </TouchableOpacity>

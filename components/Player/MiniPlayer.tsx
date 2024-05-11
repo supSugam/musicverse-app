@@ -221,7 +221,7 @@ const MiniPlayer = ({ activeTab }: { activeTab: TabRouteName | null }) => {
           currentValue={playbackPosition}
           minimumValue={0}
           maximumValue={currentTrack?.trackDuration || 0}
-          onValueChange={(value) => seek(value)}
+          onValueChange={(ms) => seek(ms / 1000)}
           roundedTrack
           allowChange={!isAsyncOperationPending}
         />

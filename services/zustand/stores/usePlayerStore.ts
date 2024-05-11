@@ -1,17 +1,16 @@
 import { create } from 'zustand';
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { Audio } from 'expo-av';
 import { ITrackDetails } from '@/utils/Interfaces/ITrack';
 import { toastResponseMessage } from '@/utils/toast';
 import { useAuthStore } from './useAuthStore';
 import { AxiosInstance } from 'axios';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, { RepeatMode, State } from 'react-native-track-player';
 import { calculatePercentage } from '@/utils/helpers/number';
 import {
   PLAYBACK_PERCENTAGE_TO_TRIGGER_PLAY,
   SLEEP_TIMER_OPTIONS,
   SleepTimerLabel,
 } from '@/utils/constants';
-import { formatDuration } from '@/utils/helpers/string';
 
 const InitialState = {
   isPlaying: false,
@@ -91,12 +90,20 @@ interface PlayerState {
   timerLabel: SleepTimerLabel;
   setTimerSeconds: (seconds: number | null) => void;
   setTimerLabel: (timerType: SleepTimerLabel) => void;
+  setIsPlaying: (isPlaying: boolean) => void;
+  setPlaybackPosition: (ms: number) => void;
 }
 
 // TODO : Sleep Timer
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
+  setPlaybackPosition(ms: number) {
+    set({ playbackPosition: ms });
+  },
+  setIsPlaying: (isPlaying: boolean) => {
+    set({ isPlaying });
+  },
   setTimerSeconds: (seconds: number | null) => {
     set({ timeRemaining: seconds });
     const interval = setInterval(() => {
@@ -105,7 +112,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         set({ timeRemaining: timeRemaining - 1 });
       } else {
         clearInterval(interval);
-        playbackInstance?.pauseAsync();
+        // playbackInstance?.pauseAsync();
+        TrackPlayer.pause();
         set({ timeRemaining: null });
       }
     }, 1000);
@@ -202,133 +210,121 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     TrackPlayer.setQueue(tracksToAdd);
     set({ tracks, queueId: tracks[0].id });
     const { playbackInstance, currentTrack } = get();
-    if (!playbackInstance || !currentTrack()) return;
-    tracks.forEach((track) => {
-      if (track.id === currentTrack()?.id) {
-        playbackInstance?.loadAsync({ uri: track.src }, {}, false);
-      }
-    });
+    // if (!playbackInstance || !currentTrack()) return;
+    // tracks.forEach((track) => {
+    //   if (track.id === currentTrack()?.id) {
+    //     playbackInstance?.loadAsync({ uri: track.src }, {}, false);
+    //   }
+    // });
   },
 
   loadTrack: async (index: number) => {
     try {
       const {
-        tracks,
-        playbackInstance,
-        isLoopingSingle,
-        isLoopingQueue,
-        playUntilLastTrack,
-        stopAfterCurrentTrack,
-        nextTrack,
         volume,
         playbackSpeed,
-        increaseMsPlayed,
+        isLoopingQueue,
+        isLoopingSingle,
+        playUntilLastTrack,
+        tracks,
         setMsPlayed,
       } = get();
 
-      if (playbackInstance) {
-        await playbackInstance.unloadAsync();
-      }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: true,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-        playThroughEarpieceAndroid: false,
-      });
+      const { title, creator, albums, genre, createdAt, cover } = tracks[index];
 
-      const newPlaybackInstance = new Audio.Sound();
-
-      const { src, id, ...rest } = tracks[index];
-      const { title, creator, albums, genre, createdAt, cover } = rest;
-
-      // Play
-      if (!src || !id) return;
-
-      newPlaybackInstance.loadAsync(
-        { uri: src },
-        {
-          progressUpdateIntervalMillis: 1000,
-          shouldPlay: true,
-          volume,
-          isLooping: isLoopingSingle,
-          rate: playbackSpeed,
-        },
-        true
-      );
       setMsPlayed(0);
-
-      newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          increaseMsPlayed();
-          TrackPlayer.setVolume(0);
-          TrackPlayer.seekTo(status.positionMillis / 1000);
-          TrackPlayer.play();
-          TrackPlayer.updateNowPlayingMetadata({
-            title,
-            artist:
-              creator?.profile?.name || creator?.username || 'Unknown Artist',
-            album: albums?.[0]?.title || 'Unknown Album',
-            genre: genre?.name || 'Unknown Genre',
-            date: createdAt,
-            artwork: cover || undefined,
-          });
-          set({
-            playbackPosition: status.positionMillis,
-            playbackDuration: status.durationMillis ?? 0,
-            isPlaying: status.isPlaying,
-            isBuffering: status.isBuffering,
-            playbackSpeed: status.rate,
-            isLoopingSingle: status.isLooping,
-            ...(status.isLooping && {
-              isLoopingQueue: false,
-              playUntilLastTrack: false,
-              stopAfterCurrentTrack: false,
-            }),
-            isMuted: status.isMuted,
-            isLoaded: status.isLoaded,
-            volume: status.volume,
-            currentTrackIndex: index,
-            didJustFinish: status.didJustFinish,
-          });
-
-          if (status.isPlaying) {
-            TrackPlayer.play();
-          } else if (!status.isBuffering) {
-            TrackPlayer.pause();
-          }
-          if (status.didJustFinish) {
-            if (isLoopingSingle) {
-              TrackPlayer.seekTo(0);
-              return;
-            }
-            if (stopAfterCurrentTrack) {
-              TrackPlayer.stop();
-              set({ currentTrackIndex: null });
-              return;
-            }
-            if (isLoopingQueue) {
-              nextTrack();
-              TrackPlayer.skipToNext();
-              return;
-            }
-            if (playUntilLastTrack && index !== tracks.length - 1) {
-              nextTrack();
-              TrackPlayer.skipToNext();
-              return;
-            } else {
-              TrackPlayer.stop();
-              set({ currentTrackIndex: null });
-              return;
-            }
-          }
-        }
+      TrackPlayer.skip(index);
+      TrackPlayer.seekTo(0);
+      TrackPlayer.setVolume(volume);
+      TrackPlayer.setRate(playbackSpeed);
+      TrackPlayer.updateNowPlayingMetadata({
+        title,
+        artist: creator?.profile?.name || creator?.username || 'Unknown Artist',
+        album: albums?.[0]?.title || 'Unknown Album',
+        genre: genre?.name || 'Unknown Genre',
+        date: createdAt,
+        artwork: cover || undefined,
+        description: title,
       });
+
+      // const { title, creator, albums, genre, createdAt, cover } = rest;
+
+      // // Play
+      // if (!src || !id) return;
+
+      // newPlaybackInstance.loadAsync(
+      //   { uri: src },
+      //   {
+      //     progressUpdateIntervalMillis: 1000,
+      //     shouldPlay: true,
+      //     volume,
+      //     isLooping: isLoopingSingle,
+      //     rate: playbackSpeed,
+      //   },
+      //   true
+      // );
+
+      // newPlaybackInstance.setOnPlaybackStatusUpdate((status) => {
+      //   if (status.isLoaded) {
+      //     increaseMsPlayed();
+      //     TrackPlayer.setVolume(0);
+      //     TrackPlayer.seekTo(status.positionMillis / 1000);
+      //     TrackPlayer.play();
+
+      //     set({
+      //       playbackPosition: status.positionMillis,
+      //       playbackDuration: status.durationMillis ?? 0,
+      //       isPlaying: status.isPlaying,
+      //       isBuffering: status.isBuffering,
+      //       playbackSpeed: status.rate,
+      //       isLoopingSingle: status.isLooping,
+      //       ...(status.isLooping && {
+      //         isLoopingQueue: false,
+      //         playUntilLastTrack: false,
+      //         stopAfterCurrentTrack: false,
+      //       }),
+      //       isMuted: status.isMuted,
+      //       isLoaded: status.isLoaded,
+      //       volume: status.volume,
+      //       currentTrackIndex: index,
+      //       didJustFinish: status.didJustFinish,
+      //     });
+
+      //     if (status.isPlaying) {
+      //       TrackPlayer.play();
+      //     } else if (!status.isBuffering) {
+      //       TrackPlayer.pause();
+      //     }
+      //     if (status.didJustFinish) {
+      //       if (isLoopingSingle) {
+      //         TrackPlayer.seekTo(0);
+      //         return;
+      //       }
+      //       if (stopAfterCurrentTrack) {
+      //         TrackPlayer.stop();
+      //         set({ currentTrackIndex: null });
+      //         return;
+      //       }
+      //       if (isLoopingQueue) {
+      //         nextTrack();
+      //         TrackPlayer.skipToNext();
+      //         return;
+      //       }
+      //       if (playUntilLastTrack && index !== tracks.length - 1) {
+      //         nextTrack();
+      //         TrackPlayer.skipToNext();
+      //         return;
+      //       } else {
+      //         TrackPlayer.stop();
+      //         set({ currentTrackIndex: null });
+      //         return;
+      //       }
+      //     }
+      //   }
+      // });
 
       set({
-        playbackInstance: newPlaybackInstance,
+        // playbackInstance: newPlaybackInstance,
         currentTrackIndex: index,
         playbackError: null,
       });
@@ -342,16 +338,21 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   playPause: async (play = false) => {
     const { isPlaying, playbackInstance, didJustFinish } = get();
     if (isPlaying && !play) {
-      playbackInstance?.setStatusAsync({ shouldPlay: false });
+      // playbackInstance?.setStatusAsync({ shouldPlay: false });
+      TrackPlayer.pause();
     } else {
       if (didJustFinish) {
-        playbackInstance?.replayAsync({
-          shouldPlay: true,
-          positionMillis: 0,
-        });
+        // playbackInstance?.replayAsync({
+        //   shouldPlay: true,
+        //   positionMillis: 0,
+        // });
+        // return;
+        TrackPlayer.seekTo(0);
+        TrackPlayer.play();
         return;
       }
-      playbackInstance?.setStatusAsync({ shouldPlay: true });
+      // playbackInstance?.setStatusAsync({ shouldPlay: true });
+      TrackPlayer.play();
     }
   },
 
@@ -366,9 +367,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const index = tracks.findIndex((track) => track.id === id);
     if (index === -1) return;
     loadTrack(index);
-    setTimeout(() => {
-      playPause(true);
-    }, 1000);
+    playPause(true);
   },
 
   nextTrack: async () => {
@@ -399,31 +398,34 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   seek: async (position: number) => {
-    const { playbackInstance, setIsAsyncOperationPending } = get();
-    if (playbackInstance) {
-      setIsAsyncOperationPending(true);
-      const start = Date.now();
-      await playbackInstance.setPositionAsync(position).finally(() => {
-        setIsAsyncOperationPending(false);
-        console.log('Seeking took', Date.now() - start, 'ms');
-      });
-    }
+    // const { playbackInstance, setIsAsyncOperationPending } = get();
+    TrackPlayer.seekTo(position / 1000);
+    // if (playbackInstance) {
+    //   setIsAsyncOperationPending(true);
+    //   const start = Date.now();
+    //   await playbackInstance.setPositionAsync(position).finally(() => {
+    //     setIsAsyncOperationPending(false);
+    //     console.log('Seeking took', Date.now() - start, 'ms');
+    //   });
+    // }
   },
 
   setVolume: async (volume: number) => {
-    const { playbackInstance } = get();
+    TrackPlayer.setVolume(volume);
+    // const { playbackInstance } = get();
 
-    if (playbackInstance) {
-      await playbackInstance.setVolumeAsync(volume);
-    }
+    // if (playbackInstance) {
+    //   await playbackInstance.setVolumeAsync(volume);
+    // }
   },
 
   setSpeed: async (speed: number) => {
-    const { playbackInstance } = get();
+    TrackPlayer.setRate(speed);
+    // const { playbackInstance } = get();
 
-    if (playbackInstance) {
-      await playbackInstance.setRateAsync(speed, true);
-    }
+    // if (playbackInstance) {
+    //   await playbackInstance.setRateAsync(speed, true);
+    // }
   },
 
   // setLooping: async () => {
@@ -445,16 +447,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     });
 
     if (playbackInstance) {
-      await playbackInstance.setIsLoopingAsync(true);
+      TrackPlayer.setRepeatMode(RepeatMode.Track);
+      // await playbackInstance.setIsLoopingAsync(true);
     }
   },
 
   disableSingleLooping: async () => {
-    const { playbackInstance } = get();
+    // const { playbackInstance } = get();
     set({ isLoopingSingle: false });
-    if (playbackInstance) {
-      await playbackInstance.setIsLoopingAsync(false);
-    }
+    // if (playbackInstance) {
+    //   await playbackInstance.setIsLoopingAsync(false);
+    // }
+    TrackPlayer.setRepeatMode(RepeatMode.Off);
   },
 
   enableQueueLooping: () => {
@@ -465,6 +469,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       playUntilLastTrack: false,
       stopAfterCurrentTrack: false,
     });
+    TrackPlayer.setRepeatMode(RepeatMode.Queue);
   },
 
   enableStopAfterCurrentTrack: () => {
@@ -525,30 +530,40 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   seekBackward: async (seconds: number) => {
-    const { playbackInstance, playbackPosition } = get();
+    // const { playbackInstance, playbackPosition } = get();
 
+    // const newPosition = Math.max(playbackPosition - seconds * 1000, 0);
+
+    // await playbackInstance?.setPositionAsync(newPosition);
+    const { playbackPosition } = get();
     const newPosition = Math.max(playbackPosition - seconds * 1000, 0);
-
-    await playbackInstance?.setPositionAsync(newPosition);
+    await TrackPlayer.seekTo(newPosition / 1000);
   },
 
   seekForward: async (seconds: number) => {
-    const { playbackInstance, playbackPosition, playbackDuration } = get();
+    // const { playbackInstance, playbackPosition, playbackDuration } = get();
 
+    // const newPosition = Math.min(
+    //   playbackPosition + seconds * 1000,
+    //   playbackDuration
+    // );
+
+    // await playbackInstance?.setPositionAsync(newPosition);
+    const { playbackPosition, playbackDuration } = get();
     const newPosition = Math.min(
       playbackPosition + seconds * 1000,
       playbackDuration
     );
-
-    await playbackInstance?.setPositionAsync(newPosition);
+    await TrackPlayer.seekTo(newPosition / 1000);
   },
 
   resetPlayer: async () => {
-    const { playbackInstance } = get();
-    if (playbackInstance) {
-      await playbackInstance.unloadAsync();
-    }
+    // const { playbackInstance } = get();
+    // if (playbackInstance) {
+    //   await playbackInstance.unloadAsync();
+    // }
     set((state) => ({ ...state, ...InitialState }));
+    TrackPlayer.reset();
   },
 
   isThisQueuePlaying: (id?: string, softCheck = false) => {

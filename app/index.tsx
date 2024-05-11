@@ -27,6 +27,9 @@ import RNTrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
   Event,
+  State,
+  usePlaybackState,
+  useTrackPlayerEvents,
 } from 'react-native-track-player';
 import * as Linking from 'expo-linking';
 import { useAppState } from '@/services/zustand/stores/useAppStore';
@@ -189,9 +192,18 @@ export default function index() {
     seek,
     seekForward,
     seekBackward,
+    setIsPlaying,
+    setPlaybackPosition,
   } = usePlayerStore();
 
   const setupPlayer = async () => {
+    RNTrackPlayer.addEventListener(
+      Event.PlaybackProgressUpdated,
+      async ({ position }) => {
+        console.log('POSITION', position);
+        setPlaybackPosition(position * 1000);
+      }
+    );
     RNTrackPlayer.addEventListener(Event.RemotePlay, () => playPause(true));
     RNTrackPlayer.addEventListener(Event.RemotePause, () => playPause(false));
     RNTrackPlayer.addEventListener(Event.RemoteStop, () => resetPlayer());
@@ -266,6 +278,16 @@ export default function index() {
       subscribeLink.remove();
     };
   }, [Linking]);
+
+  const { state } = usePlaybackState();
+
+  useEffect(() => {
+    if (!state) {
+      setIsPlaying(false);
+      return;
+    }
+    setIsPlaying(state === State.Playing || state === State.Buffering);
+  }, [state]);
 
   return (
     <Stack.Navigator

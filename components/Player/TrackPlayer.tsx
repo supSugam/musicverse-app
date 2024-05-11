@@ -241,7 +241,7 @@ const TrackPlayer = () => {
                   minimumValue={0}
                   maximumValue={track?.trackDuration || 0}
                   allowChange={!isAsyncOperationPending}
-                  onValueChange={seek}
+                  onValueChange={(ms: number) => seek(ms / 1000)}
                   roundedTrack
                   showDot
                   trackHeight={4}

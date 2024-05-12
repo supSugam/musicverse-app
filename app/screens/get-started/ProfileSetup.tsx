@@ -17,6 +17,8 @@ import { MediaTypeOptions } from 'expo-image-picker';
 import { convertObjectToFormData } from '@/utils/helpers/Object';
 import { imageAssetToFile } from '@/utils/helpers/file';
 import { toastResponseMessage } from '@/utils/toast';
+import { useNavigation } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
 
 const schema = yup.object().shape({
   name: yup
@@ -33,6 +35,7 @@ export default function ProfileSetup({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const { create } = useProfileQuery();
+  const navigate = useNavigation();
 
   const {
     control,
@@ -67,6 +70,7 @@ export default function ProfileSetup({ navigation }: { navigation: any }) {
         content: 'Please select a cover and avatar',
         type: 'error',
       });
+      return;
     }
     setLoading(true);
     const avatar = imageAssetToFile(profileAvatar?.[0]);
@@ -86,11 +90,7 @@ export default function ProfileSetup({ navigation }: { navigation: any }) {
 
     await create.mutateAsync(formPayload, {
       onSuccess: () => {
-        // toastResponseMessage({
-        //   content: `Welcome, ${data.name}!`,
-        //   type: 'success',
-        // });
-        // navigation.navigate('Home');
+        navigate.dispatch(CommonActions.navigate('TabsLayout'));
       },
       onError: (error) => {
         toastResponseMessage({

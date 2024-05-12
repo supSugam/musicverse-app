@@ -174,6 +174,7 @@ const Tracks = () => {
     downloadAndSaveTrack,
     deleteTrack,
     navigation,
+    toggleLike,
   ]);
 
   return (
@@ -239,7 +240,10 @@ const Tracks = () => {
                 {ownedTracks.map((track, i) => (
                   <TrackListItem
                     label={i + 1}
-                    optionsVisible={isTrackOptionsModalVisible}
+                    optionsVisible={
+                      isTrackOptionsModalVisible &&
+                      selectedTrack?.track.id === track.id
+                    }
                     key={`${track.id}owned`}
                     id={track.id}
                     title={track.title}
@@ -273,6 +277,10 @@ const Tracks = () => {
                         artistName={
                           track.creator?.profile.name ||
                           track?.creator?.username
+                        }
+                        optionsVisible={
+                          isTrackOptionsModalVisible &&
+                          selectedTrack?.track.id === track.id
                         }
                         options={trackOptions}
                         onPlayClick={() => {

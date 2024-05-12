@@ -189,9 +189,7 @@ export default function index() {
     resetPlayer,
     nextTrack,
     prevTrack,
-    seek,
-    seekForward,
-    seekBackward,
+    setCurrentTrackIndex,
     setIsPlaying,
     setPlaybackPosition,
   } = usePlayerStore();
@@ -229,6 +227,12 @@ export default function index() {
           state === State.Loading
       );
     });
+    RNTrackPlayer.addEventListener(
+      Event.PlaybackActiveTrackChanged,
+      ({ index }) => {
+        if (index) setCurrentTrackIndex(index);
+      }
+    );
 
     await RNTrackPlayer.updateOptions({
       android: {

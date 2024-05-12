@@ -50,7 +50,7 @@ const Membership = () => {
         content: 'Payment failed!',
       });
     }
-    // purchaseMembershipMutation.mutate();
+    purchaseMembershipMutation.mutate();
     return;
   };
   // purchase-membership

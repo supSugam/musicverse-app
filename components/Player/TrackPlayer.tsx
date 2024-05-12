@@ -28,7 +28,6 @@ import SkipIcon from '@/lib/svgs/SkipIcon';
 import LoopIcon from '@/lib/svgs/LoopIcon';
 import MenuModal from '../reusables/BottomSheetMenu/MenuModal';
 import HorizontalMarquee from '../reusables/HorizontalMarquee';
-import PrimaryGradient from '../reusables/Gradients/PrimaryGradient';
 import { useNavigation } from 'expo-router';
 import { CommonActions } from '@react-navigation/native';
 import DarkGradient from '../Playlist/DarkGradient';
@@ -45,11 +44,7 @@ const TrackPlayer = () => {
     currentTrack,
     playbackPosition,
     isAsyncOperationPending,
-    playPause,
     isPlaying,
-    seek,
-    seekForward,
-    seekBackward,
     isNextTrackAvailable,
     isPrevTrackAvailable,
     nextTrack,

@@ -99,6 +99,7 @@ export const PLAYBACK_SPEEDS: { label: string; value: number }[] = [
 
 export const SLEEP_TIMER_OPTIONS = {
   None: null,
+  '10 Seconds': 10,
   '15 Minutes': 15 * 60,
   '30 Minutes': 30 * 60,
   '45 Minutes': 45 * 60,

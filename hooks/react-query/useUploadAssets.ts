@@ -25,7 +25,7 @@ type UploadOptions = {
   payload?: Payload[] | null;
   onUploadStart?: () => void;
   onUploadProgress?: (progress: number) => void;
-  onUploadSuccess?: (data: any) => void;
+  onUploadSuccess?: (data?: any) => void;
   onUploadError?: (error: any) => void;
   onUploadCancel?: () => void;
 };
@@ -126,7 +126,7 @@ const useUploadAssets = ({
     return formData;
   };
 
-  const mutation = useMutation<void, AxiosError, any>({
+  const mutation = useMutation({
     mutationFn: async ({
       payload,
       uploadKey,
@@ -184,14 +184,6 @@ const useUploadAssets = ({
       }
     },
     onSuccess: (data) => {
-      const allUploaded = Object.values(progressDetails).every(
-        (item) => item.uploadStatus === UploadStatus.SUCCESS
-      );
-      if (allUploaded) {
-        resetUploadStatus(UploadStatus.SUCCESS);
-        onUploadSuccess?.(data);
-      }
-
       if (!multiple) {
         queryClient.invalidateQueries({
           queryKey: [TRACK_QUERY_KEY],
@@ -212,10 +204,30 @@ const useUploadAssets = ({
 
     for (const item of payloadToUpload) {
       const payloadFormData = getFormData(item);
-      await mutation.mutateAsync({
-        payload: payloadFormData,
-        uploadKey: item.uploadKey,
-      });
+      await mutation.mutateAsync(
+        {
+          payload: payloadFormData,
+          uploadKey: item.uploadKey,
+        },
+        {
+          onSuccess: (data) => {
+            setProgressDetails((prev) => ({
+              ...prev,
+              [item.uploadKey]: {
+                progress: 100,
+                uploadStatus: UploadStatus.SUCCESS,
+              },
+            }));
+          },
+        }
+      );
+    }
+    const allUploaded = Object.values(progressDetails).every(
+      (item) => item.uploadStatus === UploadStatus.SUCCESS
+    );
+    if (allUploaded) {
+      resetUploadStatus(UploadStatus.SUCCESS);
+      onUploadSuccess?.();
     }
   };
 

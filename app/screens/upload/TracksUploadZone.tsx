@@ -29,6 +29,8 @@ import { ITrack } from '@/utils/Interfaces/ITrack';
 import { ActionsEnum } from '@/utils/enums/Action';
 import { useAlbumsQuery } from '@/hooks/react-query/useAlbumsQuery';
 import EmptyGhost from '@/components/reusables/Lottie/EmptyGhost';
+import { useNavigation } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
 
 const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -44,6 +46,8 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
   const isUploadTypeSingle = uploadType === 'single';
 
   const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  const navigate = useNavigation();
 
   const {
     uploadAssets: uploadTracks,
@@ -63,12 +67,15 @@ const TracksUploadZone = ({ navigation }: { navigation: any }) => {
     },
     onUploadSuccess() {
       removeTrack();
+      setLoading(false);
       const msg = isUploadTypeSingle ? 'Track' : 'Tracks';
       toastResponseMessage({
         content: `${msg} Uploaded!`,
         type: 'success',
       });
-      setLoading(false);
+      navigate.dispatch(
+        CommonActions.navigate(isUploadTypeSingle ? 'Tracks' : 'Albums')
+      );
     },
     onUploadStart() {
       setLoading(true);

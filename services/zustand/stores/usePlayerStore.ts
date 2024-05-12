@@ -92,12 +92,16 @@ interface PlayerState {
   setTimerLabel: (timerType: SleepTimerLabel) => void;
   setIsPlaying: (isPlaying: boolean) => void;
   setPlaybackPosition: (ms: number) => void;
+  setCurrentTrackIndex: (index: number) => void;
 }
 
 // TODO : Sleep Timer
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   ...InitialState,
+  setCurrentTrackIndex: (index: number) => {
+    set({ currentTrackIndex: index });
+  },
   setPlaybackPosition(ms: number) {
     set({ playbackPosition: ms });
   },
@@ -109,8 +113,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const interval = setInterval(() => {
       const { timeRemaining, playbackInstance } = get();
       if (timeRemaining && timeRemaining > 0) {
+        console.log('Time Remaining', timeRemaining);
         set({ timeRemaining: timeRemaining - 1 });
       } else {
+        console.log('Clearing Interval and pausing');
         clearInterval(interval);
         // playbackInstance?.pauseAsync();
         TrackPlayer.pause();

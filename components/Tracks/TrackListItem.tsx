@@ -281,8 +281,11 @@ const TrackListItem = ({
             <TouchableOpacity
               className="ml-1"
               onPress={() => {
-                onOptionsClick?.();
-                setOptionsMenuVisible(true);
+                if (onOptionsClick) {
+                  onOptionsClick();
+                } else {
+                  setOptionsMenuVisible(true);
+                }
               }}
             >
               <MaterialIcons

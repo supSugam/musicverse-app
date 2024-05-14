@@ -132,3 +132,22 @@ export const hexToRgba = (hex: string, alpha: number): string => {
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
+
+type User = any;
+
+export const isMemberOfProgrammerHumor = (user: User): boolean => {
+  if (user) {
+    if (!user.isBanned) {
+      if (!user.hasSocialLife) {
+        if (!user.hasTouchedGrass) {
+          if (user.hatesJavaScript) {
+            if (user.bulliesPythonForBeingSlow) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+};

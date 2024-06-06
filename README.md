@@ -2,6 +2,8 @@
 
 MusicVerse is a cross-platform application that revolutionizes the way you experience music. With a rich set of features, it empowers you to explore, share, and collaborate on your favorite tunes like never before. 🎶✨
 
+### Screenshots & More Details at: [MyPortfolioWebsite/Projects/MusicVerse](https://sugamsubedi.com.np/projects/musicverse) 🚧
+
 ## Features
 
 - 🎧 Listening to music
